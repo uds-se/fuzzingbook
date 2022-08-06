@@ -11931,21 +11931,21 @@ MathJax.Hub.Config({
      <li class="has-sub"><a href="#"><span title="Fuzzing with Constraints"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Fuzzing with Constraints <i class="fa fa-fw fa-wrench"></i></span></a>
            <ul><li class="has-sub"><a href="#Synopsis"><i class="fa fa-fw fa-map"></i> Synopsis</a>
 </li><li class="has-sub"><a href="#Semantic-Input-Properties">&nbsp;&bull;&nbsp;&nbsp; Semantic Input Properties</a>
-</li><li class="has-sub"><a href="#Constraints-to-the-Rescue">&nbsp;&bull;&nbsp;&nbsp; Constraints to the Rescue</a>
+</li><li class="has-sub"><a href="#Specifying-Constraints">&nbsp;&bull;&nbsp;&nbsp; Specifying Constraints</a>
 <ul><li class="has-sub"><a href="#Excursion:-Using-SMT-LIB-Syntax">Excursion: Using SMT-LIB Syntax</a>
 </ul></li><li class="has-sub"><a href="#Accessing-Elements">&nbsp;&bull;&nbsp;&nbsp; Accessing Elements</a>
 </li><li class="has-sub"><a href="#Quantifiers">&nbsp;&bull;&nbsp;&nbsp; Quantifiers</a>
+</li><li class="has-sub"><a href="#Picking-Expansions">&nbsp;&bull;&nbsp;&nbsp; Picking Expansions</a>
+</li><li class="has-sub"><a href="#Matching-Expansion-Elements">&nbsp;&bull;&nbsp;&nbsp; Matching Expansion Elements</a>
 </li><li class="has-sub"><a href="#Checking-Inputs">&nbsp;&bull;&nbsp;&nbsp; Checking Inputs</a>
-</li><li class="has-sub"><a href="#A-Simple-Language">&nbsp;&bull;&nbsp;&nbsp; A Simple Language</a>
-</li><li class="has-sub"><a href="#A-Simple-Fuzzer">&nbsp;&bull;&nbsp;&nbsp; A Simple Fuzzer</a>
-</li><li class="has-sub"><a href="#Beyond-Syntax:-Semantic-Input-Properties">&nbsp;&bull;&nbsp;&nbsp; Beyond Syntax: Semantic Input Properties</a>
-</li><li class="has-sub"><a href="#Lessons-Learned"><i class="fa fa-fw fa-trophy"></i> Lessons Learned</a>
+</li><li class="has-sub"><a href="#Case-Studies">&nbsp;&bull;&nbsp;&nbsp; Case Studies</a>
+<ul><li class="has-sub"><a href="#Matching-Identifiers-in-XML">Matching Identifiers in XML</a>
+</li><li class="has-sub"><a href="#Definitions-and-Usages-in-Programming-Languages">Definitions and Usages in Programming Languages</a>
+</ul></li><li class="has-sub"><a href="#Lessons-Learned"><i class="fa fa-fw fa-trophy"></i> Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps"><i class="fa fa-fw fa-arrows"></i> Next Steps</a>
 </li><li class="has-sub"><a href="#Background"><i class="fa fa-fw fa-mortar-board"></i> Background</a>
 </li><li class="has-sub"><a href="#Exercises"><i class="fa fa-fw fa-edit"></i> Exercises</a>
-<ul><li class="has-sub"><a href="#Exercise-1:-_Title_">Exercise 1: _Title_</a>
-</li><li class="has-sub"><a href="#Exercise-2:-_Title_">Exercise 2: _Title_</a>
-</ul></li></ul></li>
+</ul></li>
      </li>
      
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
@@ -12067,7 +12067,51 @@ In this chapter, we show how the <em>ISLa</em> framework allows us to express su
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="FuzzingWithConstraints.html" class="import" target="_blank">fuzzingbook.FuzzingWithConstraints</a></span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
 </pre></div>
 <p>and then make use of the following features.</p>
-<p><em>For those only interested in using the code in this chapter (without wanting to know how it works), give an example.  This will be copied to the beginning of the chapter (before the first section) as text with rendered input and output.</em></p>
+<p>This chapter introduces the <em>ISLa framework</em>, consisting of</p>
+<ul>
+<li>the <em>ISLa specification language</em>, allowing to add <em>constraints</em> to a grammar</li>
+<li>the <em>ISLa solver</em>, solving these constraints to produce semantically (and syntactically) valid inputs</li>
+<li>the <em>ISLa checker</em>, checking given inputs for whether they satisfy these constraints.</li>
+</ul>
+<p>A typical usage of the ISLa solver is as follows.
+First, install ISLa, using</p>
+<div class="highlight"><pre><span></span>$ pip install isla-solver
+</pre></div>
+<p>Then, you can import the solver as</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">isla.solver</span> <span class="kn">import</span> <span class="n">ISLaSolver</span>
+</pre></div>
+<p>The ISLa solver needs two things. First, a <em>grammar</em> - say, US phone numbers.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">US_PHONE_GRAMMAR</span>
+</pre></div>
+<p>Second, you need )constraints – a string expressing a condition over one or more grammar elements.
+Common functions include</p>
+<ul>
+<li><code>str.len()</code>, returning the length of a string</li>
+<li><code>str.to.int()</code>, converting a string to an integer</li>
+</ul>
+<p>Here, we instantiate the ISLa solver with a constraint stating that the area code should be above 900:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">,</span> 
+<span class="o">&gt;&gt;&gt;</span>             <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&gt;&gt;&gt;             str.to.int(&lt;area&gt;) &gt; 900</span>
+<span class="s2">&gt;&gt;&gt;             &quot;&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+<p>With that, invoking <code>solver.solve()</code> produces an iterator over multiple solutions.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+<span class="p">(</span><span class="mi">906</span><span class="p">)</span><span class="mi">465</span><span class="o">-</span><span class="mi">8279</span>
+<span class="p">(</span><span class="mi">901</span><span class="p">)</span><span class="mi">695</span><span class="o">-</span><span class="mi">2708</span>
+<span class="p">(</span><span class="mi">902</span><span class="p">)</span><span class="mi">382</span><span class="o">-</span><span class="mi">9074</span>
+<span class="p">(</span><span class="mi">904</span><span class="p">)</span><span class="mi">632</span><span class="o">-</span><span class="mi">6458</span>
+<span class="p">(</span><span class="mi">992</span><span class="p">)</span><span class="mi">839</span><span class="o">-</span><span class="mi">0278</span>
+<span class="p">(</span><span class="mi">920</span><span class="p">)</span><span class="mi">458</span><span class="o">-</span><span class="mi">0439</span>
+<span class="p">(</span><span class="mi">908</span><span class="p">)</span><span class="mi">847</span><span class="o">-</span><span class="mi">3098</span>
+<span class="p">(</span><span class="mi">910</span><span class="p">)</span><span class="mi">589</span><span class="o">-</span><span class="mi">0372</span>
+<span class="p">(</span><span class="mi">914</span><span class="p">)</span><span class="mi">992</span><span class="o">-</span><span class="mi">6350</span>
+<span class="p">(</span><span class="mi">984</span><span class="p">)</span><span class="mi">431</span><span class="o">-</span><span class="mi">0475</span>
+</pre></div>
+<p>We see that the solver produces a number of inputs that all satisfy the constraint.</p>
+<p>The <code>solve()</code> method provides several additional parameters to configure the solver, as documented below
+Additional <code>ISLaSolver</code> methods allow to check inputs against constraints, and provide additional functionality.</p>
 <div class="highlight"><pre><span></span><span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">zeller</span><span class="o">/</span><span class="n">Projects</span><span class="o">/</span><span class="n">fuzzingbook</span><span class="o">/</span><span class="n">notebooks</span><span class="o">/</span><span class="n">ClassDiagram</span><span class="o">.</span><span class="n">ipynb</span><span class="p">:</span><span class="mi">367</span><span class="p">:</span> <span class="ne">UserWarning</span><span class="p">:</span> <span class="n">ISLaSolver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span> <span class="ow">is</span> <span class="n">listed</span> <span class="k">as</span> <span class="n">public</span><span class="p">,</span> <span class="n">but</span> <span class="n">has</span> <span class="n">no</span> <span class="n">docstring</span>
   <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="vm">__qualname__</span><span class="si">}</span><span class="s2">() is listed as public,&quot;</span>
 <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">zeller</span><span class="o">/</span><span class="n">Projects</span><span class="o">/</span><span class="n">fuzzingbook</span><span class="o">/</span><span class="n">notebooks</span><span class="o">/</span><span class="n">ClassDiagram</span><span class="o">.</span><span class="n">ipynb</span><span class="p">:</span><span class="mi">440</span><span class="p">:</span> <span class="ne">UserWarning</span><span class="p">:</span> <span class="n">Class</span> <span class="n">ISLaSolver</span> <span class="n">has</span> <span class="n">no</span> <span class="n">docstring</span>
@@ -12094,7 +12138,7 @@ In this chapter, we show how the <em>ISLa</em> framework allows us to express su
 <text text-anchor="start" x="8" y="-39.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">ISLaSolver</text>
 <polyline fill="none" stroke="black" points="0,-30.5 82,-30.5 "/>
 <g id="a_node1_0"><a xlink:href="#" xlink:title="ISLaSolver">
-<g id="a_node1_1"><a xlink:href="isla.solver.ipynb" xlink:title="__init__(self, grammar: Dict[str, List[str]], formula: Union[isla.language.Formula, str], structural_predicates: Set[isla.language.StructuralPredicate] = {Predicate(same_position, 2), Predicate(inside, 2), Predicate(different_position, 2), Predicate(after, 2), Predicate(consecutive, 2), Predicate(nth, 3), Predicate(level, 4), Predicate(before, 2)}, semantic_predicates: Set[isla.language.SemanticPredicate] = {SemanticPredicate(count, 3)}, max_number_free_instantiations: int = 10, max_number_smt_instantiations: int = 10, max_number_tree_insertion_results: int = 5, enforce_unique_trees_in_queue: bool = True, precompute_reachability: bool = False, debug: bool = False, cost_computer: Optional[ForwardRef(&#39;CostComputer&#39;)] = None, timeout_seconds: Optional[int] = None, global_fuzzer: bool = False, predicates_unique_in_int_arg: Tuple[isla.language.SemanticPredicate, ...] = (SemanticPredicate(count, 3),), fuzzer_factory: Callable[[Dict[str, List[str]]], isla.fuzzer.GrammarFuzzer] = &lt;function ISLaSolver.&lt;lambda&gt;&gt;, tree_insertion_methods=7):&#10;:param grammar: The underlying grammar.&#10;:param formula: The formula to solve.&#10;:param max_number_free_instantiations: Number of times that nonterminals that are not bound by any formula&#10;should be expanded by a coverage&#45;based fuzzer.&#10;:param max_number_smt_instantiations: Number of solutions of SMT formulas that should be produced.&#10;:param precompute_reachability: If true, the distances between all grammar nodes are pre&#45;computed using&#10;Floyd&#45;Warshall&#39;s algorithm. This makes sense if there are many expensive distance queries, e.g., in a big&#10;grammar and a constraint with relatively many universal quantifiers.&#10;:param debug: If true, debug information about the evolution of states is collected, notably in the&#10;field state_tree. The root of the tree is in the field state_tree_root. The field costs stores the computed&#10;cost values for all new nodes.&#10;:param global_fuzzer: If set to True, only one coverage&#45;guided grammar fuzzer object is used to finish&#10;off unconstrained open derivation trees throughout the whole generation time. This may be beneficial for&#10;some targets; e.g., we experienced that CSV works significantly faster. However, the achieved k&#45;path coverage&#10;can be lower with that setting.&#10;:param predicates_unique_in_int_arg: This is needed in certain cases for instantiating universal&#10;integer quantifiers. The supplied predicates should have exactly one integer argument, and hold&#10;for exactly one integer value once all other parameters are fixed.&#10;:param fuzzer_factory: Constructor of the fuzzer to use for instantiating &quot;free&quot; nonterminals.&#10;:param tree_insertion_methods: Combination of methods to use for existential quantifier elimination by&#10;tree insertion. Full selection: `DIRECT_EMBEDDING &amp; SELF_EMBEDDING &amp; CONTEXT_ADDITION`.">
+<g id="a_node1_1"><a xlink:href="isla.solver.ipynb" xlink:title="__init__(self, grammar: Dict[str, List[str]], formula: Union[isla.language.Formula, str], structural_predicates: Set[isla.language.StructuralPredicate] = {Predicate(level, 4), Predicate(same_position, 2), Predicate(inside, 2), Predicate(after, 2), Predicate(consecutive, 2), Predicate(before, 2), Predicate(different_position, 2), Predicate(nth, 3)}, semantic_predicates: Set[isla.language.SemanticPredicate] = {SemanticPredicate(count, 3)}, max_number_free_instantiations: int = 10, max_number_smt_instantiations: int = 10, max_number_tree_insertion_results: int = 5, enforce_unique_trees_in_queue: bool = True, precompute_reachability: bool = False, debug: bool = False, cost_computer: Optional[ForwardRef(&#39;CostComputer&#39;)] = None, timeout_seconds: Optional[int] = None, global_fuzzer: bool = False, predicates_unique_in_int_arg: Tuple[isla.language.SemanticPredicate, ...] = (SemanticPredicate(count, 3),), fuzzer_factory: Callable[[Dict[str, List[str]]], isla.fuzzer.GrammarFuzzer] = &lt;function ISLaSolver.&lt;lambda&gt;&gt;, tree_insertion_methods=7):&#10;:param grammar: The underlying grammar.&#10;:param formula: The formula to solve.&#10;:param max_number_free_instantiations: Number of times that nonterminals that are not bound by any formula&#10;should be expanded by a coverage&#45;based fuzzer.&#10;:param max_number_smt_instantiations: Number of solutions of SMT formulas that should be produced.&#10;:param precompute_reachability: If true, the distances between all grammar nodes are pre&#45;computed using&#10;Floyd&#45;Warshall&#39;s algorithm. This makes sense if there are many expensive distance queries, e.g., in a big&#10;grammar and a constraint with relatively many universal quantifiers.&#10;:param debug: If true, debug information about the evolution of states is collected, notably in the&#10;field state_tree. The root of the tree is in the field state_tree_root. The field costs stores the computed&#10;cost values for all new nodes.&#10;:param global_fuzzer: If set to True, only one coverage&#45;guided grammar fuzzer object is used to finish&#10;off unconstrained open derivation trees throughout the whole generation time. This may be beneficial for&#10;some targets; e.g., we experienced that CSV works significantly faster. However, the achieved k&#45;path coverage&#10;can be lower with that setting.&#10;:param predicates_unique_in_int_arg: This is needed in certain cases for instantiating universal&#10;integer quantifiers. The supplied predicates should have exactly one integer argument, and hold&#10;for exactly one integer value once all other parameters are fixed.&#10;:param fuzzer_factory: Constructor of the fuzzer to use for instantiating &quot;free&quot; nonterminals.&#10;:param tree_insertion_methods: Combination of methods to use for existential quantifier elimination by&#10;tree insertion. Full selection: `DIRECT_EMBEDDING &amp; SELF_EMBEDDING &amp; CONTEXT_ADDITION`.">
 <text text-anchor="start" x="11" y="-19.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__init__()</text>
 </a>
 </g>
@@ -12125,7 +12169,7 @@ In this chapter, we show how the <em>ISLa</em> framework allows us to express su
 <ul>
 <li>FIXME: Have docstrings for publicly available methods</li>
 <li>FIXME: Have a docstring for the <code>ISLaSolver</code> class</li>
-<li>FIXME: How do I check a given string whether it satisfies constraints? (Likely <code>isla.evaluator.evaluate(constraint, tree, grammar)</code>)</li>
+<li>FIXME: Have a public interface for checking inputs against constraints (preferably in <code>ISLaSolver</code>, as it already has the grammar and the constraints).</li>
 </ul>
 </div>
 </div>
@@ -12171,7 +12215,7 @@ The <em>syntax</em> of this file is given by the following grammar:</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">Grammar</span><span class="p">,</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">syntax_diagram</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">Grammar</span><span class="p">,</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">syntax_diagram</span><span class="p">,</span> <span class="n">crange</span>
 </pre></div>
 
 </div>
@@ -12802,7 +12846,7 @@ In fact, they are <em>Turing-universal</em>, meaning that they can express any f
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Constraints-to-the-Rescue">Constraints to the Rescue<a class="anchor-link" href="#Constraints-to-the-Rescue">&#182;</a></h2></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Specifying-Constraints">Specifying Constraints<a class="anchor-link" href="#Specifying-Constraints">&#182;</a></h2></div>
 </div>
 </div>
 </div>
@@ -12847,20 +12891,6 @@ ISLa can be used as a <em>fuzzer</em> (producing inputs that satisfy the constra
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">isla</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">isla.language</span> <span class="kn">import</span> <span class="n">parse_isla</span>
 </pre></div>
 
 </div>
@@ -12950,31 +12980,31 @@ If we want to have inputs in which the page size has at least 6 digits, we can w
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0
-pagesize=448880
+pagesize=842420
 bufsize=2
 1
-pagesize=842420
+pagesize=448420
 bufsize=99
 2
-pagesize=848410
+pagesize=824480
 bufsize=4
 3
-pagesize=842210
+pagesize=828210
 bufsize=6
 4
-pagesize=822480
+pagesize=842810
 bufsize=2
 5
-pagesize=824480
+pagesize=824280
 bufsize=90
 6
-pagesize=888420
+pagesize=822810
 bufsize=1
 7
-pagesize=888210
+pagesize=442280
 bufsize=81
 8
-pagesize=822210
+pagesize=828820
 bufsize=4
 9
 pagesize=822280
@@ -13022,7 +13052,7 @@ To obtain a page size that of at least 100000, we can thus also write</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=284119
+<pre>pagesize=9929220
 bufsize=10
 </pre>
 </div>
@@ -13060,7 +13090,7 @@ bufsize=10
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=180
+<pre>pagesize=114
 bufsize=31
 </pre>
 </div>
@@ -13097,16 +13127,16 @@ bufsize=31
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>Evaluation of expression StrToInt(&#34;0&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;7&#34;)%7 not implemented.
+<pre>Evaluation of expression StrToInt(&#34;7&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;0&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;63&#34;)%7 not implemented.
 Evaluation of expression StrToInt(&#34;70&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;14&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;28&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;35&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;77&#34;)%7 not implemented.
 Evaluation of expression StrToInt(&#34;56&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;84&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;21&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;14&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;77&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;28&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;42&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;49&#34;)%7 not implemented.
 </pre>
 </div>
 
@@ -13115,7 +13145,7 @@ Evaluation of expression StrToInt(&#34;21&#34;)%7 not implemented.
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=0
+<pre>pagesize=63
 bufsize=0
 </pre>
 </div>
@@ -13202,8 +13232,8 @@ bufsize=0
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=1810
-bufsize=1811
+<pre>pagesize=5122
+bufsize=5123
 </pre>
 </div>
 
@@ -13256,8 +13286,8 @@ The above predicate would thus be written as</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=5819
-bufsize=5820
+<pre>pagesize=1916
+bufsize=1917
 </pre>
 </div>
 
@@ -13401,7 +13431,7 @@ Here is an example using the double dot operator, enforcing <em>every</em> digit
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_82265/2177507368.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39459/2177507368.py&#34;, line 2, in &lt;module&gt;
     solver = ISLaSolver(CONFIG_GRAMMAR,
   File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/solver.py&#34;, line 236, in __init__
     formula = parse_isla(formula, grammar, structural_predicates, semantic_predicates)
@@ -13691,7 +13721,7 @@ In contrast, <code>&lt;config&gt;..&lt;digit&gt;</code> refers to <em>all</em> <
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_82265/3992921923.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39459/3992921923.py&#34;, line 2, in &lt;module&gt;
     solver = ISLaSolver(CONFIG_GRAMMAR,
   File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/solver.py&#34;, line 236, in __init__
     formula = parse_isla(formula, grammar, structural_predicates, semantic_predicates)
@@ -13762,7 +13792,8 @@ If you only want to constrain <em>one</em> element, though, you have to (and can
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>To use an existential quantifier in ISLa, use the construct</p>
 
-<pre><code>exists TYPE VARIABLE in CONTEXT: (CONSTRAINT)</code></pre>
+<pre><code>exists TYPE VARIABLE in CONTEXT:
+    (CONSTRAINT)</code></pre>
 <p>where <code>VARIABLE</code> is some identifier, <code>TYPE</code> is its type (as a nonterminal), and <code>CONTEXT</code> is the context (again a nonterminal) in which the constraint should hold.
 <code>CONSTRAINT</code> is again a constraint expression, in which you now can make use of <code>VARIABLE</code> as the element whose existence you assume.</p>
 </div>
@@ -13806,35 +13837,35 @@ So we write</p>
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0
-pagesize=4840
-bufsize=14
+pagesize=14
+bufsize=2949
 1
-pagesize=8780
-bufsize=5
+pagesize=5
+bufsize=1190
 2
-pagesize=8130
-bufsize=54
+pagesize=54
+bufsize=9740
 3
-pagesize=2940
-bufsize=7
+pagesize=7
+bufsize=1751
 4
-pagesize=2910
-bufsize=1
+pagesize=1
+bufsize=2249
 5
-pagesize=2254
-bufsize=66
+pagesize=66
+bufsize=1940
 6
-pagesize=8829
-bufsize=9
+pagesize=9
+bufsize=7480
 7
-pagesize=2948
-bufsize=9
+pagesize=9
+bufsize=8440
 8
-pagesize=8720
-bufsize=1
+pagesize=1
+bufsize=3340
 9
-pagesize=2928
-bufsize=95
+pagesize=95
+bufsize=1980
 </pre>
 </div>
 
@@ -13881,8 +13912,8 @@ If we want <em>all</em> elements in some context to satisfy a constraint, this c
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=4110
-bufsize=4910
+<pre>pagesize=9210
+bufsize=4320
 </pre>
 </div>
 
@@ -13892,6 +13923,17 @@ bufsize=4910
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>We see that all <code>&lt;int&gt;</code> elements satisfy the constraint.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><ul>
+<li>FIXME: Is it <code>&lt;start&gt;</code> or <code>start</code>?</li>
+</ul>
 </div>
 </div>
 </div>
@@ -13927,8 +13969,8 @@ bufsize=4910
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=4210
-bufsize=2449
+<pre>pagesize=4990
+bufsize=4120
 </pre>
 </div>
 
@@ -13949,6 +13991,409 @@ bufsize=2449
 <div class="text_cell_render border-box-sizing rendered_html"><ul>
 <li>FIXME: The above <code>forall</code> iterators return only one solution. Why?</li>
 </ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Picking-Expansions">Picking Expansions<a class="anchor-link" href="#Picking-Expansions">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Sometimes, we'd like a quantifier to apply only for a specific expansion alternative of a nonterminal.
+The form</p>
+
+<pre><code>forall TYPE VARIABLE=PATTERN in CONTEXT:
+    (CONSTRAINT)</code></pre>
+<p>means that the CONSTRAINT only applies to a VARIABLE that actually matches the expansion given in PATTERN.
+(Again, we can replace <code>forall</code> with <code>exists</code>, and make this an existential quantification rather than a universal quantification.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>In our grammar, we have two possible expansions for <code>&lt;int&gt;</code>, namely <code>&lt;digit&gt;</code> (for values 0..9) and <code>&lt;leaddigit&gt;&lt;int&gt;</code> (for 10 and above):</p>
+
+<pre><code>&lt;int&gt; ::= &lt;digit&gt; | &lt;leaddigit&gt;&lt;int&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we now want to constrain only <em>one</em> of the two alternatives, we can use the following expression:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            forall &lt;int&gt; i=&quot;&lt;digit&gt;&quot; in &lt;start&gt;:</span>
+<span class="sd">                (i = &quot;7&quot;)</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This ensures that <em>if</em> <code>&lt;int&gt;</code> is expanded to a single digit, this single digit becomes <code>7</code>.
+The effect is that all <code>&lt;int&gt;</code> values now end in a <code>7</code> digit:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>pagesize=37
+bufsize=7
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Likewise, we can constrain <code>i</code> to the second expansion alternative, and thus ensure that all multi-digit numbers are greater than 100:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            forall &lt;int&gt; i=&quot;&lt;leaddigit&gt;&lt;int&gt;&quot; in &lt;start&gt;:</span>
+<span class="sd">                (str.to.int(i) &gt; 100)</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here, however, the solver can also choose the less constrained alternative for <code>&lt;int&gt;</code>s, picking single digits:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>pagesize=5
+bufsize=6
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Matching-Expansion-Elements">Matching Expansion Elements<a class="anchor-link" href="#Matching-Expansion-Elements">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>In a quantification pattern, we can also <em>name</em> individual nonterminal elements and use them in our constraints.
+This is done by replacing the nonterminal <code>&lt;ID&gt;</code> with the special form <code>{&lt;ID&gt; VARIABLE}</code> (in curly braces) which then makes the variable VARIABLE a placeholder for the value matched by ID; VARIABLE can then be used in constraints.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here is an example. In the expansion <code>&lt;leaddigit&gt;&lt;int&gt;</code>, we want to ensure that the <code>&lt;leaddigit&gt;</code> is always <code>9</code>.
+Using the special brace form, we make <code>lead</code> a variable holding the value of <code>&lt;leaddigit&gt;</code>, and can then use it in a constraint:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            forall &lt;int&gt; i=&quot;{&lt;leaddigit&gt; lead}{&lt;int&gt; remainder}&quot; in &lt;start&gt;:</span>
+<span class="sd">                (lead = &quot;9&quot;)</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This (again) ensures that all lead digits should be <code>9</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>pagesize=2
+bufsize=7
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>... if we <em>have</em> <leaddigit> elements, that is.
+    Fortunately, ISLa is set up to systematically cover all alternatives.
+Hence, the next solution actually <em>does</em> contain a <code>&lt;leaddigit&gt;</code> element, and it is properly constrained.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>1
+pagesize=5
+bufsize=92
+2
+pagesize=94
+bufsize=7
+3
+pagesize=91
+bufsize=98
+4
+pagesize=998
+bufsize=95
+5
+pagesize=994
+bufsize=5
+6
+pagesize=96
+bufsize=997
+7
+pagesize=7
+bufsize=996
+8
+pagesize=9
+bufsize=9991
+9
+pagesize=92
+bufsize=9996
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>(Note how ISLa systematically explores longer and longer combinations of lead digits here – this again is due to ISLa exploring all possible syntactic combinations.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Could we express the above in a simpler fashion? Of course! Using implicit universal quantification and the dot notation introduced earlier, we could write, for instance</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            &lt;int&gt;.&lt;leaddigit&gt; = &quot;9&quot;</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>and obtain the same result:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0
+pagesize=4
+bufsize=6
+1
+pagesize=94
+bufsize=5
+2
+pagesize=2
+bufsize=91
+3
+pagesize=95
+bufsize=91
+4
+pagesize=5
+bufsize=990
+5
+pagesize=996
+bufsize=91
+6
+pagesize=93
+bufsize=998
+7
+pagesize=995
+bufsize=1
+8
+pagesize=9992
+bufsize=5
+9
+pagesize=0
+bufsize=9994
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>But while the dot notation is sufficient for many cases, the pattern matching notation is more general and more flexible – even if it is harder to read.</p>
 </div>
 </div>
 </div>
@@ -14130,7 +14575,636 @@ Note that this does not yet check the constraint; it will, however, detect if th
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Simple-Language">A Simple Language<a class="anchor-link" href="#A-Simple-Language">&#182;</a></h2></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">&#182;</a></h2><p>Let us further illustrate ISLa using a few case studies.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Matching-Identifiers-in-XML">Matching Identifiers in XML<a class="anchor-link" href="#Matching-Identifiers-in-XML">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The Extensible Markup Language (XML) is a typical example of an input language that cannot be fully expressed using a context-free grammar.
+The problem is not so much expressing the <em>syntax</em> of XML – the basics are fairly easy:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">XML_GRAMMAR</span><span class="p">:</span> <span class="n">Grammar</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;xml-tree&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;xml-tree&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;open-tag&gt;&lt;xml-content&gt;&lt;close-tag&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;open-tag&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;&lt;id&gt;&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;close-tag&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;/&lt;id&gt;&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;xml-content&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Text&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;xml-tree&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;id&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;letter&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;id&gt;&lt;letter&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;letter&gt;&quot;</span><span class="p">:</span> <span class="n">crange</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>start
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 208.0 62" width="208.0">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M168.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M148.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M148.0 31h0.0"/><rect height="22" width="88.0" x="60.0" y="20"/><text x="104.0" y="35">xml-tree</text></g></g><path d="M148.0 31h20"/></g><path d="M 168.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>xml-tree
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 458.0 62" width="458.0">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M418.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M398.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M148.0 31h0.0"/><rect height="22" width="88.0" x="60.0" y="20"/><text x="104.0" y="35">open-tag</text></g><path d="M148.0 31h10"/><path d="M158.0 31h10"/><g class="non-terminal">
+<path d="M168.0 31h0.0"/><path d="M281.5 31h0.0"/><rect height="22" width="113.5" x="168.0" y="20"/><text x="224.75" y="35">xml-content</text></g><path d="M281.5 31h10"/><path d="M291.5 31h10"/><g class="non-terminal">
+<path d="M301.5 31h0.0"/><path d="M398.0 31h0.0"/><rect height="22" width="96.5" x="301.5" y="20"/><text x="349.75" y="35">close-tag</text></g></g><path d="M398.0 31h20"/></g><path d="M 418.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>open-tag
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 254.0 62" width="254.0">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M214.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M194.0 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M88.5 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="60.0" y="20"/><text x="74.25" y="35">&lt;</text></g><path d="M88.5 31h10"/><path d="M98.5 31h10"/><g class="non-terminal">
+<path d="M108.5 31h0.0"/><path d="M145.5 31h0.0"/><rect height="22" width="37.0" x="108.5" y="20"/><text x="127.0" y="35">id</text></g><path d="M145.5 31h10"/><path d="M155.5 31h10"/><g class="terminal">
+<path d="M165.5 31h0.0"/><path d="M194.0 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="165.5" y="20"/><text x="179.75" y="35">&gt;</text></g></g><path d="M194.0 31h20"/></g><path d="M 214.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>close-tag
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 262.5 62" width="262.5">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M222.5 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M202.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M97.0 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="20"/><text x="78.5" y="35">&lt;/</text></g><path d="M97.0 31h10"/><path d="M107.0 31h10"/><g class="non-terminal">
+<path d="M117.0 31h0.0"/><path d="M154.0 31h0.0"/><rect height="22" width="37.0" x="117.0" y="20"/><text x="135.5" y="35">id</text></g><path d="M154.0 31h10"/><path d="M164.0 31h10"/><g class="terminal">
+<path d="M174.0 31h0.0"/><path d="M202.5 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="174.0" y="20"/><text x="188.25" y="35">&gt;</text></g></g><path d="M202.5 31h20"/></g><path d="M 222.5 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>xml-content
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 208.0 92" width="208.0">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M168.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h17.0"/><path d="M131.0 31h17.0"/><g class="terminal">
+<path d="M77.0 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="77.0" y="20"/><text x="104.0" y="35">Text</text></g></g><path d="M148.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M148.0 61h0.0"/><g class="non-terminal">
+<path d="M60.0 61h0.0"/><path d="M148.0 61h0.0"/><rect height="22" width="88.0" x="60.0" y="50"/><text x="104.0" y="65">xml-tree</text></g></g><path d="M148.0 61h20"/></g><path d="M 168.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>id
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 248.0 92" width="248.0">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M208.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h28.5"/><path d="M159.5 31h28.5"/><g class="non-terminal">
+<path d="M88.5 31h0.0"/><path d="M159.5 31h0.0"/><rect height="22" width="71.0" x="88.5" y="20"/><text x="124.0" y="35">letter</text></g></g><path d="M188.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M188.0 61h0.0"/><g class="non-terminal">
+<path d="M60.0 61h0.0"/><path d="M97.0 61h0.0"/><rect height="22" width="37.0" x="60.0" y="50"/><text x="78.5" y="65">id</text></g><path d="M97.0 61h10"/><path d="M107.0 61h10"/><g class="non-terminal">
+<path d="M117.0 61h0.0"/><path d="M188.0 61h0.0"/><rect height="22" width="71.0" x="117.0" y="50"/><text x="152.5" y="65">letter</text></g></g><path d="M188.0 61h20"/></g><path d="M 208.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>letter
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="198" viewBox="0 0 611.0 198" width="611.0">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 89v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 99h0.0"/><path d="M571.0 99h0.0"/><path d="M40.0 99a10 10 0 0 0 10 -10v-59a10 10 0 0 1 10 -10h412.5"/><path d="M138.5 178h412.5a10 10 0 0 0 10 -10v-59a10 10 0 0 1 10 -10"/><path d="M40.0 99h10"/><g>
+<path d="M50.0 99h0.0"/><path d="M118.5 99h0.0"/><path d="M50.0 99a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M70.0 69h0.0"/><path d="M98.5 69h0.0"/><g class="terminal">
+<path d="M70.0 69h0.0"/><path d="M98.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="58"/><text x="84.25" y="73">b</text></g></g><path d="M98.5 69a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M50.0 99a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M70.0 39h0.0"/><path d="M98.5 39h0.0"/><g class="terminal">
+<path d="M70.0 39h0.0"/><path d="M98.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="28"/><text x="84.25" y="43">a</text></g></g><path d="M98.5 39a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M50.0 99h20"/><g>
+<path d="M70.0 99h0.0"/><path d="M98.5 99h0.0"/><g class="terminal">
+<path d="M70.0 99h0.0"/><path d="M98.5 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="88"/><text x="84.25" y="103">c</text></g></g><path d="M98.5 99h20"/><path d="M50.0 99a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M70.0 129h0.0"/><path d="M98.5 129h0.0"/><g class="terminal">
+<path d="M70.0 129h0.0"/><path d="M98.5 129h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="118"/><text x="84.25" y="133">d</text></g></g><path d="M98.5 129a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M50.0 99a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
+<path d="M70.0 159h0.0"/><path d="M98.5 159h0.0"/><g class="terminal">
+<path d="M70.0 159h0.0"/><path d="M98.5 159h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="148"/><text x="84.25" y="163">e</text></g></g><path d="M98.5 159a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M118.5 99a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><path d="M118.5 20a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><g>
+<path d="M138.5 99h0.0"/><path d="M207.0 99h0.0"/><path d="M138.5 99a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M158.5 69h0.0"/><path d="M187.0 69h0.0"/><g class="terminal">
+<path d="M158.5 69h0.0"/><path d="M187.0 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="58"/><text x="172.75" y="73">g</text></g></g><path d="M187.0 69a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M138.5 99a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M158.5 39h0.0"/><path d="M187.0 39h0.0"/><g class="terminal">
+<path d="M158.5 39h0.0"/><path d="M187.0 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="28"/><text x="172.75" y="43">f</text></g></g><path d="M187.0 39a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M138.5 99h20"/><g>
+<path d="M158.5 99h0.0"/><path d="M187.0 99h0.0"/><g class="terminal">
+<path d="M158.5 99h0.0"/><path d="M187.0 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="88"/><text x="172.75" y="103">h</text></g></g><path d="M187.0 99h20"/><path d="M138.5 99a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M158.5 129h0.0"/><path d="M187.0 129h0.0"/><g class="terminal">
+<path d="M158.5 129h0.0"/><path d="M187.0 129h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="118"/><text x="172.75" y="133">i</text></g></g><path d="M187.0 129a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M138.5 99a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
+<path d="M158.5 159h0.0"/><path d="M187.0 159h0.0"/><g class="terminal">
+<path d="M158.5 159h0.0"/><path d="M187.0 159h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="148"/><text x="172.75" y="163">j</text></g></g><path d="M187.0 159a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M207.0 99a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><path d="M207.0 20a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><g>
+<path d="M227.0 99h0.0"/><path d="M295.5 99h0.0"/><path d="M227.0 99a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M247.0 69h0.0"/><path d="M275.5 69h0.0"/><g class="terminal">
+<path d="M247.0 69h0.0"/><path d="M275.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="58"/><text x="261.25" y="73">l</text></g></g><path d="M275.5 69a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M227.0 99a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M247.0 39h0.0"/><path d="M275.5 39h0.0"/><g class="terminal">
+<path d="M247.0 39h0.0"/><path d="M275.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="28"/><text x="261.25" y="43">k</text></g></g><path d="M275.5 39a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M227.0 99h20"/><g>
+<path d="M247.0 99h0.0"/><path d="M275.5 99h0.0"/><g class="terminal">
+<path d="M247.0 99h0.0"/><path d="M275.5 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="88"/><text x="261.25" y="103">m</text></g></g><path d="M275.5 99h20"/><path d="M227.0 99a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M247.0 129h0.0"/><path d="M275.5 129h0.0"/><g class="terminal">
+<path d="M247.0 129h0.0"/><path d="M275.5 129h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="118"/><text x="261.25" y="133">n</text></g></g><path d="M275.5 129a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M227.0 99a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
+<path d="M247.0 159h0.0"/><path d="M275.5 159h0.0"/><g class="terminal">
+<path d="M247.0 159h0.0"/><path d="M275.5 159h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="148"/><text x="261.25" y="163">o</text></g></g><path d="M275.5 159a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M295.5 99a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><path d="M295.5 20a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><g>
+<path d="M315.5 99h0.0"/><path d="M384.0 99h0.0"/><path d="M315.5 99a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M335.5 69h0.0"/><path d="M364.0 69h0.0"/><g class="terminal">
+<path d="M335.5 69h0.0"/><path d="M364.0 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="58"/><text x="349.75" y="73">q</text></g></g><path d="M364.0 69a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M315.5 99a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M335.5 39h0.0"/><path d="M364.0 39h0.0"/><g class="terminal">
+<path d="M335.5 39h0.0"/><path d="M364.0 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="28"/><text x="349.75" y="43">p</text></g></g><path d="M364.0 39a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M315.5 99h20"/><g>
+<path d="M335.5 99h0.0"/><path d="M364.0 99h0.0"/><g class="terminal">
+<path d="M335.5 99h0.0"/><path d="M364.0 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="88"/><text x="349.75" y="103">r</text></g></g><path d="M364.0 99h20"/><path d="M315.5 99a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M335.5 129h0.0"/><path d="M364.0 129h0.0"/><g class="terminal">
+<path d="M335.5 129h0.0"/><path d="M364.0 129h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="118"/><text x="349.75" y="133">s</text></g></g><path d="M364.0 129a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M315.5 99a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
+<path d="M335.5 159h0.0"/><path d="M364.0 159h0.0"/><g class="terminal">
+<path d="M335.5 159h0.0"/><path d="M364.0 159h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="148"/><text x="349.75" y="163">t</text></g></g><path d="M364.0 159a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M384.0 99a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><path d="M384.0 20a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><g>
+<path d="M404.0 99h0.0"/><path d="M472.5 99h0.0"/><path d="M404.0 99a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M424.0 69h0.0"/><path d="M452.5 69h0.0"/><g class="terminal">
+<path d="M424.0 69h0.0"/><path d="M452.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="58"/><text x="438.25" y="73">v</text></g></g><path d="M452.5 69a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M404.0 99a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M424.0 39h0.0"/><path d="M452.5 39h0.0"/><g class="terminal">
+<path d="M424.0 39h0.0"/><path d="M452.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="28"/><text x="438.25" y="43">u</text></g></g><path d="M452.5 39a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M404.0 99h20"/><g>
+<path d="M424.0 99h0.0"/><path d="M452.5 99h0.0"/><g class="terminal">
+<path d="M424.0 99h0.0"/><path d="M452.5 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="88"/><text x="438.25" y="103">w</text></g></g><path d="M452.5 99h20"/><path d="M404.0 99a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M424.0 129h0.0"/><path d="M452.5 129h0.0"/><g class="terminal">
+<path d="M424.0 129h0.0"/><path d="M452.5 129h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="118"/><text x="438.25" y="133">x</text></g></g><path d="M452.5 129a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M404.0 99a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
+<path d="M424.0 159h0.0"/><path d="M452.5 159h0.0"/><g class="terminal">
+<path d="M424.0 159h0.0"/><path d="M452.5 159h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="148"/><text x="438.25" y="163">y</text></g></g><path d="M452.5 159a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M472.5 99a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><path d="M472.5 20a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><g>
+<path d="M492.5 99h0.0"/><path d="M561.0 99h0.0"/><path d="M492.5 99h20"/><g>
+<path d="M512.5 99h0.0"/><path d="M541.0 99h0.0"/><g class="terminal">
+<path d="M512.5 99h0.0"/><path d="M541.0 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="512.5" y="88"/><text x="526.75" y="103">z</text></g></g><path d="M541.0 99h20"/></g><path d="M561.0 99h10"/></g><path d="M 571.0 99 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The problem becomes evident when we produce inputs from the grammar: The <code>&lt;id&gt;</code> elements in <code>&lt;open-tag&gt;</code> and <code>&lt;close-tag&gt;</code> do not match.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzer</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">)</span>
+<span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;&lt;rfi&gt;&lt;d&gt;&lt;u&gt;&lt;sfrbw&gt;&lt;m&gt;&lt;ku&gt;Text&lt;/ugp&gt;&lt;/ym&gt;&lt;/im&gt;&lt;/hp&gt;&lt;/s&gt;&lt;/h&gt;&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we want the tag IDs to match, we need to come up with a <em>finite</em> set of tags (as in, say, HTML); then we can extend the grammar with one rule for each tag - <code>&lt;body&gt;...&lt;/body&gt;</code>, <code>&lt;p&gt;...&lt;/p&gt;</code>, <code>&lt;strong&gt;...&lt;/strong&gt;</code>, and so on.
+For an <em>infinite</em> set of tags, though, as in our grammar, expressing that the two tag IDs must match is not possible in a context-free grammar.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>With ISLa, however, constraining the grammar is easy.
+All we need is the rule that constrains the <code>&lt;xml-tree&gt;</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            &lt;xml-tree&gt;.&lt;open-tag&gt;.&lt;id&gt; = &lt;xml-tree&gt;.&lt;close-tag&gt;.&lt;id&gt;</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>&lt;p&gt;Text&lt;/p&gt;
+&lt;p&gt;&lt;p&gt;Text&lt;/p&gt;&lt;/p&gt;
+&lt;p&gt;&lt;p&gt;&lt;p&gt;Text&lt;/p&gt;&lt;/p&gt;&lt;/p&gt;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>and we see that the <code>&lt;id&gt;</code> tags now indeed match each other.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><ul>
+<li>FIXME: This is rather slow. If we have simple equality A = B, one may also go and generate A and then set B to the value of A (or vice versa)</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>In contrast to the "input generator" solution in the <a href="GeneratorGrammarFuzzer">chapter on generators</a>, our constraint-based solution is purely declarative - and can also be used to parse and check inputs.
+Plus, of course, we can easily add more constraints:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            &lt;xml-tree&gt;.&lt;open-tag&gt;.&lt;id&gt; = &lt;xml-tree&gt;.&lt;close-tag&gt;.&lt;id&gt;</span>
+<span class="sd">            and</span>
+<span class="sd">            str.len(&lt;id&gt;) &gt; 10</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>&lt;ppkpuhxnchk&gt;Text&lt;/ppkpuhxnchk&gt;
+&lt;ppkxucumadm&gt;&lt;ppkxucumadm&gt;Text&lt;/ppkxucumadm&gt;&lt;/ppkxucumadm&gt;
+&lt;ppmxxklmphn&gt;&lt;ppmxxklmphn&gt;&lt;ppmxxklmphn&gt;Text&lt;/ppmxxklmphn&gt;&lt;/ppmxxklmphn&gt;&lt;/ppmxxklmphn&gt;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Definitions-and-Usages-in-Programming-Languages">Definitions and Usages in Programming Languages<a class="anchor-link" href="#Definitions-and-Usages-in-Programming-Languages">&#182;</a></h3><p>When testing compilers with generated program code, one often encounters the problem that before <em>using</em> an identifier, one has to <em>declare</em> it first - specifying its type, some initial value, and more.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This problem is easily illustrated in the following grammar, which produces <em>sequences of assignments</em>.
+Variable names consist of a single lowercase letter; values can only be digits; assignments are separated by semicolons.</p>
+</div>
 </div>
 </div>
 </div>
@@ -14145,9 +15219,11 @@ Note that this does not yet check the constraint; it will, however, detect if th
     <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span>
         <span class="p">[</span><span class="s2">&quot;&lt;stmt&gt;&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;stmt&gt;&quot;</span><span class="p">:</span>
-        <span class="p">[</span><span class="s2">&quot;&lt;assgn&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;assgn&gt; ; &lt;stmt&gt;&quot;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;assgn&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;assgn&gt;; &lt;stmt&gt;&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;assgn&gt;&quot;</span><span class="p">:</span>
-        <span class="p">[</span><span class="s2">&quot;&lt;var&gt; := &lt;rhs&gt;&quot;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;lhs&gt; := &lt;rhs&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;lhs&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;var&gt;&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;rhs&gt;&quot;</span><span class="p">:</span>
         <span class="p">[</span><span class="s2">&quot;&lt;var&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;var&gt;&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_lowercase</span><span class="p">),</span>
@@ -14174,10 +15250,455 @@ Note that this does not yet check the constraint; it will, however, detect if th
 </div>
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">syntax_diagram</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>start
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 174.0 62" width="174.0">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M134.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M114.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M114.0 31h0.0"/><rect height="22" width="54.0" x="60.0" y="20"/><text x="87.0" y="35">stmt</text></g></g><path d="M114.0 31h20"/></g><path d="M 134.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>stmt
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 313.5 92" width="313.5">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M273.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h65.5"/><path d="M188.0 31h65.5"/><g class="non-terminal">
+<path d="M125.5 31h0.0"/><path d="M188.0 31h0.0"/><rect height="22" width="62.5" x="125.5" y="20"/><text x="156.75" y="35">assgn</text></g></g><path d="M253.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M253.5 61h0.0"/><g class="non-terminal">
+<path d="M60.0 61h0.0"/><path d="M122.5 61h0.0"/><rect height="22" width="62.5" x="60.0" y="50"/><text x="91.25" y="65">assgn</text></g><path d="M122.5 61h10"/><path d="M132.5 61h10"/><g class="terminal">
+<path d="M142.5 61h0.0"/><path d="M179.5 61h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="142.5" y="50"/><text x="161.0" y="65">; </text></g><path d="M179.5 61h10"/><path d="M189.5 61h10"/><g class="non-terminal">
+<path d="M199.5 61h0.0"/><path d="M253.5 61h0.0"/><rect height="22" width="54.0" x="199.5" y="50"/><text x="226.5" y="65">stmt</text></g></g><path d="M253.5 61h20"/></g><path d="M 273.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>assgn
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 305.0 62" width="305.0">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M265.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M245.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M105.5 31h0.0"/><rect height="22" width="45.5" x="60.0" y="20"/><text x="82.75" y="35">lhs</text></g><path d="M105.5 31h10"/><path d="M115.5 31h10"/><g class="terminal">
+<path d="M125.5 31h0.0"/><path d="M179.5 31h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="125.5" y="20"/><text x="152.5" y="35"> := </text></g><path d="M179.5 31h10"/><path d="M189.5 31h10"/><g class="non-terminal">
+<path d="M199.5 31h0.0"/><path d="M245.0 31h0.0"/><rect height="22" width="45.5" x="199.5" y="20"/><text x="222.25" y="35">rhs</text></g></g><path d="M245.0 31h20"/></g><path d="M 265.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>lhs
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 165.5 62" width="165.5">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M125.5 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M105.5 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M105.5 31h0.0"/><rect height="22" width="45.5" x="60.0" y="20"/><text x="82.75" y="35">var</text></g></g><path d="M105.5 31h20"/></g><path d="M 125.5 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>rhs
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 182.5 92" width="182.5">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M142.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h8.5"/><path d="M114.0 31h8.5"/><g class="non-terminal">
+<path d="M68.5 31h0.0"/><path d="M114.0 31h0.0"/><rect height="22" width="45.5" x="68.5" y="20"/><text x="91.25" y="35">var</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M122.5 61h0.0"/><g class="non-terminal">
+<path d="M60.0 61h0.0"/><path d="M122.5 61h0.0"/><rect height="22" width="62.5" x="60.0" y="50"/><text x="91.25" y="65">digit</text></g></g><path d="M122.5 61h20"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>var
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="198" viewBox="0 0 611.0 198" width="611.0">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 89v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 99h0.0"/><path d="M571.0 99h0.0"/><path d="M40.0 99a10 10 0 0 0 10 -10v-59a10 10 0 0 1 10 -10h412.5"/><path d="M138.5 178h412.5a10 10 0 0 0 10 -10v-59a10 10 0 0 1 10 -10"/><path d="M40.0 99h10"/><g>
+<path d="M50.0 99h0.0"/><path d="M118.5 99h0.0"/><path d="M50.0 99a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M70.0 69h0.0"/><path d="M98.5 69h0.0"/><g class="terminal">
+<path d="M70.0 69h0.0"/><path d="M98.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="58"/><text x="84.25" y="73">b</text></g></g><path d="M98.5 69a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M50.0 99a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M70.0 39h0.0"/><path d="M98.5 39h0.0"/><g class="terminal">
+<path d="M70.0 39h0.0"/><path d="M98.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="28"/><text x="84.25" y="43">a</text></g></g><path d="M98.5 39a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M50.0 99h20"/><g>
+<path d="M70.0 99h0.0"/><path d="M98.5 99h0.0"/><g class="terminal">
+<path d="M70.0 99h0.0"/><path d="M98.5 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="88"/><text x="84.25" y="103">c</text></g></g><path d="M98.5 99h20"/><path d="M50.0 99a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M70.0 129h0.0"/><path d="M98.5 129h0.0"/><g class="terminal">
+<path d="M70.0 129h0.0"/><path d="M98.5 129h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="118"/><text x="84.25" y="133">d</text></g></g><path d="M98.5 129a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M50.0 99a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
+<path d="M70.0 159h0.0"/><path d="M98.5 159h0.0"/><g class="terminal">
+<path d="M70.0 159h0.0"/><path d="M98.5 159h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="148"/><text x="84.25" y="163">e</text></g></g><path d="M98.5 159a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M118.5 99a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><path d="M118.5 20a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><g>
+<path d="M138.5 99h0.0"/><path d="M207.0 99h0.0"/><path d="M138.5 99a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M158.5 69h0.0"/><path d="M187.0 69h0.0"/><g class="terminal">
+<path d="M158.5 69h0.0"/><path d="M187.0 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="58"/><text x="172.75" y="73">g</text></g></g><path d="M187.0 69a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M138.5 99a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M158.5 39h0.0"/><path d="M187.0 39h0.0"/><g class="terminal">
+<path d="M158.5 39h0.0"/><path d="M187.0 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="28"/><text x="172.75" y="43">f</text></g></g><path d="M187.0 39a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M138.5 99h20"/><g>
+<path d="M158.5 99h0.0"/><path d="M187.0 99h0.0"/><g class="terminal">
+<path d="M158.5 99h0.0"/><path d="M187.0 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="88"/><text x="172.75" y="103">h</text></g></g><path d="M187.0 99h20"/><path d="M138.5 99a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M158.5 129h0.0"/><path d="M187.0 129h0.0"/><g class="terminal">
+<path d="M158.5 129h0.0"/><path d="M187.0 129h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="118"/><text x="172.75" y="133">i</text></g></g><path d="M187.0 129a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M138.5 99a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
+<path d="M158.5 159h0.0"/><path d="M187.0 159h0.0"/><g class="terminal">
+<path d="M158.5 159h0.0"/><path d="M187.0 159h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="148"/><text x="172.75" y="163">j</text></g></g><path d="M187.0 159a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M207.0 99a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><path d="M207.0 20a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><g>
+<path d="M227.0 99h0.0"/><path d="M295.5 99h0.0"/><path d="M227.0 99a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M247.0 69h0.0"/><path d="M275.5 69h0.0"/><g class="terminal">
+<path d="M247.0 69h0.0"/><path d="M275.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="58"/><text x="261.25" y="73">l</text></g></g><path d="M275.5 69a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M227.0 99a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M247.0 39h0.0"/><path d="M275.5 39h0.0"/><g class="terminal">
+<path d="M247.0 39h0.0"/><path d="M275.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="28"/><text x="261.25" y="43">k</text></g></g><path d="M275.5 39a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M227.0 99h20"/><g>
+<path d="M247.0 99h0.0"/><path d="M275.5 99h0.0"/><g class="terminal">
+<path d="M247.0 99h0.0"/><path d="M275.5 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="88"/><text x="261.25" y="103">m</text></g></g><path d="M275.5 99h20"/><path d="M227.0 99a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M247.0 129h0.0"/><path d="M275.5 129h0.0"/><g class="terminal">
+<path d="M247.0 129h0.0"/><path d="M275.5 129h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="118"/><text x="261.25" y="133">n</text></g></g><path d="M275.5 129a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M227.0 99a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
+<path d="M247.0 159h0.0"/><path d="M275.5 159h0.0"/><g class="terminal">
+<path d="M247.0 159h0.0"/><path d="M275.5 159h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="148"/><text x="261.25" y="163">o</text></g></g><path d="M275.5 159a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M295.5 99a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><path d="M295.5 20a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><g>
+<path d="M315.5 99h0.0"/><path d="M384.0 99h0.0"/><path d="M315.5 99a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M335.5 69h0.0"/><path d="M364.0 69h0.0"/><g class="terminal">
+<path d="M335.5 69h0.0"/><path d="M364.0 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="58"/><text x="349.75" y="73">q</text></g></g><path d="M364.0 69a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M315.5 99a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M335.5 39h0.0"/><path d="M364.0 39h0.0"/><g class="terminal">
+<path d="M335.5 39h0.0"/><path d="M364.0 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="28"/><text x="349.75" y="43">p</text></g></g><path d="M364.0 39a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M315.5 99h20"/><g>
+<path d="M335.5 99h0.0"/><path d="M364.0 99h0.0"/><g class="terminal">
+<path d="M335.5 99h0.0"/><path d="M364.0 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="88"/><text x="349.75" y="103">r</text></g></g><path d="M364.0 99h20"/><path d="M315.5 99a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M335.5 129h0.0"/><path d="M364.0 129h0.0"/><g class="terminal">
+<path d="M335.5 129h0.0"/><path d="M364.0 129h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="118"/><text x="349.75" y="133">s</text></g></g><path d="M364.0 129a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M315.5 99a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
+<path d="M335.5 159h0.0"/><path d="M364.0 159h0.0"/><g class="terminal">
+<path d="M335.5 159h0.0"/><path d="M364.0 159h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="148"/><text x="349.75" y="163">t</text></g></g><path d="M364.0 159a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M384.0 99a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><path d="M384.0 20a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><g>
+<path d="M404.0 99h0.0"/><path d="M472.5 99h0.0"/><path d="M404.0 99a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M424.0 69h0.0"/><path d="M452.5 69h0.0"/><g class="terminal">
+<path d="M424.0 69h0.0"/><path d="M452.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="58"/><text x="438.25" y="73">v</text></g></g><path d="M452.5 69a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M404.0 99a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M424.0 39h0.0"/><path d="M452.5 39h0.0"/><g class="terminal">
+<path d="M424.0 39h0.0"/><path d="M452.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="28"/><text x="438.25" y="43">u</text></g></g><path d="M452.5 39a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M404.0 99h20"/><g>
+<path d="M424.0 99h0.0"/><path d="M452.5 99h0.0"/><g class="terminal">
+<path d="M424.0 99h0.0"/><path d="M452.5 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="88"/><text x="438.25" y="103">w</text></g></g><path d="M452.5 99h20"/><path d="M404.0 99a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M424.0 129h0.0"/><path d="M452.5 129h0.0"/><g class="terminal">
+<path d="M424.0 129h0.0"/><path d="M452.5 129h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="118"/><text x="438.25" y="133">x</text></g></g><path d="M452.5 129a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M404.0 99a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
+<path d="M424.0 159h0.0"/><path d="M452.5 159h0.0"/><g class="terminal">
+<path d="M424.0 159h0.0"/><path d="M452.5 159h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="148"/><text x="438.25" y="163">y</text></g></g><path d="M452.5 159a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M472.5 99a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><path d="M472.5 20a10 10 0 0 1 10 10v59a10 10 0 0 0 10 10"/><g>
+<path d="M492.5 99h0.0"/><path d="M561.0 99h0.0"/><path d="M492.5 99h20"/><g>
+<path d="M512.5 99h0.0"/><path d="M541.0 99h0.0"/><g class="terminal">
+<path d="M512.5 99h0.0"/><path d="M541.0 99h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="512.5" y="88"/><text x="526.75" y="103">z</text></g></g><path d="M541.0 99h20"/></g><path d="M561.0 99h10"/></g><path d="M 571.0 99 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>digit
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="109" viewBox="0 0 522.5 109" width="522.5">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:white;
+    }
+    svg.railroad-diagram text {
+        font:14px "Fira Mono", monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px "Fira Mono", monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:2;
+        stroke:black;
+        fill:mistyrose;
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 59v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 69h0.0"/><path d="M482.5 69h0.0"/><path d="M40.0 69a10 10 0 0 0 10 -10v-29a10 10 0 0 1 10 -10h324.0"/><path d="M138.5 89h324.0a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10"/><path d="M40.0 69h10"/><g>
+<path d="M50.0 69h0.0"/><path d="M118.5 69h0.0"/><path d="M50.0 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M70.0 39h0.0"/><path d="M98.5 39h0.0"/><g class="terminal">
+<path d="M70.0 39h0.0"/><path d="M98.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="28"/><text x="84.25" y="43">0</text></g></g><path d="M98.5 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M50.0 69h20"/><g>
+<path d="M70.0 69h0.0"/><path d="M98.5 69h0.0"/><g class="terminal">
+<path d="M70.0 69h0.0"/><path d="M98.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="58"/><text x="84.25" y="73">1</text></g></g><path d="M98.5 69h20"/></g><path d="M118.5 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M118.5 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
+<path d="M138.5 69h0.0"/><path d="M207.0 69h0.0"/><path d="M138.5 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M158.5 39h0.0"/><path d="M187.0 39h0.0"/><g class="terminal">
+<path d="M158.5 39h0.0"/><path d="M187.0 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="28"/><text x="172.75" y="43">2</text></g></g><path d="M187.0 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M138.5 69h20"/><g>
+<path d="M158.5 69h0.0"/><path d="M187.0 69h0.0"/><g class="terminal">
+<path d="M158.5 69h0.0"/><path d="M187.0 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="58"/><text x="172.75" y="73">3</text></g></g><path d="M187.0 69h20"/></g><path d="M207.0 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M207.0 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
+<path d="M227.0 69h0.0"/><path d="M295.5 69h0.0"/><path d="M227.0 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M247.0 39h0.0"/><path d="M275.5 39h0.0"/><g class="terminal">
+<path d="M247.0 39h0.0"/><path d="M275.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="28"/><text x="261.25" y="43">4</text></g></g><path d="M275.5 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M227.0 69h20"/><g>
+<path d="M247.0 69h0.0"/><path d="M275.5 69h0.0"/><g class="terminal">
+<path d="M247.0 69h0.0"/><path d="M275.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="58"/><text x="261.25" y="73">5</text></g></g><path d="M275.5 69h20"/></g><path d="M295.5 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M295.5 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
+<path d="M315.5 69h0.0"/><path d="M384.0 69h0.0"/><path d="M315.5 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M335.5 39h0.0"/><path d="M364.0 39h0.0"/><g class="terminal">
+<path d="M335.5 39h0.0"/><path d="M364.0 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="28"/><text x="349.75" y="43">6</text></g></g><path d="M364.0 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M315.5 69h20"/><g>
+<path d="M335.5 69h0.0"/><path d="M364.0 69h0.0"/><g class="terminal">
+<path d="M335.5 69h0.0"/><path d="M364.0 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="58"/><text x="349.75" y="73">7</text></g></g><path d="M364.0 69h20"/></g><path d="M384.0 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M384.0 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
+<path d="M404.0 69h0.0"/><path d="M472.5 69h0.0"/><path d="M404.0 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M424.0 39h0.0"/><path d="M452.5 39h0.0"/><g class="terminal">
+<path d="M424.0 39h0.0"/><path d="M452.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="28"/><text x="438.25" y="43">8</text></g></g><path d="M452.5 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M404.0 69h20"/><g>
+<path d="M424.0 69h0.0"/><path d="M452.5 69h0.0"/><g class="terminal">
+<path d="M424.0 69h0.0"/><path d="M452.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="58"/><text x="438.25" y="73">9</text></g></g><path d="M452.5 69h20"/></g><path d="M472.5 69h10"/></g><path d="M 482.5 69 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Simple-Fuzzer">A Simple Fuzzer<a class="anchor-link" href="#A-Simple-Fuzzer">&#182;</a></h2></div>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here are some assignment sequences produced by the grammar:</p>
+</div>
 </div>
 </div>
 </div>
@@ -14188,7 +15709,21 @@ Note that this does not yet check the constraint; it will, however, detect if th
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzer</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
 </pre></div>
 
@@ -14200,26 +15735,16 @@ Note that this does not yet check the constraint; it will, however, detect if th
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=421
-bufsize=2
-pagesize=6
-bufsize=30
-pagesize=4
-bufsize=3
-pagesize=1
-bufsize=5
-pagesize=7
-bufsize=4739
-pagesize=7
-bufsize=5
-pagesize=7
-bufsize=8
-pagesize=8215
-bufsize=4
-pagesize=1428
-bufsize=3
-pagesize=28
-bufsize=0
+<pre>h := v
+e := k
+t := i; v := 5
+e := 2
+j := b; y := 7
+j := g; n := 5; k := 5
+k := g; c := n; x := 4; b := 9; k := c
+i := 1; y := 8; s := w; t := 7; d := 0
+k := f
+p := 5; e := 1
 </pre>
 </div>
 
@@ -14228,30 +15753,19 @@ bufsize=0
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Beyond-Syntax:-Semantic-Input-Properties">Beyond Syntax: Semantic Input Properties<a class="anchor-link" href="#Beyond-Syntax:-Semantic-Input-Properties">&#182;</a></h2><p>Let's start with ISLa.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that the assignment <em>syntax</em> is similar to what we have in common programming languages.
+The <em>semantics</em>, however, are, well, questionable, as we commonly access variables whose values have not been previously defined.
+Again, this is a <em>semantic</em> property that cannot be expressed in a context-free grammar alone.</p>
 </div>
 </div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">isla.isla_predicates</span> <span class="kn">import</span> <span class="n">STANDARD_STRUCTURAL_PREDICATES</span>
-</pre></div>
-
-</div>
-</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Let's try the new syntax.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>What we need here is a constraint specifying that on the right-hand side of an assignment, we can only have variable names that occur on the left-hand side.
+In ISLa, we achive this thorugh the following constraint:</p>
 </div>
 </div>
 </div>
@@ -14263,89 +15777,12 @@ bufsize=0
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">constraint</span> <span class="o">=</span> <span class="n">parse_isla</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">exists &lt;assgn&gt; assgn: </span>
-<span class="s2">  (before(assgn, &lt;assgn&gt;) and &lt;assgn&gt;.&lt;rhs&gt;.&lt;var&gt; = assgn.&lt;var&gt;)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
-<span class="n">grammar</span><span class="o">=</span><span class="n">LANG_GRAMMAR</span><span class="p">,</span>
-<span class="n">structural_predicates</span><span class="o">=</span><span class="n">STANDARD_STRUCTURAL_PREDICATES</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Okay. Something simpler, maybe?</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">constraint</span> <span class="o">=</span> <span class="n">parse_isla</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">exists &lt;digit&gt; x:</span>
-<span class="s2">  (str.to.int(x) &gt;= 9)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span> <span class="n">grammar</span><span class="o">=</span><span class="n">LANG_GRAMMAR</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>How about the old SMT-LIB syntax?</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">constraint</span> <span class="o">=</span> <span class="n">parse_isla</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">exists &lt;digit&gt; x:</span>
-<span class="s2">  (&gt;= (str.to.int x) 9)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span> <span class="n">LANG_GRAMMAR</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Ok, this one works :-)</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">constraint</span> <span class="o">=</span> <span class="n">parse_isla</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">  (&gt;= (str.to.int &lt;digit&gt;) 9)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span> <span class="n">LANG_GRAMMAR</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            forall &lt;rhs&gt; in &lt;stmt&gt;:</span>
+<span class="sd">                exists &lt;lhs&gt; in &lt;stmt&gt;:</span>
+<span class="sd">                    &lt;rhs&gt;.&lt;var&gt; = &lt;lhs&gt;.&lt;var&gt;</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14359,37 +15796,7 @@ bufsize=0
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span>
-    <span class="n">grammar</span><span class="o">=</span><span class="n">LANG_GRAMMAR</span><span class="p">,</span>
-    <span class="n">formula</span><span class="o">=</span><span class="n">constraint</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">,</span> <span class="s1">&#39;(&gt;= (str.to.int &lt;digit&gt;) 9)&#39;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
 </pre></div>
 
@@ -14401,16 +15808,16 @@ bufsize=0
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>d := l
-h := 9
-r := w ; a := v
-g := l ; w := 9
-d := 9 ; r := h
-p := 9 ; m := 9
-t := f ; r := u ; j := b
-i := g ; q := m ; s := 9
-s := y ; i := 9 ; g := e
-l := v ; s := 9 ; c := 9
+<pre>p := 5
+p := 9; r := 3
+p := 5; r := p
+b := 7; r := b
+a := 5; v := a
+d := 1; j := d
+l := 7; x := l
+e := 3; z := e
+h := 8; v := h
+f := 6; p := f
 </pre>
 </div>
 
@@ -14419,11 +15826,8 @@ l := v ; s := 9 ; c := 9
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
-<li><em>Lesson one</em></li>
-<li><em>Lesson two</em></li>
-<li><em>Lesson three</em></li>
-</ul>
+<div class="text_cell_render border-box-sizing rendered_html"><p>This is much better already, but not perfect yet - we might still have assignments like <code>a := a</code> or <code>a := b; b := 5</code>.
+That is because our constraints do not yet take care of <em>ordering</em> – in a <code>&lt;rhs&gt;</code> element, we can only use variables that are defined earlier.</p>
 </div>
 </div>
 </div>
@@ -14432,44 +15836,8 @@ l := v ; s := 9 ; c := 9
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p><em>Link to subsequent chapters (notebooks) here, as in:</em></p>
-<ul>
-<li><a href="MutationFuzzer.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
-<li><a href="Grammars.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
-<li><a href="Reducer.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p><em>Cite relevant works in the literature and put them into context, as in:</em></p>
-<p>The idea of ensuring that each expansion in the grammar is used at least once goes back to Burkhardt [<a href="https://doi.org/10.1007/BF02235512">Burkhardt <em>et al</em>, 1967</a>], to be later rediscovered by Paul Purdom [<a href="https://doi.org/10.1007/BF01932308">Purdom <em>et al</em>, 1972</a>].</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p><em>Close the chapter with a few exercises such that people have things to do.  To make the solutions hidden (to be revealed by the user), have them start with</em></p>
-
-<pre><code>**Solution.**</code></pre>
-<p><em>Your solution can then extend up to the next title (i.e., any markdown cell starting with <code>#</code>).</em></p>
-<p><em>Running <code>make metadata</code> will automatically add metadata to the cells such that the cells will be hidden by default, and can be uncovered by the user.  The button will be introduced above the solution.</em></p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Title">Exercise 1: <em>Title</em><a class="anchor-link" href="#Exercise-1:-Title">&#182;</a></h3><p><em>Text of the exercise</em></p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>For this purpose, ISLa provides a <code>before()</code> predicate: <code>before(A, B)</code> expresses that the element <code>A</code> must occur before the element <code>B</code>.
+With <code>before()</code>, we can rewrite our constraint as</p>
 </div>
 </div>
 </div>
@@ -14481,8 +15849,13 @@ l := v ; s := 9 ; c := 9
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Some code that is part of the exercise</span>
-<span class="k">pass</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            forall &lt;rhs&gt; in &lt;stmt&gt;:</span>
+<span class="sd">                exists &lt;lhs&gt; in &lt;stmt&gt;:</span>
+<span class="sd">                    (before(&lt;lhs&gt;, &lt;rhs&gt;) and</span>
+<span class="sd">                     &lt;rhs&gt;.&lt;var&gt; = &lt;lhs&gt;.&lt;var&gt;)</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14493,10 +15866,51 @@ l := v ; s := 9 ; c := 9
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p><em>Some more text for the exercise</em></p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>... and thus ensure that on the right-hand-side of assignments, we only use identifiers defined earlier.</p>
+</div>
+</div>
+</div>
+</div>
 
-    
-<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/FuzzingWithConstraints.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>p := 5
+v := 6; e := 8
+i := 9; m := i
+f := 9; d := f
+p := 5; e := p
+h := 6; u := h
+a := 4; o := a
+d := 0; f := d
+e := 6; n := e
+x := 7; x := x
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><ul>
+<li>FIXME: What does one have to do to prevent <code>a := a</code>, though?</li>
+</ul>
 </div>
 </div>
 </div>
@@ -14505,10 +15919,203 @@ l := v ; s := 9 ; c := 9
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-Title">Exercise 2: <em>Title</em><a class="anchor-link" href="#Exercise-2:-Title">&#182;</a></h3><p><em>Text of the exercise</em></p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>In case you find that the assignment sequences are too short, you can use the ISLa <code>count()</code> predicate.
+<code>count(VARIABLE, NONTERMINAL, N)</code> ensures that the number of NONTERMINALs in VARIABLE is exactly N.
+To have statements with exactly 5 assignments, write</p>
+</div>
+</div>
+</div>
+</div>
 
-    
-<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/FuzzingWithConstraints.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            forall &lt;rhs&gt; in &lt;stmt&gt;:</span>
+<span class="sd">                exists &lt;lhs&gt; in &lt;stmt&gt;:</span>
+<span class="sd">                    (before(&lt;lhs&gt;, &lt;rhs&gt;) and</span>
+<span class="sd">                     &lt;rhs&gt;.&lt;var&gt; = &lt;lhs&gt;.&lt;var&gt;)</span>
+<span class="sd">            and</span>
+<span class="sd">            count(&lt;start&gt;, &quot;&lt;assgn&gt;&quot;, 5)</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39459/2187918683.py&#34;, line 3, in &lt;module&gt;
+    print(next(solver.solve()))
+  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/solver.py&#34;, line 376, in solve
+    result_state = self.eliminate_all_ready_semantic_predicate_formulas(state)
+  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/solver.py&#34;, line 776, in eliminate_all_ready_semantic_predicate_formulas
+    evaluation_result = semantic_predicate_formula.evaluate(self.graph, negate=negated)
+  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/language.py&#34;, line 854, in evaluate
+    return self.predicate.evaluate(graph, *self.args, negate=negate)
+  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/language.py&#34;, line 831, in evaluate
+    return self.eval_fun(graph, *instantiations)
+  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/isla_predicates.py&#34;, line 210, in count
+    assert not num.children
+AttributeError: &#39;int&#39; object has no attribute &#39;children&#39; (expected)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><ul>
+<li>FIXME: What am I doing wrong here?</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's a poor man's alternative:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            str.len(&lt;stmt&gt;) &gt; 20</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>p := 2; l := 2; p := 0
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39459/2187918683.py&#34;, line 3, in &lt;module&gt;
+    print(next(solver.solve()))
+StopIteration (expected)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><ul>
+<li>FIXME: This doesn't satisfy the constraint</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+<li>Using ISLa, we can add and solve <em>constraints</em> to grammars, allowing to express <em>semantic properties</em> of our test inputs</li>
+<li>Declaring constraints (and have a solver solve them) is much more versatile than adding generator code, and language-independent, too</li>
+<li>Using ISLa is fun :-)</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>In the remainder of this part, we will continue to focus on semantics.
+Among others, we will learn how to</p>
+<ul>
+<li><a href="GrammarMiner.html">mine grammars from existing inputs</a></li>
+<li><a href="SymbolicFuzzer.html">use symbolic fuzzing - that is, using constraint solvers to reach particular locations</a></li>
+<li><a href="ConcolicFuzzer.html">use concolic fuzzing - that is, combining symbolic fuzzing with concrete runs for higher efficiency</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><ul>
+<li>ISLa is published in the paper <a href="https://publications.cispa.saarland/3596/">"Input Invariants"</a> at ESEC/FSE 2022.</li>
+<li>The <a href="https://github.com/rindPHI/isla">ISLa project</a> contains the full source code and a complete reference.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p>To be added.</p>
 </div>
 </div>
 </div>
@@ -14520,7 +16127,7 @@ l := v ; s := 9 ; c := 9
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/FuzzingWithConstraints.ipynb" target=_blank)>Last change: 2022-08-04 19:44:33+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/FuzzingWithConstraints.ipynb" target=_blank)>Last change: 2022-08-06 18:15:21+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -14536,7 +16143,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html">Fuzzing with Constraints</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html">https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html</a>.  Retrieved 2022-08-04 19:44:33+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html">Fuzzing with Constraints</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html">https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html</a>.  Retrieved 2022-08-06 18:15:21+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2022:FuzzingWithConstraints,
@@ -14546,9 +16153,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2022},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html}},
-    note = {Retrieved 2022-08-04 19:44:33+02:00},
+    note = {Retrieved 2022-08-06 18:15:21+02:00},
     url = {https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html},
-    urldate = {2022-08-04 19:44:33+02:00}
+    urldate = {2022-08-06 18:15:21+02:00}
 }
 </pre>
 </div>

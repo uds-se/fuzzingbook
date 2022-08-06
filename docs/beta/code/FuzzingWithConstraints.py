@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-08-04 19:45:20+02:00
+# Last change: 2022-08-06 18:16:43+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -42,7 +42,56 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
 
-_For those only interested in using the code in this chapter (without wanting to know how it works), give an example.  This will be copied to the beginning of the chapter (before the first section) as text with rendered input and output._
+This chapter introduces the _ISLa framework_, consisting of 
+* the _ISLa specification language_, allowing to add _constraints_ to a grammar
+* the _ISLa solver_, solving these constraints to produce semantically (and syntactically) valid inputs
+* the _ISLa checker_, checking given inputs for whether they satisfy these constraints.
+
+A typical usage of the ISLa solver is as follows.
+First, install ISLa, using 
+shell
+$ pip install isla-solver
+
+Then, you can import the solver as
+
+>>> from isla.solver import ISLaSolver  # type: ignore
+
+The ISLa solver needs two things. First, a _grammar_ - say, US phone numbers.
+
+>>> from Grammars import US_PHONE_GRAMMAR
+
+Second, you need )constraints – a string expressing a condition over one or more grammar elements.
+Common functions include
+* `str.len()`, returning the length of a string
+* `str.to.int()`, converting a string to an integer
+
+Here, we instantiate the ISLa solver with a constraint stating that the area code should be above 900:
+
+>>> solver = ISLaSolver(US_PHONE_GRAMMAR, 
+>>>             """
+>>>             str.to.int() > 900
+>>>             """)
+
+With that, invoking `solver.solve()` produces an iterator over multiple solutions.
+
+>>> for _ in range(10):
+>>>     print(next(solver.solve()))
+(906)465-8279
+(901)695-2708
+(902)382-9074
+(904)632-6458
+(992)839-0278
+(920)458-0439
+(908)847-3098
+(910)589-0372
+(914)992-6350
+(984)431-0475
+
+
+We see that the solver produces a number of inputs that all satisfy the constraint.
+
+The `solve()` method provides several additional parameters to configure the solver, as documented below
+Additional `ISLaSolver` methods allow to check inputs against constraints, and provide additional functionality.
 
 /Users/zeller/Projects/fuzzingbook/notebooks/ClassDiagram.ipynb:367: UserWarning: ISLaSolver.solve() is listed as public, but has no docstring
   warnings.warn(f"{f.__qualname__}() is listed as public,"
@@ -50,7 +99,7 @@ _For those only interested in using the code in this chapter (without wanting to
   warnings.warn(f"Class {cls.__name__} has no docstring")
 * FIXME: Have docstrings for publicly available methods
 * FIXME: Have a docstring for the `ISLaSolver` class
-* FIXME: How do I check a given string whether it satisfies constraints? (Likely `isla.evaluator.evaluate(constraint, tree, grammar)`)
+* FIXME: Have a public interface for checking inputs against constraints (preferably in `ISLaSolver`, as it already has the grammar and the constraints).
 
 
 For more details, source, and documentation, see
@@ -104,7 +153,7 @@ if __name__ == '__main__':
 
 
 
-from .Grammars import Grammar, is_valid_grammar, syntax_diagram
+from .Grammars import Grammar, is_valid_grammar, syntax_diagram, crange
 
 import string
 
@@ -137,17 +186,15 @@ if __name__ == '__main__':
         print(i)
         print(fuzzer.fuzz())
 
-## Constraints to the Rescue
-## -------------------------
+## Specifying Constraints
+## ----------------------
 
 if __name__ == '__main__':
-    print('\n## Constraints to the Rescue')
+    print('\n## Specifying Constraints')
 
 
 
 import isla  # type: ignore
-
-from isla.language import parse_isla  # type: ignore
 
 from isla.solver import ISLaSolver  # type: ignore
 
@@ -291,6 +338,68 @@ if __name__ == '__main__':
             ''')
     print(next(solver.solve()))
 
+## Picking Expansions
+## ------------------
+
+if __name__ == '__main__':
+    print('\n## Picking Expansions')
+
+
+
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            forall <int> i="<digit>" in <start>:
+                (i = "7")
+            ''')
+
+if __name__ == '__main__':
+    print(next(solver.solve()))
+
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            forall <int> i="<leaddigit><int>" in <start>:
+                (str.to.int(i) > 100)
+            ''')
+
+if __name__ == '__main__':
+    print(next(solver.solve()))
+
+## Matching Expansion Elements
+## ---------------------------
+
+if __name__ == '__main__':
+    print('\n## Matching Expansion Elements')
+
+
+
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            forall <int> i="{<leaddigit> lead}{<int> remainder}" in <start>:
+                (lead = "9")
+            ''')
+
+if __name__ == '__main__':
+    print(next(solver.solve()))
+
+if __name__ == '__main__':
+    for i in range(1, 10):
+        print(i)
+        print(next(solver.solve()))
+
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            <int>.<leaddigit> = "9"
+            ''')
+
+if __name__ == '__main__':
+    for i in range(10):
+        print(i)
+        print(next(solver.solve()))
+
 ## Checking Inputs
 ## ---------------
 
@@ -317,11 +426,63 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     evaluate(constraint, tree, CONFIG_GRAMMAR)
 
-## A Simple Language
-## -----------------
+## Case Studies
+## ------------
 
 if __name__ == '__main__':
-    print('\n## A Simple Language')
+    print('\n## Case Studies')
+
+
+
+### Matching Identifiers in XML
+
+if __name__ == '__main__':
+    print('\n### Matching Identifiers in XML')
+
+
+
+XML_GRAMMAR: Grammar = {
+    "<start>": ["<xml-tree>"],
+    "<xml-tree>": ["<open-tag><xml-content><close-tag>"],
+    "<open-tag>": ["<<id>>"],
+    "<close-tag>": ["</<id>>"],
+    "<xml-content>": ["Text", "<xml-tree>"],
+    "<id>": ["<letter>", "<id><letter>"],
+    "<letter>": crange('a', 'z')
+}
+
+if __name__ == '__main__':
+    assert is_valid_grammar(XML_GRAMMAR)
+
+if __name__ == '__main__':
+    syntax_diagram(XML_GRAMMAR)
+
+if __name__ == '__main__':
+    fuzzer = GrammarFuzzer(XML_GRAMMAR)
+    fuzzer.fuzz()
+
+if __name__ == '__main__':
+    solver = ISLaSolver(XML_GRAMMAR, 
+                '''
+            <xml-tree>.<open-tag>.<id> = <xml-tree>.<close-tag>.<id>
+            ''')
+    for _ in range(3):
+        print(next(solver.solve()))
+
+if __name__ == '__main__':
+    solver = ISLaSolver(XML_GRAMMAR, 
+                '''
+            <xml-tree>.<open-tag>.<id> = <xml-tree>.<close-tag>.<id>
+            and
+            str.len(<id>) > 10
+            ''')
+    for _ in range(3):
+        print(next(solver.solve()))
+
+### Definitions and Usages in Programming Languages
+
+if __name__ == '__main__':
+    print('\n### Definitions and Usages in Programming Languages')
 
 
 
@@ -329,9 +490,11 @@ LANG_GRAMMAR: Grammar = {
     "<start>":
         ["<stmt>"],
     "<stmt>":
-        ["<assgn>", "<assgn> ; <stmt>"],
+        ["<assgn>", "<assgn>; <stmt>"],
     "<assgn>":
-        ["<var> := <rhs>"],
+        ["<lhs> := <rhs>"],
+    "<lhs>":
+        ["<var>"],
     "<rhs>":
         ["<var>", "<digit>"],
     "<var>": list(string.ascii_lowercase),
@@ -341,64 +504,67 @@ LANG_GRAMMAR: Grammar = {
 if __name__ == '__main__':
     assert is_valid_grammar(LANG_GRAMMAR)
 
-## A Simple Fuzzer
-## ---------------
+if __name__ == '__main__':
+    syntax_diagram(LANG_GRAMMAR)
 
 if __name__ == '__main__':
-    print('\n## A Simple Fuzzer')
-
-
+    fuzzer = GrammarFuzzer(LANG_GRAMMAR)
 
 if __name__ == '__main__':
-    for i in range(10):
+    for _ in range(10):
         print(fuzzer.fuzz())
 
-## Beyond Syntax: Semantic Input Properties
-## ----------------------------------------
+if __name__ == '__main__':
+    solver = ISLaSolver(LANG_GRAMMAR, 
+                '''
+            forall <rhs> in <stmt>:
+                exists <lhs> in <stmt>:
+                    <rhs>.<var> = <lhs>.<var>
+            ''')
 
 if __name__ == '__main__':
-    print('\n## Beyond Syntax: Semantic Input Properties')
-
-
-
-from isla.isla_predicates import STANDARD_STRUCTURAL_PREDICATES  # type: ignore
-
-if __name__ == '__main__':
-    constraint = parse_isla("""
-exists <assgn> assgn: 
-  (before(assgn, <assgn>) and <assgn>.<rhs>.<var> = assgn.<var>)
-""",
-    grammar=LANG_GRAMMAR,
-    structural_predicates=STANDARD_STRUCTURAL_PREDICATES)
-
-if __name__ == '__main__':
-    constraint = parse_isla("""
-exists <digit> x:
-  (str.to.int(x) >= 9)
-""", grammar=LANG_GRAMMAR)
-
-if __name__ == '__main__':
-    constraint = parse_isla("""
-exists <digit> x:
-  (>= (str.to.int x) 9)
-""", LANG_GRAMMAR)
-
-if __name__ == '__main__':
-    constraint = parse_isla("""
-  (>= (str.to.int <digit>) 9)
-""", LANG_GRAMMAR)
-
-if __name__ == '__main__':
-    solver = ISLaSolver(
-        grammar=LANG_GRAMMAR,
-        formula=constraint)
-
-if __name__ == '__main__':
-    solver = ISLaSolver(LANG_GRAMMAR, '(>= (str.to.int <digit>) 9)')
-
-if __name__ == '__main__':
-    for i in range(10):
+    for _ in range(10):
         print(next(solver.solve()))
+
+if __name__ == '__main__':
+    solver = ISLaSolver(LANG_GRAMMAR, 
+                '''
+            forall <rhs> in <stmt>:
+                exists <lhs> in <stmt>:
+                    (before(<lhs>, <rhs>) and
+                     <rhs>.<var> = <lhs>.<var>)
+            ''')
+
+if __name__ == '__main__':
+    for _ in range(10):
+        print(next(solver.solve()))
+
+if __name__ == '__main__':
+    solver = ISLaSolver(LANG_GRAMMAR, 
+                '''
+            forall <rhs> in <stmt>:
+                exists <lhs> in <stmt>:
+                    (before(<lhs>, <rhs>) and
+                     <rhs>.<var> = <lhs>.<var>)
+            and
+            count(<start>, "<assgn>", 5)
+            ''')
+
+if __name__ == '__main__':
+    with ExpectError():
+        for _ in range(10):
+            print(next(solver.solve()))
+
+if __name__ == '__main__':
+    solver = ISLaSolver(LANG_GRAMMAR, 
+                '''
+            str.len(<stmt>) > 20
+            ''')
+
+if __name__ == '__main__':
+    with ExpectError():
+        for _ in range(10):
+            print(next(solver.solve()))
 
 ## Synopsis
 ## --------
@@ -407,6 +573,20 @@ if __name__ == '__main__':
     print('\n## Synopsis')
 
 
+
+from isla.solver import ISLaSolver  # type: ignore
+
+from .Grammars import US_PHONE_GRAMMAR
+
+if __name__ == '__main__':
+    solver = ISLaSolver(US_PHONE_GRAMMAR, 
+                """
+            str.to.int(<area>) > 900
+            """)
+
+if __name__ == '__main__':
+    for _ in range(10):
+        print(next(solver.solve()))
 
 import warnings
 
@@ -451,25 +631,5 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     print('\n## Exercises')
-
-
-
-### Exercise 1: _Title_
-
-if __name__ == '__main__':
-    print('\n### Exercise 1: _Title_')
-
-
-
-if __name__ == '__main__':
-    pass
-
-if __name__ == '__main__':
-    2 + 2
-
-### Exercise 2: _Title_
-
-if __name__ == '__main__':
-    print('\n### Exercise 2: _Title_')
 
 

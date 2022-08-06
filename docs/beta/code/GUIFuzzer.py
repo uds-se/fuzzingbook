@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2022-08-04 19:01:25+02:00
+# Last change: 2022-08-06 17:57:47+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -69,11 +69,13 @@ The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow pa
 >>> gui_driver.get(httpd_url)
 >>> actions = gui_fuzzer.fuzz()
 >>> print(actions)
+click('terms and conditions')
+click('order form')
+fill('email', 'Y@LF')
+fill('name', 'n')
+fill('zip', '52')
+fill('city', 'us')
 check('terms', True)
-fill('city', 've')
-fill('zip', '86')
-fill('name', 'M')
-fill('email', 'fCa@N')
 submit('submit')
 
 
