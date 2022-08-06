@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-08-06 18:16:43+02:00
+# Last change: 2022-08-06 19:35:20+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -76,16 +76,16 @@ With that, invoking `solver.solve()` produces an iterator over multiple solution
 
 >>> for _ in range(10):
 >>>     print(next(solver.solve()))
-(906)465-8279
-(901)695-2708
-(902)382-9074
-(904)632-6458
-(992)839-0278
-(920)458-0439
+(902)465-8279
+(910)695-2708
+(904)382-9074
+(903)632-6458
+(914)839-0278
+(994)458-0439
 (908)847-3098
-(910)589-0372
-(914)992-6350
-(984)431-0475
+(901)589-0372
+(909)992-6350
+(911)431-0475
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint.
@@ -186,6 +186,20 @@ if __name__ == '__main__':
         print(i)
         print(fuzzer.fuzz())
 
+### Excursion: Unrestricted Grammars
+
+if __name__ == '__main__':
+    print('\n### Excursion: Unrestricted Grammars')
+
+
+
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
+
 ## Specifying Constraints
 ## ----------------------
 
@@ -207,7 +221,8 @@ if __name__ == '__main__':
         print(next(solver.solve()))   
 
 if __name__ == '__main__':
-    solver = ISLaSolver(CONFIG_GRAMMAR, 'str.to.int(<pagesize>) >= 100000')
+    solver = ISLaSolver(CONFIG_GRAMMAR,
+                        'str.to.int(<pagesize>) >= 100000')
     print(next(solver.solve()))
 
 if __name__ == '__main__':
@@ -225,6 +240,19 @@ if __name__ == '__main__':
                     ''')
     print(next(solver.solve()))
 
+from .bookutils import quiz
+
+if __name__ == '__main__':
+    quiz("Which of the following constraints expresses "
+         "that the page size and the buffer size "
+         "have to be equal? Try it out!",
+         [
+             "`<pagesize> is <bufsize>`",
+             "`str.to.int(<pagesize>) = str.to.int(<bufsize>)`",
+             "`<pagesize>) = <bufsize>`",
+             "`atoi(<pagesize>) == atoi(<bufsize>)`",
+         ], "[4 ** 0.5, 9 ** 0.5]")
+
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                         '''
@@ -239,6 +267,16 @@ if __name__ == '__main__':
                     str.to.int(<bufsize>) = str.to.int(<pagesize>) + 1
                     ''')
     print(next(solver.solve()))
+
+if __name__ == '__main__':
+    quiz("Which constraints are necessary to "
+         "ensure that all digits are between 1 and 3?",
+         [
+             "`str.to.int(<digit>) >= 1`",
+             "`str.to.int(<digit>) <= 3`",
+             "`str.to.int(<leaddigit>) >= 1`",
+             "`str.to.int(<leaddigit>) <= 3`",
+         ], "[1 ** 0, 4 ** 0.5, 16 ** 0.5]")
 
 ### Excursion: Using SMT-LIB Syntax
 
@@ -288,7 +326,7 @@ if __name__ == '__main__':
                 ''')
         print(next(solver.solve()))
 
-from .Parser import EarleyParser
+from .Parser import EarleyParser  # minor dependency
 from .GrammarFuzzer import display_tree
 
 if __name__ == '__main__':
@@ -633,3 +671,60 @@ if __name__ == '__main__':
     print('\n## Exercises')
 
 
+
+### Exercise 1: String Encodings
+
+if __name__ == '__main__':
+    print('\n### Exercise 1: String Encodings')
+
+
+
+#### Part 1: Syntax
+
+if __name__ == '__main__':
+    print('\n#### Part 1: Syntax')
+
+
+
+import string
+
+PASCAL_STRING_GRAMMAR: Grammar = {
+    "<start>": ["<string>"],
+    "<string>": ["<length><chars>"],
+    "<length>": ["<high-byte><low-byte>"],
+    "<high-byte>": ["<byte>"],
+    "<low-byte>": ["<byte>"],
+    "<byte>": crange('\x00', '\xff'),
+    "<chars>": ["", "<char><chars>"],
+    "<char>": list(string.printable),
+}
+
+if __name__ == '__main__':
+    assert is_valid_grammar(PASCAL_STRING_GRAMMAR)
+
+if __name__ == '__main__':
+    fuzzer = GrammarFuzzer(PASCAL_STRING_GRAMMAR)
+
+if __name__ == '__main__':
+    for _ in range(10):
+        print(repr(fuzzer.fuzz()))
+
+#### Part 2: Semantics
+
+if __name__ == '__main__':
+    print('\n#### Part 2: Semantics')
+
+
+
+if __name__ == '__main__':
+    solver = ISLaSolver(PASCAL_STRING_GRAMMAR, 
+                '''
+            str.to_code(<low-byte>) +
+            str.to_code(<high-byte>) * 256 =
+            str.len(<chars>)
+            ''')
+
+if __name__ == '__main__':
+    with ExpectError():
+        for _ in range(10):
+            print(next(solver.solve()))

@@ -11798,7 +11798,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Fuzzing with Constraints - The Fuzzing Book" />
-<meta property="og:description" content="In previous chapters, we have seen how Grammar-Based Fuzzing allows us to express the structure of an input using context-free grammars, and how we can use these very grammars to efficiently generate myriads of valid inputs.However, there are input features that cannot be expressed in a context-free language: &quot;$X$ is the length of $Y$&quot;, for instance, or &quot;$X$ is an identifier previously declared&quot;.In this chapter, we show how the ISLa framework allows us to express such features as constraints added to a grammar, and how ISLa solves these constraints automatically to produce inputs that are not only syntactically valid, but actually semantically valid.Prerequisites You should have read the chapter on grammars. The chapter on generators and filters addresses a similar problem, but with program code instead of constraints." />
+<meta property="og:description" content="In previous chapters, we have seen how Grammar-Based Fuzzing allows us to efficiently generate myriads of syntactically valid inputs.However, there are semantic input features that cannot be expressed in a context-free grammar, such as &quot;$X$ is the length of $Y$&quot;; &quot;$X$ is an identifier previously declared&quot;; or &quot;$X$ should be longer than 4,096 bytes&quot;.In this chapter, we show how the ISLa framework allows us to express such features as constraints added to a grammar.By having ISLa solve these constraints automatically, we produce inputs that are not only syntactically valid, but actually semantically valid.Furthermore, such constraints allow us to very precisely shape the inputs we want for testing.Prerequisites You should have read the chapter on grammars. The chapter on generators and filters addresses a similar problem, but with program code instead of constraints." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <meta name="twitter:dnt" content="on">
@@ -11931,7 +11931,8 @@ MathJax.Hub.Config({
      <li class="has-sub"><a href="#"><span title="Fuzzing with Constraints"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Fuzzing with Constraints <i class="fa fa-fw fa-wrench"></i></span></a>
            <ul><li class="has-sub"><a href="#Synopsis"><i class="fa fa-fw fa-map"></i> Synopsis</a>
 </li><li class="has-sub"><a href="#Semantic-Input-Properties">&nbsp;&bull;&nbsp;&nbsp; Semantic Input Properties</a>
-</li><li class="has-sub"><a href="#Specifying-Constraints">&nbsp;&bull;&nbsp;&nbsp; Specifying Constraints</a>
+<ul><li class="has-sub"><a href="#Excursion:-Unrestricted-Grammars">Excursion: Unrestricted Grammars</a>
+</ul></li><li class="has-sub"><a href="#Specifying-Constraints">&nbsp;&bull;&nbsp;&nbsp; Specifying Constraints</a>
 <ul><li class="has-sub"><a href="#Excursion:-Using-SMT-LIB-Syntax">Excursion: Using SMT-LIB Syntax</a>
 </ul></li><li class="has-sub"><a href="#Accessing-Elements">&nbsp;&bull;&nbsp;&nbsp; Accessing Elements</a>
 </li><li class="has-sub"><a href="#Quantifiers">&nbsp;&bull;&nbsp;&nbsp; Quantifiers</a>
@@ -11945,7 +11946,8 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Next-Steps"><i class="fa fa-fw fa-arrows"></i> Next Steps</a>
 </li><li class="has-sub"><a href="#Background"><i class="fa fa-fw fa-mortar-board"></i> Background</a>
 </li><li class="has-sub"><a href="#Exercises"><i class="fa fa-fw fa-edit"></i> Exercises</a>
-</ul></li>
+<ul><li class="has-sub"><a href="#Exercise-1:-String-Encodings">Exercise 1: String Encodings</a>
+</ul></li></ul></li>
      </li>
      
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
@@ -11992,9 +11994,16 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing-with-Constraints">Fuzzing with Constraints<a class="anchor-link" href="#Fuzzing-with-Constraints">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-wrench"></i>&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p><p>In previous chapters, we have seen how <a href="GrammarFuzzer.html">Grammar-Based Fuzzing</a> allows us to express the structure of an input using context-free grammars, and how we can use these very grammars to efficiently generate myriads of valid inputs.
-However, there are input features that cannot be expressed in a context-free language: "$X$ is the length of $Y$", for instance, or "$X$ is an identifier previously declared".
-In this chapter, we show how the <em>ISLa</em> framework allows us to express such features as <em>constraints</em> added to a grammar, and how ISLa solves these constraints automatically to produce inputs that are not only <em>syntactically</em> valid, but actually <em>semantically</em> valid.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing-with-Constraints">Fuzzing with Constraints<a class="anchor-link" href="#Fuzzing-with-Constraints">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-wrench"></i>&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p><p>In previous chapters, we have seen how <a href="GrammarFuzzer.html">Grammar-Based Fuzzing</a> allows us to efficiently generate myriads of syntactically valid inputs.
+However, there are <em>semantic</em> input features that cannot be expressed in a context-free grammar, such as</p>
+<ul>
+<li>"$X$ is the length of $Y$";</li>
+<li>"$X$ is an identifier previously declared"; or</li>
+<li>"$X$ should be longer than 4,096 bytes".</li>
+</ul>
+<p>In this chapter, we show how the <em>ISLa</em> framework allows us to express such features as <em>constraints</em> added to a grammar.
+By having ISLa solve these constraints automatically, we produce inputs that are not only <em>syntactically</em> valid, but actually <em>semantically</em> valid.
+Furthermore, such constraints allow us to very precisely <em>shape</em> the inputs we want for testing.</p>
 </div>
 </div>
 </div>
@@ -12098,16 +12107,16 @@ Common functions include</p>
 <p>With that, invoking <code>solver.solve()</code> produces an iterator over multiple solutions.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
-<span class="p">(</span><span class="mi">906</span><span class="p">)</span><span class="mi">465</span><span class="o">-</span><span class="mi">8279</span>
-<span class="p">(</span><span class="mi">901</span><span class="p">)</span><span class="mi">695</span><span class="o">-</span><span class="mi">2708</span>
-<span class="p">(</span><span class="mi">902</span><span class="p">)</span><span class="mi">382</span><span class="o">-</span><span class="mi">9074</span>
-<span class="p">(</span><span class="mi">904</span><span class="p">)</span><span class="mi">632</span><span class="o">-</span><span class="mi">6458</span>
-<span class="p">(</span><span class="mi">992</span><span class="p">)</span><span class="mi">839</span><span class="o">-</span><span class="mi">0278</span>
-<span class="p">(</span><span class="mi">920</span><span class="p">)</span><span class="mi">458</span><span class="o">-</span><span class="mi">0439</span>
+<span class="p">(</span><span class="mi">902</span><span class="p">)</span><span class="mi">465</span><span class="o">-</span><span class="mi">8279</span>
+<span class="p">(</span><span class="mi">910</span><span class="p">)</span><span class="mi">695</span><span class="o">-</span><span class="mi">2708</span>
+<span class="p">(</span><span class="mi">904</span><span class="p">)</span><span class="mi">382</span><span class="o">-</span><span class="mi">9074</span>
+<span class="p">(</span><span class="mi">903</span><span class="p">)</span><span class="mi">632</span><span class="o">-</span><span class="mi">6458</span>
+<span class="p">(</span><span class="mi">914</span><span class="p">)</span><span class="mi">839</span><span class="o">-</span><span class="mi">0278</span>
+<span class="p">(</span><span class="mi">994</span><span class="p">)</span><span class="mi">458</span><span class="o">-</span><span class="mi">0439</span>
 <span class="p">(</span><span class="mi">908</span><span class="p">)</span><span class="mi">847</span><span class="o">-</span><span class="mi">3098</span>
-<span class="p">(</span><span class="mi">910</span><span class="p">)</span><span class="mi">589</span><span class="o">-</span><span class="mi">0372</span>
-<span class="p">(</span><span class="mi">914</span><span class="p">)</span><span class="mi">992</span><span class="o">-</span><span class="mi">6350</span>
-<span class="p">(</span><span class="mi">984</span><span class="p">)</span><span class="mi">431</span><span class="o">-</span><span class="mi">0475</span>
+<span class="p">(</span><span class="mi">901</span><span class="p">)</span><span class="mi">589</span><span class="o">-</span><span class="mi">0372</span>
+<span class="p">(</span><span class="mi">909</span><span class="p">)</span><span class="mi">992</span><span class="o">-</span><span class="mi">6350</span>
+<span class="p">(</span><span class="mi">911</span><span class="p">)</span><span class="mi">431</span><span class="o">-</span><span class="mi">0475</span>
 </pre></div>
 <p>We see that the solver produces a number of inputs that all satisfy the constraint.</p>
 <p>The <code>solve()</code> method provides several additional parameters to configure the solver, as documented below
@@ -12138,7 +12147,7 @@ Additional <code>ISLaSolver</code> methods allow to check inputs against constra
 <text text-anchor="start" x="8" y="-39.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">ISLaSolver</text>
 <polyline fill="none" stroke="black" points="0,-30.5 82,-30.5 "/>
 <g id="a_node1_0"><a xlink:href="#" xlink:title="ISLaSolver">
-<g id="a_node1_1"><a xlink:href="isla.solver.ipynb" xlink:title="__init__(self, grammar: Dict[str, List[str]], formula: Union[isla.language.Formula, str], structural_predicates: Set[isla.language.StructuralPredicate] = {Predicate(level, 4), Predicate(same_position, 2), Predicate(inside, 2), Predicate(after, 2), Predicate(consecutive, 2), Predicate(before, 2), Predicate(different_position, 2), Predicate(nth, 3)}, semantic_predicates: Set[isla.language.SemanticPredicate] = {SemanticPredicate(count, 3)}, max_number_free_instantiations: int = 10, max_number_smt_instantiations: int = 10, max_number_tree_insertion_results: int = 5, enforce_unique_trees_in_queue: bool = True, precompute_reachability: bool = False, debug: bool = False, cost_computer: Optional[ForwardRef(&#39;CostComputer&#39;)] = None, timeout_seconds: Optional[int] = None, global_fuzzer: bool = False, predicates_unique_in_int_arg: Tuple[isla.language.SemanticPredicate, ...] = (SemanticPredicate(count, 3),), fuzzer_factory: Callable[[Dict[str, List[str]]], isla.fuzzer.GrammarFuzzer] = &lt;function ISLaSolver.&lt;lambda&gt;&gt;, tree_insertion_methods=7):&#10;:param grammar: The underlying grammar.&#10;:param formula: The formula to solve.&#10;:param max_number_free_instantiations: Number of times that nonterminals that are not bound by any formula&#10;should be expanded by a coverage&#45;based fuzzer.&#10;:param max_number_smt_instantiations: Number of solutions of SMT formulas that should be produced.&#10;:param precompute_reachability: If true, the distances between all grammar nodes are pre&#45;computed using&#10;Floyd&#45;Warshall&#39;s algorithm. This makes sense if there are many expensive distance queries, e.g., in a big&#10;grammar and a constraint with relatively many universal quantifiers.&#10;:param debug: If true, debug information about the evolution of states is collected, notably in the&#10;field state_tree. The root of the tree is in the field state_tree_root. The field costs stores the computed&#10;cost values for all new nodes.&#10;:param global_fuzzer: If set to True, only one coverage&#45;guided grammar fuzzer object is used to finish&#10;off unconstrained open derivation trees throughout the whole generation time. This may be beneficial for&#10;some targets; e.g., we experienced that CSV works significantly faster. However, the achieved k&#45;path coverage&#10;can be lower with that setting.&#10;:param predicates_unique_in_int_arg: This is needed in certain cases for instantiating universal&#10;integer quantifiers. The supplied predicates should have exactly one integer argument, and hold&#10;for exactly one integer value once all other parameters are fixed.&#10;:param fuzzer_factory: Constructor of the fuzzer to use for instantiating &quot;free&quot; nonterminals.&#10;:param tree_insertion_methods: Combination of methods to use for existential quantifier elimination by&#10;tree insertion. Full selection: `DIRECT_EMBEDDING &amp; SELF_EMBEDDING &amp; CONTEXT_ADDITION`.">
+<g id="a_node1_1"><a xlink:href="isla.solver.ipynb" xlink:title="__init__(self, grammar: Dict[str, List[str]], formula: Union[isla.language.Formula, str], structural_predicates: Set[isla.language.StructuralPredicate] = {Predicate(consecutive, 2), Predicate(same_position, 2), Predicate(before, 2), Predicate(after, 2), Predicate(inside, 2), Predicate(level, 4), Predicate(different_position, 2), Predicate(nth, 3)}, semantic_predicates: Set[isla.language.SemanticPredicate] = {SemanticPredicate(count, 3)}, max_number_free_instantiations: int = 10, max_number_smt_instantiations: int = 10, max_number_tree_insertion_results: int = 5, enforce_unique_trees_in_queue: bool = True, precompute_reachability: bool = False, debug: bool = False, cost_computer: Optional[ForwardRef(&#39;CostComputer&#39;)] = None, timeout_seconds: Optional[int] = None, global_fuzzer: bool = False, predicates_unique_in_int_arg: Tuple[isla.language.SemanticPredicate, ...] = (SemanticPredicate(count, 3),), fuzzer_factory: Callable[[Dict[str, List[str]]], isla.fuzzer.GrammarFuzzer] = &lt;function ISLaSolver.&lt;lambda&gt;&gt;, tree_insertion_methods=7):&#10;:param grammar: The underlying grammar.&#10;:param formula: The formula to solve.&#10;:param max_number_free_instantiations: Number of times that nonterminals that are not bound by any formula&#10;should be expanded by a coverage&#45;based fuzzer.&#10;:param max_number_smt_instantiations: Number of solutions of SMT formulas that should be produced.&#10;:param precompute_reachability: If true, the distances between all grammar nodes are pre&#45;computed using&#10;Floyd&#45;Warshall&#39;s algorithm. This makes sense if there are many expensive distance queries, e.g., in a big&#10;grammar and a constraint with relatively many universal quantifiers.&#10;:param debug: If true, debug information about the evolution of states is collected, notably in the&#10;field state_tree. The root of the tree is in the field state_tree_root. The field costs stores the computed&#10;cost values for all new nodes.&#10;:param global_fuzzer: If set to True, only one coverage&#45;guided grammar fuzzer object is used to finish&#10;off unconstrained open derivation trees throughout the whole generation time. This may be beneficial for&#10;some targets; e.g., we experienced that CSV works significantly faster. However, the achieved k&#45;path coverage&#10;can be lower with that setting.&#10;:param predicates_unique_in_int_arg: This is needed in certain cases for instantiating universal&#10;integer quantifiers. The supplied predicates should have exactly one integer argument, and hold&#10;for exactly one integer value once all other parameters are fixed.&#10;:param fuzzer_factory: Constructor of the fuzzer to use for instantiating &quot;free&quot; nonterminals.&#10;:param tree_insertion_methods: Combination of methods to use for existential quantifier elimination by&#10;tree insertion. Full selection: `DIRECT_EMBEDDING &amp; SELF_EMBEDDING &amp; CONTEXT_ADDITION`.">
 <text text-anchor="start" x="11" y="-19.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__init__()</text>
 </a>
 </g>
@@ -12826,22 +12835,28 @@ In essence, you have to code your own <em>strategy</em> for generating inputs, w
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Another, very general solution to this problem would be to use <em>unrestricted</em> grammars rather than the <em>context-free</em> grammars we have used so far.
-In an unrestricted grammar, one can have multiple symbols also on the left hand side of an expansion rule, making them very flexible.
-In fact, they are <em>Turing-universal</em>, meaning that they can express any feature that could also be expressed in program code; and they could thus check and produce arbitrary strings with arbitrary features. (If they finish, that is – unrestricted grammars also suffer from the halting problem.)</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Hence, we are looking to a more <em>general</em> way to express semantic properties - and also a more <em>declarative</em> way to express semantic properties.</p>
 </div>
 </div>
 </div>
 </div>
 
+<details id="Excursion:-Unrestricted-Grammars">
+<summary>Unrestricted Grammars</summary>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The downside is that there is literally no programming support for unrestricted grammars – we'd have to implement all of arithmetics, strings, and other functionality from scratch in a grammar, which is - well - not fun.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>One very general solution to this problem would be to use <em>unrestricted</em> grammars rather than the <em>context-free</em> grammars we have used so far.
+In an unrestricted grammar, one can have multiple symbols also on the left hand side of an expansion rule, making them very flexible.
+In fact, unrestricted grammars are <em>Turing-universal</em>, meaning that they can express any feature that could also be expressed in program code; and they could thus check and produce arbitrary strings with arbitrary features. (If they finish, that is – unrestricted grammars also suffer from the halting problem.)
+The downside is that there is literally no programming support for unrestricted grammars – we'd have to implement all of arithmetics, strings, and other functionality from scratch in a grammar, which is - well - not fun.</p>
 </div>
 </div>
 </div>
 </div>
+
+</details>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
@@ -12980,34 +12995,34 @@ If we want to have inputs in which the page size has at least 6 digits, we can w
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0
-pagesize=842420
+pagesize=822280
 bufsize=2
 1
-pagesize=448420
+pagesize=448880
 bufsize=99
 2
-pagesize=824480
+pagesize=888420
 bufsize=4
 3
-pagesize=828210
+pagesize=822210
 bufsize=6
 4
-pagesize=842810
+pagesize=824480
 bufsize=2
 5
-pagesize=824280
+pagesize=842420
 bufsize=90
 6
-pagesize=822810
+pagesize=888210
 bufsize=1
 7
-pagesize=442280
+pagesize=842210
 bufsize=81
 8
-pagesize=828820
+pagesize=822480
 bufsize=4
 9
-pagesize=822280
+pagesize=848410
 bufsize=5
 </pre>
 </div>
@@ -13040,7 +13055,8 @@ To obtain a page size that of at least 100000, we can thus also write</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> <span class="s1">&#39;str.to.int(&lt;pagesize&gt;) &gt;= 100000&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span>
+                    <span class="s1">&#39;str.to.int(&lt;pagesize&gt;) &gt;= 100000&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
 </pre></div>
 
@@ -13052,7 +13068,7 @@ To obtain a page size that of at least 100000, we can thus also write</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=9929220
+<pre>pagesize=1921440
 bufsize=10
 </pre>
 </div>
@@ -13090,7 +13106,7 @@ bufsize=10
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=114
+<pre>pagesize=110
 bufsize=31
 </pre>
 </div>
@@ -13127,16 +13143,16 @@ bufsize=31
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>Evaluation of expression StrToInt(&#34;7&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;0&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;63&#34;)%7 not implemented.
+<pre>Evaluation of expression StrToInt(&#34;0&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;7&#34;)%7 not implemented.
 Evaluation of expression StrToInt(&#34;70&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;56&#34;)%7 not implemented.
 Evaluation of expression StrToInt(&#34;14&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;77&#34;)%7 not implemented.
 Evaluation of expression StrToInt(&#34;28&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;42&#34;)%7 not implemented.
-Evaluation of expression StrToInt(&#34;49&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;35&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;77&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;56&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;84&#34;)%7 not implemented.
+Evaluation of expression StrToInt(&#34;21&#34;)%7 not implemented.
 </pre>
 </div>
 
@@ -13145,7 +13161,7 @@ Evaluation of expression StrToInt(&#34;49&#34;)%7 not implemented.
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=63
+<pre>pagesize=0
 bufsize=0
 </pre>
 </div>
@@ -13164,10 +13180,129 @@ bufsize=0
 </div>
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span> <span class="kn">import</span> <span class="n">quiz</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+    <script>
+    var bad_answers = new Map();
+
+    function answer(quiz_id) {
+        ans = 0;
+        for (i = 1;; i++) {
+            checkbox = document.getElementById(quiz_id + "-" + i.toString());
+            if (!checkbox)
+                break;
+            if (checkbox.checked)
+                ans |= (1 << i);
+        }
+        return ans;
+    }
+    function check_selection(quiz_id, correct_answer, multiple_choice, hint) {
+        given_answer = answer(quiz_id);
+        if (given_answer == correct_answer)
+        {
+            document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-hint").innerHTML = "";
+
+            for (i = 1;; i++) {
+                checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+                if (!checkbox)
+                    break;
+
+                if (checkbox.checked) {
+                    label.style.fontWeight = "bold";
+                }
+                else {
+                    label.style.textDecoration = "line-through";
+                }
+            }
+        }
+        else 
+        {
+            document.getElementById(quiz_id + "-submit").value = "Try again";
+
+            if (!bad_answers.has(quiz_id)) {
+                bad_answers.set(quiz_id, 1);
+            }
+            else {
+                bad_answers.set(quiz_id, bad_answers.get(quiz_id) + 1);
+            }
+
+            if (bad_answers.get(quiz_id) >= 2 && hint.length > 0) {
+                document.getElementById(quiz_id + "-hint").innerHTML = 
+                    "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
+            }
+
+            if (!multiple_choice) {
+                for (i = 1;; i++) {
+                    checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                    label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+
+                    if (!checkbox)
+                        break;
+                    if (checkbox.checked) {
+                        label.style.textDecoration = "line-through";
+                    }
+                }
+            }
+        }
+    }
+    function clear_selection(quiz_id) {
+        document.getElementById(quiz_id + "-submit").value = "Submit";
+        document.getElementById(quiz_id + "-hint").innerHTML = "";
+    }
+    </script>
+
+    <div class="quiz">
+    <h3 class="quiz_title">Quiz</h3>
+    <p>
+    <div class="quiz_question">Which of the following constraints expresses that the page size and the buffer size have to be equal? Try it out!</div>
+    </p>
+    <p>
+    <div class="quiz_options" title="Check all that apply.">
+
+        <input type="checkbox" name="105e7cc6-15ae-11ed-bcff-6298cf1a578f" id="105e7cc6-15ae-11ed-bcff-6298cf1a578f-1" onclick="clear_selection('105e7cc6-15ae-11ed-bcff-6298cf1a578f')">
+        <label id="105e7cc6-15ae-11ed-bcff-6298cf1a578f-1-label" for="105e7cc6-15ae-11ed-bcff-6298cf1a578f-1"><code>&lt;pagesize&gt; is &lt;bufsize&gt;</code></label><br>
+
+        <input type="checkbox" name="105e7cc6-15ae-11ed-bcff-6298cf1a578f" id="105e7cc6-15ae-11ed-bcff-6298cf1a578f-2" onclick="clear_selection('105e7cc6-15ae-11ed-bcff-6298cf1a578f')">
+        <label id="105e7cc6-15ae-11ed-bcff-6298cf1a578f-2-label" for="105e7cc6-15ae-11ed-bcff-6298cf1a578f-2"><code>str.to.int(&lt;pagesize&gt;) = str.to.int(&lt;bufsize&gt;)</code></label><br>
+
+        <input type="checkbox" name="105e7cc6-15ae-11ed-bcff-6298cf1a578f" id="105e7cc6-15ae-11ed-bcff-6298cf1a578f-3" onclick="clear_selection('105e7cc6-15ae-11ed-bcff-6298cf1a578f')">
+        <label id="105e7cc6-15ae-11ed-bcff-6298cf1a578f-3-label" for="105e7cc6-15ae-11ed-bcff-6298cf1a578f-3"><code>&lt;pagesize&gt;) = &lt;bufsize&gt;</code></label><br>
+
+        <input type="checkbox" name="105e7cc6-15ae-11ed-bcff-6298cf1a578f" id="105e7cc6-15ae-11ed-bcff-6298cf1a578f-4" onclick="clear_selection('105e7cc6-15ae-11ed-bcff-6298cf1a578f')">
+        <label id="105e7cc6-15ae-11ed-bcff-6298cf1a578f-4-label" for="105e7cc6-15ae-11ed-bcff-6298cf1a578f-4"><code>atoi(&lt;pagesize&gt;) == atoi(&lt;bufsize&gt;)</code></label><br>
+
+    </div>
+    </p>
+    <input id="105e7cc6-15ae-11ed-bcff-6298cf1a578f-submit" type="submit" value="Submit" onclick="check_selection('105e7cc6-15ae-11ed-bcff-6298cf1a578f', 12, 1, '[4 ** 0.5, 9 ** 0.5]')">
+    <span class="quiz_hint" id="105e7cc6-15ae-11ed-bcff-6298cf1a578f-hint"></span>
+    </div>
+
+</div>
+
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>ISLa constraints can also involve multiple elements. Expressing equality between two elements is easy:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Indeed, ISLa constraints can also involve multiple elements. Expressing equality between two elements is easy, and uses a single equal siqn. (There's no assignment in ISLa the <code>=</code> could be confused with.)</p>
 </div>
 </div>
 </div>
@@ -13194,8 +13329,8 @@ bufsize=0
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=0
-bufsize=0
+<pre>pagesize=8
+bufsize=8
 </pre>
 </div>
 
@@ -13232,8 +13367,8 @@ bufsize=0
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=5122
-bufsize=5123
+<pre>pagesize=1790
+bufsize=1791
 </pre>
 </div>
 
@@ -13242,11 +13377,116 @@ bufsize=5123
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>All the above functions (like <code>str.to.int</code>) actually stem from the <em>SMT-LIB</em> library for <em>satisfiability modulo theories</em> (SMT), a standard for expressing constraints for constraint solvers (like ISLa).
+<div class="text_cell_render border-box-sizing rendered_html"><p>All the above functions (like <code>str.to.int()</code>) actually stem from the <em>SMT-LIB</em> library for <em>satisfiability modulo theories</em> (SMT), a standard for expressing constraints for constraint solvers (like ISLa).
 The <a href="https://smtlib.cs.uiowa.edu/theories.shtml">list of all theories defined in SMT-LIB</a> lists dozens of functions and predicates that can be used in ISLa constraints.</p>
 </div>
 </div>
 </div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+    <script>
+    var bad_answers = new Map();
+
+    function answer(quiz_id) {
+        ans = 0;
+        for (i = 1;; i++) {
+            checkbox = document.getElementById(quiz_id + "-" + i.toString());
+            if (!checkbox)
+                break;
+            if (checkbox.checked)
+                ans |= (1 << i);
+        }
+        return ans;
+    }
+    function check_selection(quiz_id, correct_answer, multiple_choice, hint) {
+        given_answer = answer(quiz_id);
+        if (given_answer == correct_answer)
+        {
+            document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-hint").innerHTML = "";
+
+            for (i = 1;; i++) {
+                checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+                if (!checkbox)
+                    break;
+
+                if (checkbox.checked) {
+                    label.style.fontWeight = "bold";
+                }
+                else {
+                    label.style.textDecoration = "line-through";
+                }
+            }
+        }
+        else 
+        {
+            document.getElementById(quiz_id + "-submit").value = "Try again";
+
+            if (!bad_answers.has(quiz_id)) {
+                bad_answers.set(quiz_id, 1);
+            }
+            else {
+                bad_answers.set(quiz_id, bad_answers.get(quiz_id) + 1);
+            }
+
+            if (bad_answers.get(quiz_id) >= 2 && hint.length > 0) {
+                document.getElementById(quiz_id + "-hint").innerHTML = 
+                    "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
+            }
+
+            if (!multiple_choice) {
+                for (i = 1;; i++) {
+                    checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                    label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+
+                    if (!checkbox)
+                        break;
+                    if (checkbox.checked) {
+                        label.style.textDecoration = "line-through";
+                    }
+                }
+            }
+        }
+    }
+    function clear_selection(quiz_id) {
+        document.getElementById(quiz_id + "-submit").value = "Submit";
+        document.getElementById(quiz_id + "-hint").innerHTML = "";
+    }
+    </script>
+
+    <div class="quiz">
+    <h3 class="quiz_title">Quiz</h3>
+    <p>
+    <div class="quiz_question">Which constraints are necessary to ensure that all digits are between 1 and 3?</div>
+    </p>
+    <p>
+    <div class="quiz_options" title="Check all that apply.">
+
+        <input type="checkbox" name="130279fa-15ae-11ed-bcff-6298cf1a578f" id="130279fa-15ae-11ed-bcff-6298cf1a578f-1" onclick="clear_selection('130279fa-15ae-11ed-bcff-6298cf1a578f')">
+        <label id="130279fa-15ae-11ed-bcff-6298cf1a578f-1-label" for="130279fa-15ae-11ed-bcff-6298cf1a578f-1"><code>str.to.int(&lt;digit&gt;) &gt;= 1</code></label><br>
+
+        <input type="checkbox" name="130279fa-15ae-11ed-bcff-6298cf1a578f" id="130279fa-15ae-11ed-bcff-6298cf1a578f-2" onclick="clear_selection('130279fa-15ae-11ed-bcff-6298cf1a578f')">
+        <label id="130279fa-15ae-11ed-bcff-6298cf1a578f-2-label" for="130279fa-15ae-11ed-bcff-6298cf1a578f-2"><code>str.to.int(&lt;digit&gt;) &lt;= 3</code></label><br>
+
+        <input type="checkbox" name="130279fa-15ae-11ed-bcff-6298cf1a578f" id="130279fa-15ae-11ed-bcff-6298cf1a578f-3" onclick="clear_selection('130279fa-15ae-11ed-bcff-6298cf1a578f')">
+        <label id="130279fa-15ae-11ed-bcff-6298cf1a578f-3-label" for="130279fa-15ae-11ed-bcff-6298cf1a578f-3"><code>str.to.int(&lt;leaddigit&gt;) &gt;= 1</code></label><br>
+
+        <input type="checkbox" name="130279fa-15ae-11ed-bcff-6298cf1a578f" id="130279fa-15ae-11ed-bcff-6298cf1a578f-4" onclick="clear_selection('130279fa-15ae-11ed-bcff-6298cf1a578f')">
+        <label id="130279fa-15ae-11ed-bcff-6298cf1a578f-4-label" for="130279fa-15ae-11ed-bcff-6298cf1a578f-4"><code>str.to.int(&lt;leaddigit&gt;) &lt;= 3</code></label><br>
+
+    </div>
+    </p>
+    <input id="130279fa-15ae-11ed-bcff-6298cf1a578f-submit" type="submit" value="Submit" onclick="check_selection('130279fa-15ae-11ed-bcff-6298cf1a578f', 22, 1, '[1 ** 0, 4 ** 0.5, 16 ** 0.5]')">
+    <span class="quiz_hint" id="130279fa-15ae-11ed-bcff-6298cf1a578f-hint"></span>
+    </div>
+
+</div>
+
 </div>
 
 <details id="Excursion:-Using-SMT-LIB-Syntax">
@@ -13286,8 +13526,8 @@ The above predicate would thus be written as</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=1916
-bufsize=1917
+<pre>pagesize=5480
+bufsize=5481
 </pre>
 </div>
 
@@ -13431,7 +13671,7 @@ Here is an example using the double dot operator, enforcing <em>every</em> digit
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39459/2177507368.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_76620/2177507368.py&#34;, line 2, in &lt;module&gt;
     solver = ISLaSolver(CONFIG_GRAMMAR,
   File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/solver.py&#34;, line 236, in __init__
     formula = parse_isla(formula, grammar, structural_predicates, semantic_predicates)
@@ -13721,7 +13961,7 @@ In contrast, <code>&lt;config&gt;..&lt;digit&gt;</code> refers to <em>all</em> <
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39459/3992921923.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_76620/3992921923.py&#34;, line 2, in &lt;module&gt;
     solver = ISLaSolver(CONFIG_GRAMMAR,
   File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/solver.py&#34;, line 236, in __init__
     formula = parse_isla(formula, grammar, structural_predicates, semantic_predicates)
@@ -13763,6 +14003,7 @@ AssertionError (expected)
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><ul>
 <li>FIXME: Is there more support for XPath-like selectors? If so, we should have an excursion for them</li>
+<li>FIXME: Does ISLa really start counting with 1?</li>
 </ul>
 </div>
 </div>
@@ -13838,34 +14079,34 @@ So we write</p>
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0
 pagesize=14
-bufsize=2949
+bufsize=1110
 1
 pagesize=5
-bufsize=1190
+bufsize=1154
 2
 pagesize=54
-bufsize=9740
+bufsize=7154
 3
 pagesize=7
-bufsize=1751
+bufsize=8920
 4
 pagesize=1
-bufsize=2249
+bufsize=8220
 5
 pagesize=66
-bufsize=1940
+bufsize=1220
 6
 pagesize=9
-bufsize=7480
+bufsize=1940
 7
 pagesize=9
-bufsize=8440
+bufsize=5920
 8
 pagesize=1
-bufsize=3340
+bufsize=2220
 9
 pagesize=95
-bufsize=1980
+bufsize=8420
 </pre>
 </div>
 
@@ -13912,8 +14153,8 @@ If we want <em>all</em> elements in some context to satisfy a constraint, this c
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=9210
-bufsize=4320
+<pre>pagesize=1130
+bufsize=8150
 </pre>
 </div>
 
@@ -13932,7 +14173,7 @@ bufsize=4320
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><ul>
-<li>FIXME: Is it <code>&lt;start&gt;</code> or <code>start</code>?</li>
+<li>FIXME: Is it <code>&lt;start&gt;</code> or <code>start</code>? (IMHO, only the former should be allowed.)</li>
 </ul>
 </div>
 </div>
@@ -13969,8 +14210,8 @@ bufsize=4320
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pagesize=4990
-bufsize=4120
+<pre>pagesize=2930
+bufsize=2180
 </pre>
 </div>
 
@@ -14270,23 +14511,23 @@ bufsize=7
 pagesize=91
 bufsize=98
 4
-pagesize=998
-bufsize=95
+pagesize=98
+bufsize=995
 5
-pagesize=994
-bufsize=5
+pagesize=4
+bufsize=995
 6
-pagesize=96
-bufsize=997
+pagesize=996
+bufsize=97
 7
-pagesize=7
-bufsize=996
+pagesize=997
+bufsize=6
 8
-pagesize=9
-bufsize=9991
+pagesize=9999
+bufsize=1
 9
-pagesize=92
-bufsize=9996
+pagesize=9992
+bufsize=96
 </pre>
 </div>
 
@@ -14368,20 +14609,20 @@ bufsize=91
 pagesize=95
 bufsize=91
 4
-pagesize=5
-bufsize=990
-5
-pagesize=996
-bufsize=91
-6
-pagesize=93
-bufsize=998
-7
 pagesize=995
-bufsize=1
+bufsize=90
+5
+pagesize=6
+bufsize=991
+6
+pagesize=993
+bufsize=8
+7
+pagesize=95
+bufsize=991
 8
 pagesize=9992
-bufsize=5
+bufsize=95
 9
 pagesize=0
 bufsize=9994
@@ -15182,9 +15423,9 @@ Plus, of course, we can easily add more constraints:</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>&lt;ppkpuhxnchk&gt;Text&lt;/ppkpuhxnchk&gt;
-&lt;ppkxucumadm&gt;&lt;ppkxucumadm&gt;Text&lt;/ppkxucumadm&gt;&lt;/ppkxucumadm&gt;
-&lt;ppmxxklmphn&gt;&lt;ppmxxklmphn&gt;&lt;ppmxxklmphn&gt;Text&lt;/ppmxxklmphn&gt;&lt;/ppmxxklmphn&gt;&lt;/ppmxxklmphn&gt;
+<pre>&lt;ppkpscplahk&gt;Text&lt;/ppkpscplahk&gt;
+&lt;ppmpuilmcdp&gt;&lt;ppmpuilmcdp&gt;Text&lt;/ppmpuilmcdp&gt;&lt;/ppmpuilmcdp&gt;
+&lt;ppnpsklkaln&gt;&lt;ppnpsklkaln&gt;&lt;ppnpsklkaln&gt;Text&lt;/ppnpsklkaln&gt;&lt;/ppnpsklkaln&gt;&lt;/ppnpsklkaln&gt;
 </pre>
 </div>
 
@@ -15810,14 +16051,14 @@ In ISLa, we achive this thorugh the following constraint:</p>
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>p := 5
 p := 9; r := 3
-p := 5; r := p
-b := 7; r := b
-a := 5; v := a
-d := 1; j := d
-l := 7; x := l
-e := 3; z := e
-h := 8; v := h
-f := 6; p := f
+j := 5; r := j
+p := 7; r := p
+d := 5; v := d
+x := 1; j := x
+b := 7; x := b
+h := 3; z := h
+a := 8; v := a
+c := 6; p := c
 </pre>
 </div>
 
@@ -15892,14 +16133,14 @@ With <code>before()</code>, we can rewrite our constraint as</p>
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>p := 5
 v := 6; e := 8
-i := 9; m := i
-f := 9; d := f
-p := 5; e := p
-h := 6; u := h
-a := 4; o := a
-d := 0; f := d
-e := 6; n := e
-x := 7; x := x
+h := 9; m := h
+v := 9; d := v
+f := 5; e := f
+p := 6; u := p
+t := 4; o := t
+b := 0; f := b
+u := 6; n := u
+d := 7; x := d
 </pre>
 </div>
 
@@ -15969,7 +16210,7 @@ To have statements with exactly 5 assignments, write</p>
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39459/2187918683.py&#34;, line 3, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_76620/2187918683.py&#34;, line 3, in &lt;module&gt;
     print(next(solver.solve()))
   File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/solver.py&#34;, line 376, in solve
     result_state = self.eliminate_all_ready_semantic_predicate_formulas(state)
@@ -16043,7 +16284,7 @@ AttributeError: &#39;int&#39; object has no attribute &#39;children&#39; (expect
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>p := 2; l := 2; p := 0
+<pre>p := 2; p := 2; p := 0
 </pre>
 </div>
 
@@ -16053,7 +16294,7 @@ AttributeError: &#39;int&#39; object has no attribute &#39;children&#39; (expect
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39459/2187918683.py&#34;, line 3, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_76620/2187918683.py&#34;, line 3, in &lt;module&gt;
     print(next(solver.solve()))
 StopIteration (expected)
 </pre>
@@ -16065,7 +16306,7 @@ StopIteration (expected)
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><ul>
-<li>FIXME: This doesn't satisfy the constraint</li>
+<li>FIXME: This doesn't satisfy the constraint either :-(</li>
 </ul>
 </div>
 </div>
@@ -16088,12 +16329,12 @@ StopIteration (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>In the remainder of this part, we will continue to focus on semantics.
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>In the next chapters, we will continue to focus on semantics.
 Among others, we will learn how to</p>
 <ul>
 <li><a href="GrammarMiner.html">mine grammars from existing inputs</a></li>
-<li><a href="SymbolicFuzzer.html">use symbolic fuzzing - that is, using constraint solvers to reach particular locations</a></li>
-<li><a href="ConcolicFuzzer.html">use concolic fuzzing - that is, combining symbolic fuzzing with concrete runs for higher efficiency</a></li>
+<li>use <a href="SymbolicFuzzer.html">symbolic fuzzing</a> - that is, using constraint solvers to reach particular locations</li>
+<li>use <a href="ConcolicFuzzer.html">concolic fuzzing</a> - that is, combining symbolic fuzzing with concrete runs for higher efficiency</li>
 </ul>
 </div>
 </div>
@@ -16104,7 +16345,7 @@ Among others, we will learn how to</p>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><ul>
-<li>ISLa is published in the paper <a href="https://publications.cispa.saarland/3596/">"Input Invariants"</a> at ESEC/FSE 2022.</li>
+<li>ISLa is presented in the paper <a href="https://publications.cispa.saarland/3596/">"Input Invariants"</a> at ESEC/FSE 2022.</li>
 <li>The <a href="https://github.com/rindPHI/isla">ISLa project</a> contains the full source code and a complete reference.</li>
 </ul>
 </div>
@@ -16115,7 +16356,44 @@ Among others, we will learn how to</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p>To be added.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-String-Encodings">Exercise 1: String Encodings<a class="anchor-link" href="#Exercise-1:-String-Encodings">&#182;</a></h3><p>A common way of representing strings is <em>length-prefixed strings</em>, a representation made popular by the Pascal programming language.
+A length-prefixed string starts with a few bytes that encode the length $L$ of the string, followed by the $L$ actual characters.
+For instance, assuming that two bytes are used to encode the length, the string <code>"Hello"</code> could be represented as the sequence</p>
+
+<pre><code>0x00 0x05 'H' 'e' 'l' 'l' 'o'</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-1:-Syntax">Part 1: Syntax<a class="anchor-link" href="#Part-1:-Syntax">&#182;</a></h4><p>Write a grammar that defines the syntax of length-prefixed strings.</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/FuzzingWithConstraints.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-2:-Semantics">Part 2: Semantics<a class="anchor-link" href="#Part-2:-Semantics">&#182;</a></h4><p>Use ISLa to produce valid length-prefixed strings.
+Make use of the <a href="https://smtlib.cs.uiowa.edu/theories-UnicodeStrings.shtml">SMT-LIB string library</a> to find appropriate conversion functions.</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/FuzzingWithConstraints.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 </div>
 </div>
 </div>
@@ -16127,7 +16405,7 @@ Among others, we will learn how to</p>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/FuzzingWithConstraints.ipynb" target=_blank)>Last change: 2022-08-06 18:15:21+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/FuzzingWithConstraints.ipynb" target=_blank)>Last change: 2022-08-06 19:33:21+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -16143,7 +16421,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html">Fuzzing with Constraints</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html">https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html</a>.  Retrieved 2022-08-06 18:15:21+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html">Fuzzing with Constraints</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html">https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html</a>.  Retrieved 2022-08-06 19:33:21+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2022:FuzzingWithConstraints,
@@ -16153,9 +16431,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2022},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html}},
-    note = {Retrieved 2022-08-06 18:15:21+02:00},
+    note = {Retrieved 2022-08-06 19:33:21+02:00},
     url = {https://www.fuzzingbook.org/beta/html/FuzzingWithConstraints.html},
-    urldate = {2022-08-06 18:15:21+02:00}
+    urldate = {2022-08-06 19:33:21+02:00}
 }
 </pre>
 </div>
