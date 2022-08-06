@@ -214,6 +214,10 @@ def update_synopsis(notebook_name, synopsis):
         elif cell.source.startswith("## "):
             # Insert cell before
             new_cell = nbformat.v4.new_markdown_cell(source=synopsis)
+            
+            # Don't include an "id" field; this may break compatibility
+            del new_cell['id']
+
             new_cell = skip_cell(new_cell)
             notebook.cells = (notebook.cells[:i] + 
                                 [new_cell] + notebook.cells[i:])
