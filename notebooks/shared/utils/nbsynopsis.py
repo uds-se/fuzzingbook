@@ -221,6 +221,9 @@ def update_synopsis(notebook_name, synopsis):
             
     # print(nbformat.writes(notebook))
     
+    # Convert notebook to 4.5
+    notebook = nbformat.convert(notebook, 4)
+
     # Write notebook out again
     with io.open(notebook_path, 'w', encoding='utf-8') as f:
         f.write(nbformat.writes(notebook))
