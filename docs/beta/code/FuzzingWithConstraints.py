@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-08-06 19:35:20+02:00
+# Last change: 2022-08-07 00:50:01+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -60,7 +60,7 @@ The ISLa solver needs two things. First, a _grammar_ - say, US phone numbers.
 
 >>> from Grammars import US_PHONE_GRAMMAR
 
-Second, you need )constraints – a string expressing a condition over one or more grammar elements.
+Second, you need _constraints_ – a string expressing a condition over one or more grammar elements.
 Common functions include
 * `str.len()`, returning the length of a string
 * `str.to.int()`, converting a string to an integer
@@ -76,19 +76,19 @@ With that, invoking `solver.solve()` produces an iterator over multiple solution
 
 >>> for _ in range(10):
 >>>     print(next(solver.solve()))
-(902)465-8279
-(910)695-2708
-(904)382-9074
-(903)632-6458
-(914)839-0278
-(994)458-0439
-(908)847-3098
-(901)589-0372
-(909)992-6350
-(911)431-0475
+(920)465-8279
+(980)695-2708
+(914)382-9074
+(904)632-6458
+(910)839-0278
+(984)458-0439
+(979)847-3098
+(908)589-0372
+(901)992-6350
+(940)431-0475
 
 
-We see that the solver produces a number of inputs that all satisfy the constraint.
+We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
 
 The `solve()` method provides several additional parameters to configure the solver, as documented below
 Additional `ISLaSolver` methods allow to check inputs against constraints, and provide additional functionality.
@@ -701,13 +701,6 @@ PASCAL_STRING_GRAMMAR: Grammar = {
 
 if __name__ == '__main__':
     assert is_valid_grammar(PASCAL_STRING_GRAMMAR)
-
-if __name__ == '__main__':
-    fuzzer = GrammarFuzzer(PASCAL_STRING_GRAMMAR)
-
-if __name__ == '__main__':
-    for _ in range(10):
-        print(repr(fuzzer.fuzz()))
 
 #### Part 2: Semantics
 

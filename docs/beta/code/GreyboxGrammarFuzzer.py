@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html
-# Last change: 2022-08-06 17:54:54+02:00
+# Last change: 2022-08-07 00:52:06+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -52,68 +52,11 @@ Rather than mutating strings randomly, the `DictMutator` class allows to insert 
 >>> seeds = ["HelloWorld"]
 >>> for i in range(10):
 >>>     print(dict_mutator.mutate(seeds[0]))
-HelloWorldbody>
-HelloWorl
-html>HelloWorld
 HelloWorld
+Hello='a'head>World
+Helloe>World
+d>HelloWorld
 HelloWorld
-HelloWorld
-HelloWorld
-HelloWorld
-HelloWorld
-HelloWord
-
-
-This `DictMutator` can be used as an argument to `GreyboxFuzzer`:
-
->>> runner = FunctionCoverageRunner(my_parser)
->>> dict_fuzzer = GreyboxFuzzer(seeds, dict_mutator, PowerSchedule())
->>> dict_fuzzer_outcome = dict_fuzzer.runs(runner, trials=5)
-### Fuzzing with Input Fragments
-
-The `LangFuzzer` class introduces a _language-aware_ fuzzer that can recombine fragments from existing inputs – inspired by the highly effective `LangFuzz` fuzzer. At its core is a `FragmentMutator` class that that takes a [_parser_](Parser.ipynb) as argument:
-
->>> parser = EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS)
->>> mutator = FragmentMutator(parser)
-
-The fuzzer itself is initialized with a list of seeds, the above `FragmentMutator`, and a power schedule:
-
->>> seeds = ["HelloWorld"]
->>> schedule = PowerSchedule()
->>> lang_fuzzer = LangFuzzer(seeds, mutator, schedule)
->>> for i in range(10):
->>>     print(lang_fuzzer.fuzz())
-HelloWorld
-HelloWorld
-Hello
-HelloWorld
-HelloWorld
-World
-HelloWorld
-HelloWorld
-World
-HelloWorldWorld
-### Fuzzing with Input Regions
-
-The `GreyboxGrammarFuzzer` class uses two mutators:
-* a _tree mutator_ (a `RegionMutator` object) that can parse existing strings to identify _regions_ in that string to be swapped or deleted.
-* a _byte mutator_ to apply bit- and character-level mutations.
-
->>> tree_mutator = RegionMutator(parser)
->>> byte_mutator = Mutator()
-
-The _schedule_ for the `GreyboxGrammarFuzzer` class can be a regular `PowerSchedule` object. However, a more sophisticated schedule is provided by `AFLSmartSchedule`, which assigns more [energy](GreyboxFuzzer.ipynb#Power-Schedules) to seeds that have a higher degree of validity.
-
->>> schedule = AFLSmartSchedule(parser)
-
-The `GreyboxGrammarFuzzer` constructor takes a set of seeds as well as the two mutators and the schedule:
-
->>> aflsmart_fuzzer = GreyboxGrammarFuzzer(seeds, byte_mutator, tree_mutator, schedule)
-
-As it relies on code coverage, it is typically combined with a `FunctionCoverageRunner`:
-
->>> runner = FunctionCoverageRunner(my_parser)
->>> aflsmart_outcome = aflsmart_fuzzer.runs(runner, trials=5)
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Greybox Fuzzing with Grammars"

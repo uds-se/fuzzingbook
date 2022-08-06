@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2022-08-04 18:54:05+02:00
+# Last change: 2022-08-07 00:48:39+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,28 +68,26 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- hjttp:/wwwA.gno*gl'2*e.snm/erch!?q=fuzjging,
- http://wTw:w.go/le.com/searchp=fzzino,
- hjtup/:EgwwA^.gNo.l&2ja.s!jm/$@echFf!/H(q
- zjin:pg,
- httgp:/pwTw:w.go/ld.com/sarchp=zino,
- hjtt p:/wwwA.no*'l'2*e.sn"m'ech!?q=vuzjging,
- h|T:owws[gOg$co?6sarc;[5=Adu#zn,
- hjtt://wwwA%.no*'l'*e.s/n"m'c!=q=vuzji^lg,
- http//www.google.com/search?q=fuzzhng,
- ://LTwA5weg+ov.co/Cs>earchBEp2f{yno,
- http:/wTw:Uw.go/l[e.c/lm(d/sy8Kayrchp-fzzihno,
- hUttp://Tw:w&go/le.cn/searchp=fzzmo.,
- httq:/SwTv:E.go4/l[av>c/m(sd/sy8Kayrch-fzzihno,
- http:/OTw:Uw.go/l[e.c/lm(d/s;yKayzcp
- fzihno,
- jt/t2/wwAz^|g`no*gl#dj*uEsD/oGoerch!?y-=fufzbgiO,
- tt#p:/OTw:Uw.goI;l[eclm(ds;yKatzc4P
- fzihNuo,
- :./LTgA5eg*ov.co/Cs>archBEp3fyno,
- Ht|p/pwT;:wo/(.km/sM5rc&hp-BzNo,
- Ht|r`/pT*;:wo(.km/sM5rc&hp,BNoD,
- Lt|C/p{T;*f"woZ'V&}km+lsLU!d5rc{&ip->BzNof]
+ ttp:/;/swww!&bgokDgle.com/seasch?q=Qftkg,
+ htp://wvw.google.com/search?q=fuzzing,
+ ttp:/B;swww!&bgokDgle.com/seasc(?qQftkg,
+ to/;swww!i&bgoBkDNl_/com/seasc(qQfgF,
+ ttp;aosw!&b,okDgl:c.com/sEcsc`>q=Qfkg,
+ Ap|/]$:aoA5!$b,oiDg8~c.msErch>uoQkg,
+ Ap|/9]?:a1oC!$BiDg8~'k}msch>uoQjg,
+ Lto/;swwkWw!6bgoBDJl_/cm/s\a?g,qQfgF,
+ Ap|/]$:aoA5#$b~,oiDg8~c.msErch>uoQkg,
+ -to/s7ww!i&bgokdKcom/seaxssc8qQ}pgF,
+ ttpO/;aos%&b,kDg'l:c.aom/sEcsc`>q=Qfkg,
+ U~tp;AoqwW&nF,o`k7[#HDgl:c&Co/T[E#sc`>rq_.=Qfkg,
+ p|/9]?:a1oC!$BiDg98~'k}ms#h>uoQg,
+ ttp:/;)/sww!&bg~kDglEcomseasch=q=Qftkg,
+ Ap|]$aoA5#&B~,omDg8~.msV0Dbkh>quoQcDfg,
+ ttp/;)/sJww!bg~kDglEIcomseasch=q=Qftkg,
+ Tr/~;/-w8w!9&bgZIekTglDcKee;Qcc(=q=Qfwk,
+ -xto/ys6wwO!i&bgokdm{Kk+omojseaxs!cQ}1gF,
+ T/|;9X9@
+ 8&bOg}RIeQkTbTD:cKee;Qac(qq=Qfsk]
 
 Besides the simple `PowerSchedule`, we can have advanced power schedules.
 

@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-08-04 18:59:02+02:00
+# Last change: 2022-08-07 00:53:12+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -124,13 +124,14 @@ IndexError: string index out of range (expected)
 'A%'
 'ABC+DE'
 'AB'
+
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
+
 'AB+'
 'A'
 'ABCD'
 'A'
-
-IndexError: string index out of range (expected)
-IndexError: string index out of range (expected)
 
 
 We see how the additional inputs generated explore additional paths.
