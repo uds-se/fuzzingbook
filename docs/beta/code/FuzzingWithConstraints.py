@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-08-07 00:50:01+02:00
+# Last change: 2022-08-07 13:17:58+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -76,16 +76,16 @@ With that, invoking `solver.solve()` produces an iterator over multiple solution
 
 >>> for _ in range(10):
 >>>     print(next(solver.solve()))
-(920)465-8279
-(980)695-2708
-(914)382-9074
-(904)632-6458
-(910)839-0278
-(984)458-0439
-(979)847-3098
-(908)589-0372
-(901)992-6350
-(940)431-0475
+(980)535-8297
+(902)862-4805
+(909)842-0857
+(986)792-8745
+(920)421-5936
+(904)542-0175
+(910)670-1892
+(901)451-7403
+(903)418-6425
+(908)692-4356
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
@@ -165,7 +165,8 @@ CONFIG_GRAMMAR: Grammar = {
     ],
     "<pagesize>": ["<int>"],
     "<bufsize>": ["<int>"],
-    "<int>": ["<digit>", "<leaddigit><int>"],
+    "<int>": ["<leaddigit><digits>"],
+    "<digits>": ["", "<digit><digits>"],
     "<digit>": list("0123456789"),
     "<leaddigit>": list("123456789")
 }
@@ -215,10 +216,13 @@ from isla.solver import ISLaSolver  # type: ignore
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 'str.len(<pagesize>) >= 6')
 
+import itertools
+
 if __name__ == '__main__':
-    for i in range(10):
+    solutions = itertools.islice(solver.solve(), 10)
+    for i, solution in enumerate(solutions):
         print(i)
-        print(next(solver.solve()))   
+        print(solution)   
 
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR,
@@ -236,7 +240,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                         '''
-                    (= (mod (str.to.int <pagesize>) 7) 0)
+                    str.to.int(<pagesize>) mod 7 = 0
                     ''')
     print(next(solver.solve()))
 
@@ -335,13 +339,27 @@ if __name__ == '__main__':
     tree = next(parser.parse(inp))
     display_tree(tree)
 
+LINES_OF_THREE_AS_OR_BS_GRAMMAR: Grammar = {
+    '<start>': ['<A>'],
+    '<A>': ['<B><B><B>', '<B><B><B>\n<A>'],
+    '<B>': ['a', 'b']
+}
+
 if __name__ == '__main__':
-    with ExpectError():
-        solver = ISLaSolver(CONFIG_GRAMMAR, 
-                    '''
-                <int>.<digit>[2] = "7"
-                ''')
-        print(next(solver.solve()))
+    fuzzer = GrammarFuzzer(LINES_OF_THREE_AS_OR_BS_GRAMMAR)
+    for _ in range(5):
+        print(fuzzer.fuzz())
+        print()
+
+if __name__ == '__main__':
+    solver = ISLaSolver(LINES_OF_THREE_AS_OR_BS_GRAMMAR, 
+                '''
+            <A>.<B>[2] = "b"
+            ''')
+
+    for solution in itertools.islice(solver.solve(), 5):
+        print(solution)
+        print()
 
 ## Quantifiers
 ## -----------
@@ -354,18 +372,19 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                 '''
-            exists <int> i in <start>:
-                (str.to.int(i) > 1000)
+            exists <int> i in start:
+                str.to.int(i) > 1000
             ''')
-    for i in range(10):
+
+    for i, solution in enumerate(itertools.islice(solver.solve(), 10)):
         print(i)
-        print(next(solver.solve()))
+        print(solution)
 
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                 '''
-            forall <int> i in <start>:
-                (str.to.int(i) > 1000)
+            forall <int> i in start:
+                str.to.int(i) > 1000
             ''')
     print(next(solver.solve()))
 
@@ -415,17 +434,14 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                 '''
-            forall <int> i="{<leaddigit> lead}{<int> remainder}" in <start>:
+            forall <int> i="{<leaddigit> lead}<digits>" in start:
                 (lead = "9")
             ''')
 
 if __name__ == '__main__':
-    print(next(solver.solve()))
-
-if __name__ == '__main__':
-    for i in range(1, 10):
+    for i, solution in enumerate(itertools.islice(solver.solve(), 10)):
         print(i)
-        print(next(solver.solve()))
+        print(solution)
 
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
@@ -434,9 +450,9 @@ if __name__ == '__main__':
             ''')
 
 if __name__ == '__main__':
-    for i in range(10):
+    for i, solution in enumerate(itertools.islice(solver.solve(), 10)):
         print(i)
-        print(next(solver.solve()))
+        print(solution)
 
 ## Checking Inputs
 ## ---------------
@@ -451,18 +467,10 @@ if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, constraint)
 
 if __name__ == '__main__':
-    tree = solver.parse('<config>', 'pagesize=12\nbufsize=34')
-
-from isla.evaluator import evaluate  # type: ignore
+    solver.evaluate('pagesize=12\nbufsize=34')
 
 if __name__ == '__main__':
-    evaluate(constraint, tree, CONFIG_GRAMMAR)
-
-if __name__ == '__main__':
-    tree = solver.parse('<config>', 'pagesize=27\nbufsize=27')
-
-if __name__ == '__main__':
-    evaluate(constraint, tree, CONFIG_GRAMMAR)
+    solver.evaluate('pagesize=27\nbufsize=27')
 
 ## Case Studies
 ## ------------
