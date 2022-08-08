@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-08-08 11:17:19+02:00
+# Last change: 2022-08-08 11:26:58+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -76,16 +76,16 @@ With that, invoking `solver.solve()` produces an iterator over multiple solution
 
 >>> for _ in range(10):
 >>>     print(next(solver.solve()))
-(980)451-2706
-(944)831-0847
-(912)468-5290
+(905)451-2706
+(904)831-0847
+(984)468-5290
 (910)348-3721
-(920)771-6402
-(914)281-2704
-(909)528-9146
-(921)643-6982
-(903)638-7014
-(919)896-7204
+(902)771-6402
+(906)281-2704
+(908)528-9146
+(901)643-6982
+(982)638-7014
+(980)896-7204
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
@@ -714,9 +714,7 @@ import string
 PASCAL_STRING_GRAMMAR: Grammar = {
     "<start>": ["<string>"],
     "<string>": ["<length><chars>"],
-    "<length>": ["<high-byte><low-byte>"],
-    "<high-byte>": ["<byte>"],
-    "<low-byte>": ["<byte>"],
+    "<length>": ["<byte>"],
     "<byte>": crange('\x00', '\xff'),
     "<chars>": ["", "<char><chars>"],
     "<char>": list(string.printable),
@@ -742,25 +740,15 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     solver = ISLaSolver(PASCAL_STRING_GRAMMAR, 
                 '''
-            str.to_code(<string>.<length>.<low-byte>) +
-            str.to_code(<string>.<length>.<high-byte>) * 256 =
+            str.to_code(<string>.<length>.<byte>) =
             str.len(<string>.<chars>)
             ''')
 
 if __name__ == '__main__':
-    solver = ISLaSolver(PASCAL_STRING_GRAMMAR, 
-                '''
-            str.to_code(<string>.<length>.<low-byte>) =
-            str.len(<string>.<chars>) and 
-            <string>.<length>.<high-byte> = str.from_code(0)
-            ''')
-
-if __name__ == '__main__':
     for solution in itertools.islice(solver.solve(), 10):
-        high_byte = solution.filter(lambda n: n.value == "<high-byte>")[0][1]
-        low_byte = solution.filter(lambda n: n.value == "<low-byte>")[0][1]
+        low_byte = solution.filter(lambda n: n.value == "<length>")[0][1]
         chars = solution.filter(lambda n: n.value == "<chars>")[0][1]
 
         print(f'Solution: "{solution}"', end=' ')
-        print(f'(low-byte: {ord(str(low_byte))}, high-byte: {ord(str(high_byte))}, len(chars): {len(str(chars))})')
+        print(f'(length: {ord(str(low_byte))}, len(chars): {len(str(chars))})')
         print()
