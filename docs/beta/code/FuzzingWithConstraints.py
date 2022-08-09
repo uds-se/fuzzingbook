@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-08-09 11:02:46+02:00
+# Last change: 2022-08-09 11:12:24+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -76,15 +76,15 @@ With that, invoking `solver.solve()` produces an iterator over multiple solution
 
 >>> for _ in range(10):
 >>>     print(next(solver.solve()))
-(960)451-2706
-(910)831-0847
-(904)468-5290
-(940)348-3721
-(914)771-6402
-(909)281-2704
-(920)528-9146
-(908)643-6982
-(980)638-7014
+(984)451-2706
+(903)831-0847
+(902)468-5290
+(904)348-3721
+(908)771-6402
+(980)281-2704
+(909)528-9146
+(912)643-6982
+(910)638-7014
 (901)896-7204
 
 
