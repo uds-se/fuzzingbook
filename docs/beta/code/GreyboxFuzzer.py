@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2022-08-07 00:48:39+02:00
+# Last change: 2022-08-08 17:59:01+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,26 +68,17 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- ttp:/;/swww!&bgokDgle.com/seasch?q=Qftkg,
- htp://wvw.google.com/search?q=fuzzing,
- ttp:/B;swww!&bgokDgle.com/seasc(?qQftkg,
- to/;swww!i&bgoBkDNl_/com/seasc(qQfgF,
- ttp;aosw!&b,okDgl:c.com/sEcsc`>q=Qfkg,
- Ap|/]$:aoA5!$b,oiDg8~c.msErch>uoQkg,
- Ap|/9]?:a1oC!$BiDg8~'k}msch>uoQjg,
- Lto/;swwkWw!6bgoBDJl_/cm/s\a?g,qQfgF,
- Ap|/]$:aoA5#$b~,oiDg8~c.msErch>uoQkg,
- -to/s7ww!i&bgokdKcom/seaxssc8qQ}pgF,
- ttpO/;aos%&b,kDg'l:c.aom/sEcsc`>q=Qfkg,
- U~tp;AoqwW&nF,o`k7[#HDgl:c&Co/T[E#sc`>rq_.=Qfkg,
- p|/9]?:a1oC!$BiDg98~'k}ms#h>uoQg,
- ttp:/;)/sww!&bg~kDglEcomseasch=q=Qftkg,
- Ap|]$aoA5#&B~,omDg8~.msV0Dbkh>quoQcDfg,
- ttp/;)/sJww!bg~kDglEIcomseasch=q=Qftkg,
- Tr/~;/-w8w!9&bgZIekTglDcKee;Qcc(=q=Qfwk,
- -xto/ys6wwO!i&bgokdm{Kk+omojseaxs!cQ}1gF,
- T/|;9X9@
- 8&bOg}RIeQkTbTD:cKee;Qac(qq=Qfsk]
+ htpp://w.gfoogne.com/seaRchw?q=fuzzng,
+ http://ww.google.com/search?q=furzing,
+ xvtp:{/www.foogle.com/seapch=q=uzzing,
+ ht:w/ww.goog\l*#m/seaXrceh?bq=rzilgl,
+ http:/wwwgoogne.coe/seazch?q=uzzin&,
+ h|t4p://.PgoolL.com/sdrh?Qq=Fuzi,
+ htzBjQex/c&*ieq=08T,
+  vpe7pJ5/nb/nUc{jICo-m /gacw0qmfQuzz#ng,
+ htpp://w.gf/ogn.#m/seaRchw?q=fuzzng,
+ J;w?G/&!7jwA,j7/o!fLmX\gh?2-bz@"i,
+ ;?p8.gnooxn%ncooms'aRhqW=f"Dzg]
 
 Besides the simple `PowerSchedule`, we can have advanced power schedules.
 
@@ -470,7 +461,7 @@ import hashlib  # produces a 128-bit hash value from a byte array
 
 def getPathID(coverage: Any) -> str:
     """Returns a unique hash for the covered statements"""
-    pickled = pickle.dumps(coverage)
+    pickled = pickle.dumps(sorted(coverage))
     return hashlib.md5(pickled).hexdigest()
 
 class AFLFastSchedule(PowerSchedule):

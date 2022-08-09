@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-08-08 11:26:58+02:00
+# Last change: 2022-08-09 11:02:46+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -76,16 +76,16 @@ With that, invoking `solver.solve()` produces an iterator over multiple solution
 
 >>> for _ in range(10):
 >>>     print(next(solver.solve()))
-(905)451-2706
-(904)831-0847
-(984)468-5290
-(910)348-3721
-(902)771-6402
-(906)281-2704
-(908)528-9146
-(901)643-6982
-(982)638-7014
-(980)896-7204
+(960)451-2706
+(910)831-0847
+(904)468-5290
+(940)348-3721
+(914)771-6402
+(909)281-2704
+(920)528-9146
+(908)643-6982
+(980)638-7014
+(901)896-7204
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
@@ -123,7 +123,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     from .bookutils import YouTubeVideo
-    YouTubeVideo("w4u5gCgPlmg")
+    YouTubeVideo("FADrEcA0wos")
 
 if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
