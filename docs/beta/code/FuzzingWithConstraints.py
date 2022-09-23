@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-09-22 17:13:46+02:00
+# Last change: 2022-09-23 09:34:45+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -75,7 +75,7 @@ Here, we instantiate the ISLa solver with a constraint stating that the area cod
 With that, invoking `solver.solve()` returns a _solution_ for the constraints.
 
 >>> str(solver.solve())
-'(902)428-1097'
+'(904)273-9402'
 
 `solve()` returns a derivation tree, which typically is converted into a string using `str()` as above. The `print()` function does this implicitly.
 
@@ -83,16 +83,16 @@ Subsequent calls of `solve()` return more solutions:
 
 >>> for _ in range(10):
 >>>     print(solver.solve())
-(902)734-5266
-(902)376-3428
-(902)542-4549
-(902)603-9055
-(902)901-9578
-(902)281-0144
-(902)807-8203
-(902)621-8055
-(902)255-4974
-(908)917-4705
+(904)865-5108
+(904)647-7322
+(904)416-7444
+(904)371-8098
+(904)934-7079
+(904)750-3441
+(904)598-0755
+(904)685-7836
+(904)251-7391
+(901)263-6121
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
@@ -394,8 +394,8 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     import os
-    os.system(f"isla solve grammar.py --constraint '<pagesize> = <bufsize>' \\")
-    os.system(f"                       --constraint 'str.to.int(<pagesize>) > 10000'")
+    os.system(f'isla solve grammar.py \\')
+    os.system(f"    --constraint '<pagesize> = <bufsize> and str.to.int(<pagesize>) > 10000'")
 
 if __name__ == '__main__':
     import os
@@ -419,12 +419,11 @@ if __name__ == '__main__':
 from .ExpectError import ExpectError
 
 if __name__ == '__main__':
-    with ExpectError():
-        solver = ISLaSolver(CONFIG_GRAMMAR, 
-                    '''
-                <config>..<digit> = "7"
-                ''')
-        print(solver.solve())
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            <config>..<digit> = "7" and <config>..<leaddigit> = "7"
+            ''')
+    print(solver.solve())
 
 if __name__ == '__main__':
     inp = 'pagesize=12\nbufsize=34'
@@ -440,9 +439,9 @@ LINES_OF_THREE_AS_OR_BS_GRAMMAR: Grammar = {
 
 if __name__ == '__main__':
     fuzzer = GrammarFuzzer(LINES_OF_THREE_AS_OR_BS_GRAMMAR)
-    for _ in range(5):
+    for i in range(5):
+        print(i)
         print(fuzzer.fuzz())
-        print()
 
 if __name__ == '__main__':
     solver = ISLaSolver(LINES_OF_THREE_AS_OR_BS_GRAMMAR, 
@@ -450,7 +449,8 @@ if __name__ == '__main__':
             <A>.<B>[2] = "b"
             ''')
 
-    for _ in range(5):
+    for i in range(5):
+        print(i)
         print(solver.solve())
 
 ## Quantifiers
@@ -474,8 +474,17 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                 '''
-            forall <int> i in <start>:
-                str.to.int(i) > 1000
+            exists <int> in <start>:
+                str.to.int(<int>) > 1000
+            ''')
+
+    print(solver.solve())
+
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            forall <int> in <start>:
+                str.to.int(<int>) > 1000
             ''')
 
     for _ in range(10):
@@ -501,8 +510,8 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                 '''
-            forall <int> i="<digit>" in <start>:
-                (i = "7")
+            forall <int>="<leaddigit><digits>" in <start>:
+                (<leaddigit> = "7")
             ''')
 
 if __name__ == '__main__':
@@ -511,11 +520,18 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                 '''
-            forall <int> i="<leaddigit><int>" in <start>:
-                (str.to.int(i) > 100)
+            forall <int> in <start>:
+                (str.to.int(<int>) > 100)
             ''')
 
+    str(solver.solve())
+
 if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            str.to.int(<int>) > 100
+            ''')
+
     str(solver.solve())
 
 ## Matching Expansion Elements
@@ -540,18 +556,30 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                 '''
+            forall <int>="<leaddigit><digits>" in <start>:
+                (<leaddigit> = "9")
+            ''')
+    print(solver.solve())
+
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
             <int>.<leaddigit> = "9"
             ''')
+    print(solver.solve())
 
 if __name__ == '__main__':
-    for _ in range(10):
-        print(solver.solve())
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            <leaddigit> = "9"
+            ''')
+    print(solver.solve())
 
-## Checking Inputs
-## ---------------
+## Checking Strings
+## ----------------
 
 if __name__ == '__main__':
-    print('\n## Checking Inputs')
+    print('\n## Checking Strings')
 
 
 
@@ -684,7 +712,9 @@ if __name__ == '__main__':
             forall <rhs> in <assgn>:
                 exists <assgn> declaration:
                     <rhs>.<var> = declaration.<lhs>.<var>
-            ''', max_number_smt_instantiations=1, max_number_free_instantiations=1)
+            ''',
+                max_number_smt_instantiations=1,
+                max_number_free_instantiations=1)
 
 if __name__ == '__main__':
     for _ in range(10):
