@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-09-23 09:34:45+02:00
+# Last change: 2022-09-26 19:24:19+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -75,7 +75,7 @@ Here, we instantiate the ISLa solver with a constraint stating that the area cod
 With that, invoking `solver.solve()` returns a _solution_ for the constraints.
 
 >>> str(solver.solve())
-'(904)273-9402'
+'(910)910-7342'
 
 `solve()` returns a derivation tree, which typically is converted into a string using `str()` as above. The `print()` function does this implicitly.
 
@@ -83,31 +83,22 @@ Subsequent calls of `solve()` return more solutions:
 
 >>> for _ in range(10):
 >>>     print(solver.solve())
-(904)865-5108
-(904)647-7322
-(904)416-7444
-(904)371-8098
-(904)934-7079
-(904)750-3441
-(904)598-0755
-(904)685-7836
-(904)251-7391
-(901)263-6121
+(910)565-8296
+(910)440-0369
+(910)608-6457
+(910)700-3479
+(910)326-1972
+(910)814-1878
+(910)294-0408
+(910)705-1344
+(910)689-0159
+(904)209-7853
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
 
-The `solve()` method provides several additional parameters to configure the solver, as documented below
+The `ISLaSolver()` constructor provides several additional parameters to configure the solver, as documented below.
 Additional `ISLaSolver` methods allow to check inputs against constraints, and provide additional functionality.
-
->>> from ClassDiagram import display_class_hierarchy
->>> hierarchy = display_class_hierarchy([ISLaSolver],
->>>                        public_methods=[
->>>                             ISLaSolver.__init__,
->>>                             ISLaSolver.solve,
->>>                             ISLaSolver.check,
->>>                         ])
->>> hierarchy
 The ISLa functionality is also available on the command line:
 
 >>> !isla --help
@@ -778,13 +769,15 @@ if __name__ == '__main__':
         print(solver.solve())
 
 from .ClassDiagram import display_class_hierarchy
-hierarchy = display_class_hierarchy([ISLaSolver],
-                       public_methods=[
-                            ISLaSolver.__init__,
-                            ISLaSolver.solve,
-                            ISLaSolver.check,
-                        ])
-hierarchy
+
+if __name__ == '__main__':
+    display_class_hierarchy([ISLaSolver],
+                             public_methods=[
+                                ISLaSolver.__init__,
+                                ISLaSolver.solve,
+                                ISLaSolver.check,
+                                ISLaSolver.parse,
+                            ])
 
 if __name__ == '__main__':
     import os
