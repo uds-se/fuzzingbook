@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2022-08-03 19:07:26+02:00
+# Last change: 2022-08-08 17:59:01+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,26 +68,25 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- httr:/www.google.com/sEarch?q=fwzzing,
- _`tBt:+//tr_~w9.coogLesT/jom/sdaR;=fqjzan,
- _`TBNt:+//r_~w9.coooLesT/j>1om/sdaR>=fqjzan,
- ttp:/www.gomglew*com/REach?q=fwzzing,
- c`uvZv|t8t/tr_w.oogLrds/kjoM-5sTdSafR;=fqK>jzn,
- V$ww,goVgl.c}s3ec.q=Fuzzixg,
- hsFrt0:]/wo.oTgld.cm"/smar#>=fquzpzi.g{,
- _`tBt:+o/tb_~9c.soogLenG{T/jo?m/saR/;=6fqWKzan,
- (sFrt0:]/7o.oVgld.cm"/smar#>=fquzpzig{,
- V$ww,goVgl.c}s3ec.q=Fuzzixg,
- hsFr`0:\.wo.oTgd.km"/cmar#>=fquzpzig{,
- rt }4]/m.EoT[lDec"/soaxr#a.=&u?qziv.?g{,
- http:/wsw.oogle.om/sJeacQh?qS=fEuDzzi5nf'@,
- hsFrt0:./wo.oTglJd.c7m/smar#>=fquqzi.1g{,
- hsFrt.t:\./wU[o\g,lJd.ci/ewMa2Q{;=fquqz`.gwI{,
- hsBrhT;]wnoKLd.c/sr#quz\r.g[,
- $sBrh6;
- :W nO2Kl.k/+sz\.e(,
- xthp*/Aw.cooDlgg.cosachs5fuxzbg,
- _xt':/mo/b_5vP9cp*soogLc".9G[T/jo
+ htpp://w.gfoogne.com/seaRchw?q=fuzzng,
+ http://ww.google.com/search?q=furzing,
+ xvtp:{/www.foogle.com/seapch=q=uzzing,
+ ht:w/ww.goog\l*#m/seaXrceh?bq=rzilgl,
+ http:/wwwgoogne.coe/seazch?q=uzzin&,
+ h|t4p://.PgoolL.com/sdrh?Qq=Fuzi,
+ htzBjQex/c&*ieq=08T,
+  vpe7pJ5/nb/nUc{jICo-m /gacw0qmfQuzz#ng,
+ htpp://w.gf/ogn.#m/seaRchw?q=fuzzng,
+ J;w?G/&!7jwA,j7/o!fLmX\gh?2-bz@"i,
+ ;?p8.gnooxn%ncooms'aRhqW=f"Dzg]
+
+Besides the simple `PowerSchedule`, we can have advanced power schedules.
+
+* `AFLFastSchedule` assigns high energy to "unusual" paths not taken very often.
+* `AFLGoSchedule` assigns high energy to paths close to uncovered program locations. 
+
+The `AFLGoSchedule` class constructor requires a `distance` metric from each node towards target locations, as determined via analysis of the program code. See the chapter for details.
+
 For more details, source, and documentation, see
 "The Fuzzing Book - Greybox Fuzzing"
 at https://www.fuzzingbook.org/html/GreyboxFuzzer.html
@@ -462,7 +461,7 @@ import hashlib  # produces a 128-bit hash value from a byte array
 
 def getPathID(coverage: Any) -> str:
     """Returns a unique hash for the covered statements"""
-    pickled = pickle.dumps(coverage)
+    pickled = pickle.dumps(sorted(coverage))
     return hashlib.md5(pickled).hexdigest()
 
 class AFLFastSchedule(PowerSchedule):

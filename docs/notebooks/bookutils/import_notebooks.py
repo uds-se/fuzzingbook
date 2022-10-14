@@ -9,6 +9,7 @@ from IPython import get_ipython
 from nbformat import read
 from IPython.core.interactiveshell import InteractiveShell
 from importlib.abc import MetaPathFinder
+from importlib.machinery import ModuleSpec
 
 import linecache
 import ast
@@ -129,10 +130,11 @@ class NotebookFinder(MetaPathFinder):
     def __init__(self) -> None:
         self.loaders: Dict[Any, Any] = {}
 
+    # Deprecated since Python 3.4
     def find_module(self, fullname: str, path: Any = None) -> Any:
         nb_path = find_notebook(fullname, path)
         if not nb_path:
-            return
+            return None
 
         key = path
         if path:
@@ -142,5 +144,13 @@ class NotebookFinder(MetaPathFinder):
         if key not in self.loaders:
             self.loaders[key] = NotebookLoader(path)
         return self.loaders[key]
+        
+    # New since Python 3.4
+    def find_spec(self, fullname: str, path: Any = None, target: Any = None) -> Any:
+        loader = self.find_module(fullname, path)
+        if not loader:
+            return None
+        
+        return ModuleSpec(fullname, loader)
 
 sys.meta_path.append(NotebookFinder())

@@ -11798,7 +11798,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/html/Carver.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Carving Unit Tests - The Fuzzing Book" />
-<meta property="og:description" content="So far, we have always generated system input, i.e. data that the program as a whole obtains via its input channels.  If we are interested in testing only a small set of functions, having to go through the system can be very inefficient.  This chapter introduces a technique known as carving, which, given a system test, automatically extracts a set of unit tests that replicate the calls seen during the unit test.  The key idea is to record such calls such that we can replay them later – as a whole or selectively.  On top, we also explore how to synthesize API grammars from carved unit tests; this means that we can synthesize API tests without having to write a grammar at all.Prerequisites Carving makes use of dynamic traces of function calls and variables, as introduced in the chapter on configuration fuzzing. Using grammars to test units was introduced in the chapter on API fuzzing." />
+<meta property="og:description" content="So far, we have always generated system input, i.e. data that the program as a whole obtains via its input channels.  If we are interested in testing only a small set of functions, having to go through the system can be very inefficient.  This chapter introduces a technique known as carving, which, given a system test, automatically extracts a set of unit tests that replicate the calls seen during the system test.  The key idea is to record such calls such that we can replay them later – as a whole or selectively.  On top, we also explore how to synthesize API grammars from carved unit tests; this means that we can synthesize API tests without having to write a grammar at all.Prerequisites Carving makes use of dynamic traces of function calls and variables, as introduced in the chapter on configuration fuzzing. Using grammars to test units was introduced in the chapter on API fuzzing." />
 <meta property="og:image" content="https://www.fuzzingbook.org/html/PICS/wordcloud.png" />
 
 <meta name="twitter:dnt" content="on">
@@ -11898,6 +11898,7 @@ MathJax.Hub.Config({
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs</a></li>
 </ul><li class="has-sub"><a href="04_Semantical_Fuzzing.html" class="chapters"><span class="part_number">IV</span> Semantical Fuzzing <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
+<li><a href="FuzzingWithConstraints.html">Fuzzing with Constraints</a></li>
 <li><a href="GrammarMiner.html">Mining Input Grammars</a></li>
 <li><a href="InformationFlow.html">Tracking Information Flow</a></li>
 <li><a href="ConcolicFuzzer.html">Concolic Fuzzing</a></li>
@@ -11996,7 +11997,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Carving-Unit-Tests">Carving Unit Tests<a class="anchor-link" href="#Carving-Unit-Tests">&#182;</a></h1><p>So far, we have always generated <em>system input</em>, i.e. data that the program as a whole obtains via its input channels.  If we are interested in testing only a small set of functions, having to go through the system can be very inefficient.  This chapter introduces a technique known as <em>carving</em>, which, given a system test, automatically extracts a set of <em>unit tests</em> that replicate the calls seen during the unit test.  The key idea is to <em>record</em> such calls such that we can <em>replay</em> them later – as a whole or selectively.  On top, we also explore how to synthesize API grammars from carved unit tests; this means that we can <em>synthesize API tests without having to write a grammar at all.</em></p>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Carving-Unit-Tests">Carving Unit Tests<a class="anchor-link" href="#Carving-Unit-Tests">&#182;</a></h1><p>So far, we have always generated <em>system input</em>, i.e. data that the program as a whole obtains via its input channels.  If we are interested in testing only a small set of functions, having to go through the system can be very inefficient.  This chapter introduces a technique known as <em>carving</em>, which, given a system test, automatically extracts a set of <em>unit tests</em> that replicate the calls seen during the system test.  The key idea is to <em>record</em> such calls such that we can <em>replay</em> them later – as a whole or selectively.  On top, we also explore how to synthesize API grammars from carved unit tests; this means that we can <em>synthesize API tests without having to write a grammar at all.</em></p>
 </div>
 </div>
 </div>
@@ -12074,17 +12075,17 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <span class="o">&gt;&gt;&gt;</span> <span class="n">my_sqrt_grammar</span>
 <span class="p">{</span><span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;call&gt;&#39;</span><span class="p">],</span>
  <span class="s1">&#39;&lt;call&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;my_sqrt&gt;&#39;</span><span class="p">],</span>
- <span class="s1">&#39;&lt;my_sqrt-x&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">],</span>
+ <span class="s1">&#39;&lt;my_sqrt-x&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;4&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">],</span>
  <span class="s1">&#39;&lt;my_sqrt&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;my_sqrt(&lt;my_sqrt-x&gt;)&#39;</span><span class="p">]}</span>
 </pre></div>
 <p>This grammar can be used to synthesize calls.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">my_sqrt_grammar</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
-<span class="s1">&#39;my_sqrt(4)&#39;</span>
+<span class="s1">&#39;my_sqrt(2)&#39;</span>
 </pre></div>
 <p>These calls can be executed in isolation, effectively extracting unit tests from system tests:</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">eval</span><span class="p">(</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
-<span class="mf">1.414213562373095</span>
+<span class="mf">2.0</span>
 </pre></div>
 </div>
 </div>
@@ -12181,7 +12182,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Downloaded 457273 bytes in 0.30 seconds
+<pre>Downloaded 460300 bytes in 0.31 seconds
 </pre>
 </div>
 
@@ -12318,7 +12319,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>1.5427080000001149e-06
+<pre>1.5607079258188606e-06
 </pre>
 </div>
 
@@ -12350,7 +12351,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.3041719170000001
+<pre>0.31093745795078576
 </pre>
 </div>
 
@@ -12382,7 +12383,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>197167.52424955176
+<pre>199228.47369897566
 </pre>
 </div>
 
@@ -12700,7 +12701,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
  &#39;__exit__&#39;: [[(&#39;tb&#39;, None),
    (&#39;exc_value&#39;, None),
    (&#39;exc_type&#39;, None),
-   (&#39;self&#39;, &lt;__main__.CallCarver at 0x144982130&gt;)]]}
+   (&#39;self&#39;, &lt;__main__.CallCarver at 0x12485bf40&gt;)]]}
 </pre>
 </div>
 
@@ -12809,7 +12810,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>my_sqrt(x=2)
 my_sqrt(x=4)
-__exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver object at 0x144982130&gt;)
+__exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver object at 0x12485bf40&gt;)
 </pre>
 </div>
 
@@ -13151,7 +13152,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;email.parser.Parser.parse(headersonly=False, fp=&lt;_io.StringIO object at 0x144971ee0&gt;, self=&lt;email.parser.Parser object at 0x144ad4340&gt;)&#39;
+<pre>&#39;email.parser.Parser.parse(headersonly=False, fp=&lt;_io.StringIO object at 0x147a8d7e0&gt;, self=&lt;email.parser.Parser object at 0x147c58670&gt;)&#39;
 </pre>
 </div>
 
@@ -13207,8 +13208,8 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 
 <div class="output_text output_subarea output_execute_result">
 <pre>[[(&#39;headersonly&#39;, False),
-  (&#39;fp&#39;, &lt;_io.StringIO at 0x144971ee0&gt;),
-  (&#39;self&#39;, &lt;email.parser.Parser at 0x144ad4340&gt;)]]
+  (&#39;fp&#39;, &lt;_io.StringIO at 0x147a8d7e0&gt;),
+  (&#39;self&#39;, &lt;email.parser.Parser at 0x147c58670&gt;)]]
 </pre>
 </div>
 
@@ -13232,7 +13233,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;email.parser.Parser at 0x144ad4340&gt;
+<pre>&lt;email.parser.Parser at 0x147c58670&gt;
 </pre>
 </div>
 
@@ -13289,7 +13290,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;email.parser.Parser at 0x144ad4c10&gt;
+<pre>&lt;email.parser.Parser at 0x147c59720&gt;
 </pre>
 </div>
 
@@ -13376,7 +13377,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>email.parser.Parser.parse(headersonly=False, fp=pickle.loads(b&#39;\x80\x04\x95\x8e\x01\x00\x00\x00\x00\x00\x00\x8c\x03_io\x94\x8c\x08StringIO\x94\x93\x94)\x81\x94(Xe\x01\x00\x00Content-Encoding: gzip\r\nAccept-Ranges: bytes\r\nAge: 451278\r\nCache-Control: max-age=604800\r\nContent-Type: text/html; charset=UTF-8\r\nDate: Tue, 17 May 2022 17:07:57 GMT\r\nEtag: &#34;3147526947&#34;\r\nExpires: Tue, 24 May 2022 17:07:57 GMT\r\nLast-Modified: Thu, 17 Oct 2019 07:18:26 GMT\r\nServer: ECS (dcb/7F5C)\r\nVary: Accept-Encoding\r\nX-Cache: HIT\r\nContent-Length: 648\r\n\r\n\x94\x8c\x01\n\x94Me\x01Nt\x94b.&#39;), self=pickle.loads(b&#39;\x80\x04\x95w\x00\x00\x00\x00\x00\x00\x00\x8c\x0cemail.parser\x94\x8c\x06Parser\x94\x93\x94)\x81\x94}\x94(\x8c\x06_class\x94\x8c\x0bhttp.client\x94\x8c\x0bHTTPMessage\x94\x93\x94\x8c\x06policy\x94\x8c\x11email._policybase\x94\x8c\x08Compat32\x94\x93\x94)\x81\x94ub.&#39;))
+<pre>email.parser.Parser.parse(headersonly=False, fp=pickle.loads(b&#39;\x80\x04\x95\x8e\x01\x00\x00\x00\x00\x00\x00\x8c\x03_io\x94\x8c\x08StringIO\x94\x93\x94)\x81\x94(Xe\x01\x00\x00Content-Encoding: gzip\r\nAccept-Ranges: bytes\r\nAge: 589988\r\nCache-Control: max-age=604800\r\nContent-Type: text/html; charset=UTF-8\r\nDate: Sat, 06 Aug 2022 22:54:15 GMT\r\nEtag: &#34;3147526947&#34;\r\nExpires: Sat, 13 Aug 2022 22:54:15 GMT\r\nLast-Modified: Thu, 17 Oct 2019 07:18:26 GMT\r\nServer: ECS (dcb/7F83)\r\nVary: Accept-Encoding\r\nX-Cache: HIT\r\nContent-Length: 648\r\n\r\n\x94\x8c\x01\n\x94Me\x01Nt\x94b.&#39;), self=pickle.loads(b&#39;\x80\x04\x95w\x00\x00\x00\x00\x00\x00\x00\x8c\x0cemail.parser\x94\x8c\x06Parser\x94\x93\x94)\x81\x94}\x94(\x8c\x06_class\x94\x8c\x0bhttp.client\x94\x8c\x0bHTTPMessage\x94\x93\x94\x8c\x06policy\x94\x8c\x11email._policybase\x94\x8c\x08Compat32\x94\x93\x94)\x81\x94ub.&#39;))
 </pre>
 </div>
 
@@ -13422,7 +13423,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;http.client.HTTPMessage at 0x144b05250&gt;
+<pre>&lt;http.client.HTTPMessage at 0x147c5a3e0&gt;
 </pre>
 </div>
 
@@ -13532,7 +13533,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>263/324 calls (81.17%) successfully created and 54/324 calls (16.67%) successfully ran
+<pre>263/324 calls (81.17%) successfully created and 55/324 calls (16.98%) successfully ran
 </pre>
 </div>
 
@@ -13565,16 +13566,16 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>NameError(&#34;name &#39;os&#39; is not defined&#34;)
+<pre>AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;header_source_parse&#39;&#34;)
+AttributeError(&#34;module &#39;email.message&#39; has no attribute &#39;get&#39;&#34;)
+NameError(&#34;name &#39;fnmatch&#39; is not defined&#34;)
+AttributeError(&#34;&#39;Response&#39; object has no attribute &#39;generate&#39;&#34;)
+NameError(&#34;name &#39;encodings&#39; is not defined&#34;)
 NameError(&#34;name &#39;requests&#39; is not defined&#34;)
-TypeError(&#34;cannot pickle &#39;traceback&#39; object&#34;)
-SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 21, &#34;requests.structures.&lt;genexpr&gt;(mappedvalue=&#39;python-requests/2.27.1&#39;, casedkey=&#39;User-Agent&#39;, .0=pickle.loads(b&#39;\\x80\\x04\\x95\\x1b\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x8c\\x08builtins\\x94\\x8c\\x04iter\\x94\\x93\\x94]\\x94\\x85\\x94R\\x94.&#39;))&#34;))
-StopIteration()
-SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 18, &#34;urllib3.response.&lt;genexpr&gt;(enc=&#39;&#39;, .0=pickle.loads(b&#39;\\x80\\x04\\x95\\x1b\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x8c\\x08builtins\\x94\\x8c\\x04iter\\x94\\x93\\x94]\\x94\\x85\\x94R\\x94.&#39;))&#34;))
-TypeError(&#34;cannot pickle &#39;socket&#39; object&#34;)
-SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 16, &#34;requests.hooks.&lt;dictcomp&gt;(.0=pickle.loads(b&#39;\\x80\\x04\\x95\\x1b\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x8c\\x08builtins\\x94\\x8c\\x04iter\\x94\\x93\\x94]\\x94\\x85\\x94R\\x94.&#39;))&#34;))
-NameError(&#34;name &#39;Compat32&#39; is not defined&#34;)
-NameError(&#34;name &#39;Timeout&#39; is not defined&#34;)
+SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 21, &#34;requests.structures.&lt;genexpr&gt;(mappedvalue=&#39;gzip, deflate&#39;, casedkey=&#39;Accept-Encoding&#39;, .0=pickle.loads(b&#39;\\x80\\x04\\x95\\x1b\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x8c\\x08builtins\\x94\\x8c\\x04iter\\x94\\x93\\x94]\\x94\\x85\\x94R\\x94.&#39;))&#34;, 1, 22))
+SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 21, &#34;requests.structures.&lt;genexpr&gt;(mappedvalue=&#39;*/*&#39;, casedkey=&#39;Accept&#39;, .0=pickle.loads(b&#39;\\x80\\x04\\x95\\x1b\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x8c\\x08builtins\\x94\\x8c\\x04iter\\x94\\x93\\x94]\\x94\\x85\\x94R\\x94.&#39;))&#34;, 1, 22))
+TypeError(&#39;module.__new__(): not enough arguments&#39;)
+AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sanitize_header&#39;&#34;)
 </pre>
 </div>
 
@@ -14015,7 +14016,7 @@ NameError(&#34;name &#39;Timeout&#39; is not defined&#34;)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;], &#39;&lt;power-x&gt;&#39;: [&#39;1&#39;, &#39;3&#39;]}
+<pre>{&#39;&lt;power-y&gt;&#39;: [&#39;4&#39;, &#39;2&#39;], &#39;&lt;power-x&gt;&#39;: [&#39;1&#39;, &#39;3&#39;]}
 </pre>
 </div>
 
@@ -14123,7 +14124,7 @@ NameError(&#34;name &#39;Timeout&#39; is not defined&#34;)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;],
+<pre>{&#39;&lt;power-y&gt;&#39;: [&#39;4&#39;, &#39;2&#39;],
  &#39;&lt;power-x&gt;&#39;: [&#39;1&#39;, &#39;3&#39;],
  &#39;&lt;power&gt;&#39;: [&#39;power(&lt;power-y&gt;, &lt;power-x&gt;)&#39;]}
 </pre>
@@ -14263,7 +14264,7 @@ NameError(&#34;name &#39;Timeout&#39; is not defined&#34;)
 <div class="output_text output_subarea output_execute_result">
 <pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;call&gt;&#39;],
  &#39;&lt;call&gt;&#39;: [&#39;&lt;power&gt;&#39;],
- &#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;],
+ &#39;&lt;power-y&gt;&#39;: [&#39;4&#39;, &#39;2&#39;],
  &#39;&lt;power-x&gt;&#39;: [&#39;1&#39;, &#39;3&#39;],
  &#39;&lt;power&gt;&#39;: [&#39;power(&lt;power-y&gt;, &lt;power-x&gt;)&#39;]}
 </pre>
@@ -14298,7 +14299,7 @@ NameError(&#34;name &#39;Timeout&#39; is not defined&#34;)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;power(4, 1)&#39;, &#39;power(2, 3)&#39;, &#39;power(4, 1)&#39;, &#39;power(4, 1)&#39;, &#39;power(2, 1)&#39;]
+<pre>[&#39;power(2, 1)&#39;, &#39;power(4, 3)&#39;, &#39;power(2, 1)&#39;, &#39;power(2, 1)&#39;, &#39;power(4, 1)&#39;]
 </pre>
 </div>
 
@@ -14389,7 +14390,7 @@ NameError(&#34;name &#39;Timeout&#39; is not defined&#34;)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>139
+<pre>140
 </pre>
 </div>
 
@@ -14477,9 +14478,9 @@ NameError(&#34;name &#39;Timeout&#39; is not defined&#34;)
 
 <div class="output_text output_subarea output_execute_result">
 <pre>[&#34;&#39;https://www.fuzzingbook.org/&#39;&#34;,
- &#34;&#39;https://www.fuzzingbook.org&#39;&#34;,
+ &#34;&#39;http://www.example.com/&#39;&#34;,
  &#34;&#39;http://www.example.com&#39;&#34;,
- &#34;&#39;http://www.example.com/&#39;&#34;]
+ &#34;&#39;https://www.fuzzingbook.org&#39;&#34;]
 </pre>
 </div>
 
@@ -14546,10 +14547,10 @@ NameError(&#34;name &#39;Timeout&#39; is not defined&#34;)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org&#39;)
+<pre>urlsplit(True, &#39;&#39;, &#39;http://www.example.com/&#39;)
 urlsplit(True, &#39;&#39;, &#39;http://www.example.com&#39;)
 urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org/&#39;)
-urlsplit(True, &#39;&#39;, &#39;http://www.example.com/&#39;)
+urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org&#39;)
 urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org/&#39;)
 </pre>
 </div>
@@ -14612,7 +14613,7 @@ urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org/&#39;)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>1.2917000000278733e-05
+<pre>1.1958996765315533e-05
 </pre>
 </div>
 
@@ -14637,7 +14638,7 @@ urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org/&#39;)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>1.107643542
+<pre>0.12173708307091147
 </pre>
 </div>
 
@@ -14660,7 +14661,7 @@ urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org/&#39;)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>85750.83548626603
+<pre>10179.539760725029
 </pre>
 </div>
 
@@ -14774,7 +14775,7 @@ urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org/&#39;)
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>my_sqrt(x=2)
 Result: 1.414213562373095
-__exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.ResultCarver object at 0x144d81b50&gt;)
+__exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.ResultCarver object at 0x147eaa560&gt;)
 </pre>
 </div>
 
@@ -14839,7 +14840,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.ResultCarver 
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Carver.ipynb" target=_blank)>Last change: 2022-01-11 09:27:09+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Carver.ipynb" target=_blank)>Last change: 2022-07-25 12:06:03+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -14855,7 +14856,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Carver.html">Carving Unit Tests</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/Carver.html">https://www.fuzzingbook.org/html/Carver.html</a>.  Retrieved 2022-01-11 09:27:09+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Carver.html">Carving Unit Tests</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/Carver.html">https://www.fuzzingbook.org/html/Carver.html</a>.  Retrieved 2022-07-25 12:06:03+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2022:Carver,
@@ -14865,9 +14866,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2022},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/html/Carver.html}},
-    note = {Retrieved 2022-01-11 09:27:09+01:00},
+    note = {Retrieved 2022-07-25 12:06:03+02:00},
     url = {https://www.fuzzingbook.org/html/Carver.html},
-    urldate = {2022-01-11 09:27:09+01:00}
+    urldate = {2022-07-25 12:06:03+02:00}
 }
 </pre>
 </div>
