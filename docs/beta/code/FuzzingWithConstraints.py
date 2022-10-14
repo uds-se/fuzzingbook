@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-09-26 19:24:19+02:00
+# Last change: 2022-10-14 09:45:20+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -75,7 +75,7 @@ Here, we instantiate the ISLa solver with a constraint stating that the area cod
 With that, invoking `solver.solve()` returns a _solution_ for the constraints.
 
 >>> str(solver.solve())
-'(910)910-7342'
+'(902)671-9208'
 
 `solve()` returns a derivation tree, which typically is converted into a string using `str()` as above. The `print()` function does this implicitly.
 
@@ -83,16 +83,16 @@ Subsequent calls of `solve()` return more solutions:
 
 >>> for _ in range(10):
 >>>     print(solver.solve())
-(910)565-8296
-(910)440-0369
-(910)608-6457
-(910)700-3479
-(910)326-1972
-(910)814-1878
-(910)294-0408
-(910)705-1344
-(910)689-0159
-(904)209-7853
+(902)753-7640
+(902)524-6249
+(902)249-8254
+(902)845-5106
+(902)447-7322
+(902)316-7444
+(902)971-8098
+(902)434-9728
+(902)750-3441
+(910)598-0755
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     from .bookutils import YouTubeVideo
-    YouTubeVideo("FADrEcA0wos")
+    YouTubeVideo("HQoyaE8-zj8")
 
 if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency

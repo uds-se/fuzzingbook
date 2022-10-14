@@ -18,12 +18,12 @@
 # from . import GeneratorGrammarFuzzer
 # from . import GreyboxGrammarFuzzer
 # from . import Reducer
+# from . import FuzzingWithConstraints
 # from . import GrammarMiner
 # from . import InformationFlow
 # from . import ConcolicFuzzer
 # from . import SymbolicFuzzer
 # from . import DynamicInvariants
-# from . import FuzzingWithConstraints
 # from . import ConfigurationFuzzer
 # from . import APIFuzzer
 # from . import Carver
