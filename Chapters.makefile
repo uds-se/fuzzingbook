@@ -51,14 +51,14 @@ SYNTACTICAL_PART_TODO =
 
 SEMANTICAL_PART = \
 	04_Semantical_Fuzzing.ipynb \
+	FuzzingWithConstraints.ipynb \
 	GrammarMiner.ipynb \
 	InformationFlow.ipynb \
 	ConcolicFuzzer.ipynb \
 	SymbolicFuzzer.ipynb \
 	DynamicInvariants.ipynb
-SEMANTICAL_PART_READY =
-SEMANTICAL_PART_TODO = 	FuzzingWithConstraints.ipynb
-# When final, FuzzingWithConstraints should be the first chapter in this part
+SEMANTICAL_PART_READY = 
+SEMANTICAL_PART_TODO = 
 
 DOMAINS_PART = \
 	05_Domain-Specific_Fuzzing.ipynb \
