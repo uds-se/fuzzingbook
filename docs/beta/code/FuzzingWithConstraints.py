@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-10-14 09:45:20+02:00
+# Last change: 2022-10-20 08:18:32+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -42,7 +42,7 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
 
-This chapter introduces the _ISLa framework_, consisting of 
+This chapter introduces the [ISLa](https://rindphi.github.io/isla/) framework, consisting of 
 * the _ISLa specification language_, allowing to add _constraints_ to a grammar
 * the _ISLa solver_, solving these constraints to produce semantically (and syntactically) valid inputs
 * the _ISLa checker_, checking given inputs for whether they satisfy these constraints.
@@ -75,7 +75,7 @@ Here, we instantiate the ISLa solver with a constraint stating that the area cod
 With that, invoking `solver.solve()` returns a _solution_ for the constraints.
 
 >>> str(solver.solve())
-'(902)671-9208'
+'(902)638-5426'
 
 `solve()` returns a derivation tree, which typically is converted into a string using `str()` as above. The `print()` function does this implicitly.
 
@@ -83,12 +83,12 @@ Subsequent calls of `solve()` return more solutions:
 
 >>> for _ in range(10):
 >>>     print(solver.solve())
-(902)753-7640
-(902)524-6249
+(902)317-9701
+(902)797-2646
 (902)249-8254
 (902)845-5106
-(902)447-7322
-(902)316-7444
+(902)547-7322
+(902)416-7444
 (902)971-8098
 (902)434-9728
 (902)750-3441
@@ -102,7 +102,7 @@ Additional `ISLaSolver` methods allow to check inputs against constraints, and p
 The ISLa functionality is also available on the command line:
 
 >>> !isla --help
-usage: isla [-h] [-v] {solve,fuzz,check,parse,create} ...
+usage: isla [-h] [-v] {solve,fuzz,check,parse,repair,mutate,create,config} ...
 
 The ISLa command line interface.
 
@@ -111,14 +111,19 @@ options:
   -v, --version         Print the ISLa version number
 
 Commands:
-  {solve,fuzz,check,parse,create}
+  {solve,fuzz,check,parse,repair,mutate,create,config}
     solve               create solutions to ISLa constraints or check their
                         unsatisfiability
     fuzz                pass solutions to an ISLa constraint to a test subject
     check               check whether an input satisfies an ISLa constraint
     parse               parse an input into a derivation tree if it satisfies
                         an ISLa constraint
+    repair              try to repair an existing input such that it satisfies
+                        an ISLa constraint
+    mutate              mutate an input such that the result satisfies an ISLa
+                        constraint
     create              create grammar and constraint stubs
+    config              dumps the default configuration file
 
 
 
@@ -866,12 +871,14 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     for _ in range(10):
+        # Get the solution
         solution = solver.solve()
+        print(f'Solution: {repr(str(solution))}', end=' ')
+
+        # Print statistics
         low_byte = solution.filter(lambda n: n.value == "<length>")[0][1]
         chars = solution.filter(lambda n: n.value == "<chars>")[0][1]
-
-        print(f'Solution: "{solution}"', end=' ')
-        print(f'(length: {ord(str(low_byte))}, len(chars): {len(str(chars))})')
+        print(f'(<length> = {ord(str(low_byte))}, len(<chars>) = {len(str(chars))})')
         print()
 
 import os
