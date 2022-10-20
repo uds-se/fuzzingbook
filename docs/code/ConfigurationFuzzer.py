@@ -3,7 +3,7 @@
 
 # "Testing Configurations" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2022-08-07 00:54:05+02:00
+# Last change: 2022-10-20 08:18:46+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -193,18 +193,18 @@ The grammar can be immediately used for fuzzing. A `GrammarCoverageFuzzer` will 
 >>> from Grammars import convert_ebnf_grammar
 >>> fuzzer = GrammarCoverageFuzzer(convert_ebnf_grammar(option_ebnf_grammar))
 >>> [fuzzer.fuzz() for i in range(3)]
-[' --list-fixes foo.py',
- ' --ignore QA --pep8-passes -03 --exclude 2e. --line-range 8 42 --in-place --version -v -h -a foo.py',
- ' --range -76 9 --experimental --jobs -15 --help -p -55 -r --global-config @Eo --select X -i --indent-size -8 --recursive --max-line-length -0 --hang-closing -j -333 --aggressive --verbose --diff --ignore-local-config -d --exit-code --exclude nU --select 4 --select x --ignore `Ifb --ignore y|8 --global-config "v --select ~J --ignore N --exclude q --exclude ? --exclude Da] --ignore H --select (5\\[ --ignore Su --exclude +; --exclude # --ignore ^6!C_ --exclude G --exclude c --ignore r --ignore d --global-config k --global-config w) --select Y\' --exclude 7 --global-config , --global-config MVL/1Bs --global-config $ --indent-size -8 --exclude wX! -d -j 86 --diff -j 49 foo.py']
+[' foo.py',
+ " -i --experimental -v --exit-code --jobs -04 --diff -r --exclude 'l --help --version --aggressive --list-fixes --range 1 3 -p 89 -h --line-range 7 -2 --ignore-local-config --hang-closing --verbose --recursive -a foo.py",
+ ' --ignore + --exclude 3M --exclude ua% --ignore ` --exclude " --exclude \\ --exclude Y --select N --global-config e --ignore ; --select y --exclude IT --ignore ~_D5, --exclude = --exclude i --select dO --global-config 8 --select b --global-config fv{Q-0 --global-config G --select Z --ignore Hmo --select # --ignore h9F7 --global-config @ --select E/? --ignore &] --select q!$4:| --select S --ignore g --global-config XL --exclude J2 --ignore [P --select *kj^ --global-config B --global-config 6.WK --exclude )(U^8Z --global-config d --global-config V] -p -71 --version --line-range -35 30 --exclude O --aggressive foo.py']
 
 The `OptionFuzzer` class summarizes these steps.  Its constructor takes an `OptionRunner` to automatically extract the grammar; it does the necessary steps to extract the grammar and fuzz with it.
 
 >>> autopep8_runner = OptionRunner("autopep8", "foo.py")
 >>> autopep8_fuzzer = OptionFuzzer(autopep8_runner)
 >>> [autopep8_fuzzer.fuzz() for i in range(3)]
-[' --diff foo.py',
- ' --version --max-line-length 7 --recursive --help --exit-code --global-config >. --line-range -69104379 -85 -h -d --ignore-local-config --hang-closing --in-place --jobs -2 --experimental -v --range 1 88 --select V -p 2 --ignore s --verbose -a foo.py',
- ' -i -j -77554612 -r --exclude F --list-fixes --indent-size -0 --aggressive --pep8-passes 8 --select ; --ignore ` --ignore Cqpjg --global-config B --ignore cv --select (S --ignore Jb --ignore K --ignore )Qy$1m\\ --select O3=U --global-config E -a -v foo.py']
+[' --ignore-local-config foo.py',
+ ' --indent-size -8 --recursive --range 570 46 --list-fixes --jobs 9 --diff foo.py',
+ ' -h --aggressive --hang-closing --global-config E7 -r --help --select ] --in-place --line-range 21 36 --experimental -p 5 -d --verbose -i foo.py']
 
 The final step in testing would now to invoke the program with these arguments.
 
