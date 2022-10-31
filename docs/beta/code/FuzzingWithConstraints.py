@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-10-20 08:18:32+02:00
+# Last change: 2022-10-31 11:25:49+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -92,7 +92,7 @@ Subsequent calls of `solve()` return more solutions:
 (902)971-8098
 (902)434-9728
 (902)750-3441
-(910)598-0755
+(908)598-0755
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     from .bookutils import YouTubeVideo
-    YouTubeVideo("HQoyaE8-zj8")
+    YouTubeVideo("dgaGuwn-1OU")
 
 if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
