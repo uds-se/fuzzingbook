@@ -10,7 +10,8 @@ AUTHORS = Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Chri
 TWITTER = @FuzzingBook
 
 # Chapter(s) to be marked as "new" in menu
-NEW_CHAPTERS = 
+NEW_CHAPTERS = \
+	FuzzingWithConstraints.ipynb
 
 # Chapters to include in the book, in this order.
 # * Chapters in `..._PART` get published.
@@ -80,6 +81,7 @@ MANAGEMENT_PART_TODO =
 # Appendices for the book
 APPENDICES = \
 	99_Appendices.ipynb \
+	AcademicPrototyping.ipynb \
 	PrototypingWithPython.ipynb \
 	ExpectError.ipynb \
 	Timer.ipynb \
