@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# "Prototyping with Python" - a chapter of "The Fuzzing Book"
-# Web site: https://www.fuzzingbook.org/html/PrototypingWithPython.html
-# Last change: 2022-11-12 15:35:45+08:00
+# "Academic Prototyping" - a chapter of "The Fuzzing Book"
+# Web site: https://www.fuzzingbook.org/html/AcademicPrototyping.html
+# Last change: 2022-11-12 15:46:22+08:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -28,24 +28,24 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 r'''
-The Fuzzing Book - Prototyping with Python
+The Fuzzing Book - Academic Prototyping
 
 This file can be _executed_ as a script, running all experiments:
 
-    $ python PrototypingWithPython.py
+    $ python AcademicPrototyping.py
 
 or _imported_ as a package, providing classes, functions, and constants:
 
-    >>> from fuzzingbook.PrototypingWithPython import <identifier>
+    >>> from fuzzingbook.AcademicPrototyping import <identifier>
     
 but before you do so, _read_ it and _interact_ with it at:
 
-    https://www.fuzzingbook.org/html/PrototypingWithPython.html
+    https://www.fuzzingbook.org/html/AcademicPrototyping.html
 
 
 For more details, source, and documentation, see
-"The Fuzzing Book - Prototyping with Python"
-at https://www.fuzzingbook.org/html/PrototypingWithPython.html
+"The Fuzzing Book - Academic Prototyping"
+at https://www.fuzzingbook.org/html/AcademicPrototyping.html
 '''
 
 
@@ -54,17 +54,47 @@ if __name__ == '__main__' and __package__ is None:
     __package__ = 'fuzzingbook'
 
 
-# Prototyping with Python
-# =======================
+# Academic Prototyping
+# ====================
 
 if __name__ == '__main__':
-    print('# Prototyping with Python')
+    print('# Academic Prototyping')
 
 
 
 if __name__ == '__main__':
     from .bookutils import YouTubeVideo
     YouTubeVideo("IAreRIID9lM")
+
+## About this Tutorial
+## -------------------
+
+if __name__ == '__main__':
+    print('\n## About this Tutorial')
+
+
+
+### What I will talk about
+
+if __name__ == '__main__':
+    print('\n### What I will talk about')
+
+
+
+### What you will learn
+
+if __name__ == '__main__':
+    print('\n### What you will learn')
+
+
+
+## The Trouble with Analyzing Compiled Languages
+## ---------------------------------------------
+
+if __name__ == '__main__':
+    print('\n## The Trouble with Analyzing Compiled Languages')
+
+
 
 ## Python is Easy
 ## --------------
@@ -92,11 +122,11 @@ def triangle(a, b, c):
 if __name__ == '__main__':
     triangle(2, 3, 4)
 
-## Fuzzing is as Easy as Always
-## ----------------------------
+## Building a Minimal Tester
+## -------------------------
 
 if __name__ == '__main__':
-    print('\n## Fuzzing is as Easy as Always')
+    print('\n## Building a Minimal Tester')
 
 
 
@@ -260,6 +290,30 @@ if __name__ == '__main__':
         m = s.model()
         print(m, triangle(m[a].as_long(), m[b].as_long(), m[c].as_long()))
 
+## Replicable Experiments
+## ----------------------
+
+if __name__ == '__main__':
+    print('\n## Replicable Experiments')
+
+
+
+## A Prototyping Process
+## ---------------------
+
+if __name__ == '__main__':
+    print('\n## A Prototyping Process')
+
+
+
+## Keeping things up to date
+## -------------------------
+
+if __name__ == '__main__':
+    print('\n## Keeping things up to date')
+
+
+
 ## Things that will not work
 ## -------------------------
 
@@ -298,14 +352,6 @@ if __name__ == '__main__':
         del x
 
     # Does x exist at this point?
-
-## The Virtues of Prototyping
-## --------------------------
-
-if __name__ == '__main__':
-    print('\n## The Virtues of Prototyping')
-
-
 
 ## Try it out!
 ## -----------

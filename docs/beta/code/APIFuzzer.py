@@ -3,7 +3,7 @@
 
 # "Fuzzing APIs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2022-08-07 00:54:10+02:00
+# Last change: 2022-11-12 15:34:15+08:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -72,9 +72,7 @@ The grammars are [probabilistic](ProbabilisticGrammarFuzzer.ipynb) and make use 
 >>> [fuzzer.fuzz() for i in range(10)]
 ['154', '149', '185', '117', '182', '154', '131', '194', '147', '192']
 
-`float_grammar_with_range(start, end)` produces a floating-number grammar with values `N` such that `start <= N <= end`.
-
->>> float_grammar = float_grammar_with_range(100, 200)
+`float_grammar_with_range(start, end)` produces a floating-number grammar with values `N` such that `start >> float_grammar = float_grammar_with_range(100, 200)
 >>> fuzzer = ProbabilisticGeneratorGrammarFuzzer(float_grammar)
 >>> [fuzzer.fuzz() for i in range(10)]
 ['121.8092479227325',
