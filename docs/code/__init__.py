@@ -31,6 +31,7 @@
 # from . import GUIFuzzer
 # from . import FuzzingInTheLarge
 # from . import WhenToStopFuzzing
+# from . import AcademicPrototyping
 # from . import PrototypingWithPython
 # from . import ExpectError
 # from . import Timer
