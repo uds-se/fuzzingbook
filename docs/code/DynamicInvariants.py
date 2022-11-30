@@ -3,7 +3,7 @@
 
 # "Mining Function Specifications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/DynamicInvariants.html
-# Last change: 2022-11-12 15:33:51+08:00
+# Last change: 2022-11-29 14:52:02+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -1370,7 +1370,7 @@ if __name__ == '__main__':
 
 from typing import Union, Optional
 
-def my_sqrt_with_union_type(x: Union[int, float]) -> float:
+def my_sqrt_with_union_type(x: Union[int, float]) -> float:   # type: ignore
     ...
 
 ### Exercise 2: Types for Local Variables

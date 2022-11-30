@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-08-07 00:53:12+02:00
+# Last change: 2022-11-29 14:51:39+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -61,24 +61,7 @@ Once executed, we can retrieve the symbolic variables in the `decls` attribute. 
 The extracted path conditions can be found in the `path` attribute:
 
 >>> _.path
-[0 < Length(cgi_decode_s_str_1),
- Not(str.substr(cgi_decode_s_str_1, 0, 1) == "+"),
- Not(str.substr(cgi_decode_s_str_1, 0, 1) == "%"),
- 1 < Length(cgi_decode_s_str_1),
- Not(str.substr(cgi_decode_s_str_1, 1, 1) == "+"),
- str.substr(cgi_decode_s_str_1, 1, 1) == "%",
- Not(str.substr(cgi_decode_s_str_1, 2, 1) == "0"),
- Not(str.substr(cgi_decode_s_str_1, 2, 1) == "1"),
- str.substr(cgi_decode_s_str_1, 2, 1) == "2",
- str.substr(cgi_decode_s_str_1, 3, 1) == "0",
- 4 < Length(cgi_decode_s_str_1),
- Not(str.substr(cgi_decode_s_str_1, 4, 1) == "+"),
- Not(str.substr(cgi_decode_s_str_1, 4, 1) == "%"),
- Not(5 < Length(cgi_decode_s_str_1))]
-
-The `context` attribute holds a pair of `decls` and `path` attributes; this is useful for passing it into the `ConcolicTracer` constructor.
-
->>> assert _.context == (_.decls, _.path)
+[0 >> assert _.context == (_.decls, _.path)
 
 We can solve these constraints to obtain a value for the function parameters that follow the same path as the original (traced) invocation:
 
@@ -107,31 +90,34 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>     scf.add_trace(_, v)
 ' '
 '%'
-'AB'
 ''
-'ABC'
-'A'
-'AB+'
 'AB'
-'ABCD'
+'A+'
+'%'
+'A'
+'AB'
+'+'
+'%'
 
 IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
 
-'ABC+'
-'A'
-'ABC'
-'ABC%'
 'A%'
-'ABC+DE'
+'%'
+'A+'
+'A'
 'AB'
+'A'
+'A+B'
+'ABC'
+'AB%'
+'A%'
 
 IndexError: string index out of range (expected)
 IndexError: string index out of range (expected)
-
-'AB+'
-'A'
-'ABCD'
-'A'
+IndexError: string index out of range (expected)
 
 
 We see how the additional inputs generated explore additional paths.
@@ -156,26 +142,35 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-insert into W (Ru_2,.Wj186518W8) values ('@','}','h')
-Table ('W') was not found
+insert into H (DZxQ) values (60366,'QR',-21.2981,6,38.7)
+Table ('H') was not found
 
-select S>R(j),A from C3 where U4==9249
-Table ('C3') was not found
+select 340.0 from i8g4
+Table ('i8g4') was not found
 
-select I/I*U/n1(M),T/E*d(S) from months
-Invalid WHERE ('(I/I*U/n1(M),T/E*d(S))')
+delete from months where -16.98==Q000
+Invalid WHERE ('-16.98==Q000')
 
-select (v==X),t,h,E from vehicles where r8(w)B/P(g)
+update uKt set D=d,:=m,c=R,R=C where A==Q==M
+Table ('uKt') was not found
 
-select x/z+.(L)-h from vehicles where -9!=Y>G(A)
+insert into months (q491) values ('Ib^|}',2,'8/','k')
+Column ('q491') was not found
 
-delete from h4OB60J where K-w/MA) from months where B(e,R)>D
+select w from lU where 445==M(v/n*J!=a)>W-e/k-r(n)*G
+Table ('lU') was not found
 
+select (r),k-Q*f>Z,((s)),i>N,f!=t from FK9
+Table ('FK9') was not found
 
-TypeError: 'NotImplementedType' object is not callable (expected)
-TypeError: 'NotImplementedType' object is not callable (expected)
-TypeError: 'NotImplementedType' object is not callable (expected)
-TypeError: 'NotImplementedType' object is not callable (expected)
+update m5 set name=U,name=W where (d*D>k)==(d)
+Table ('m5') was not found
+
+select H2==h!=R,j-e+F*t,(L),p,W from p_
+Table ('p_') was not found
+
+delete from vehicles where _(w)+q/D/x>(e+H>u*b)
+Invalid WHERE ('_(w)+q/D/x>(e+H>u*b)')
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"

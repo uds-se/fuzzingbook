@@ -3,7 +3,7 @@
 
 # "Fuzzing: Breaking Things with Random Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2022-08-07 00:47:08+02:00
+# Last change: 2022-11-29 15:19:58+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -53,11 +53,7 @@ This chapter provides two important classes, introduced in [A Fuzzing Architectu
 
 >>> random_fuzzer = RandomFuzzer()
 >>> random_fuzzer.fuzz()
-'%$<1&?99$%7!!*#96=>2&-/(5*)=$;0$$+;<12"?30&'
-
-The `RandomFuzzer()` constructor allows to specify a number of keyword arguments:
-
->>> print(RandomFuzzer.__init__.__doc__)
+'%$?99$%7!!*#96=>2&-/(5*)=$;0$$+;>> print(RandomFuzzer.__init__.__doc__)
 Produce strings of `min_length` to `max_length` characters
            in the range [`char_start`, `char_start` + `char_range`)
 

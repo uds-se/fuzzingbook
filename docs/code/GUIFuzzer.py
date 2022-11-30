@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2022-11-12 15:35:37+08:00
+# Last change: 2022-11-29 14:53:20+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -69,18 +69,20 @@ The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow pa
 >>> gui_driver.get(httpd_url)
 >>> actions = gui_fuzzer.fuzz()
 >>> print(actions)
-fill('name', 'v')
-check('terms', True)
-fill('email', 's@Q')
-fill('city', 'i')
-fill('zip', '4')
+fill('zip', '1')
+check('terms', False)
+fill('city', 'Q')
+fill('email', 'K@i')
+fill('name', 'lGd')
 submit('submit')
 click('order form')
-fill('name', 'g')
-check('terms', False)
-fill('email', 'p@j')
-fill('city', 'F')
-fill('zip', '0')
+click('terms and conditions')
+click('order form')
+fill('zip', '6')
+check('terms', True)
+fill('city', 'w')
+fill('email', 'S@q')
+fill('name', 'h')
 submit('submit')
 
 
@@ -693,7 +695,7 @@ class GUIGrammarMiner(GUIGrammarMiner):
         return new_symbol(grammar, self.START_STATE)
 
     def mine_state_grammar(self, grammar: Grammar = {},
-                           state_symbol: str = None) -> Grammar:
+                           state_symbol: Optional[str] = None) -> Grammar:
         """Return a state grammar for the actions on the current Web site.
         Can be overloaded in subclasses."""
 
