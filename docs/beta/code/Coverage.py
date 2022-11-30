@@ -3,7 +3,7 @@
 
 # "Code Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2022-08-07 00:47:22+02:00
+# Last change: 2022-11-29 14:45:23+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,28 +68,7 @@ Printing out a coverage object shows the covered functions, with covered lines p
   14  
 # 15      t = ""
 # 16      i = 0
-# 17      while i < len(s):
-# 18          c = s[i]
-# 19          if c == '+':
-# 20              t += ' '
-# 21          elif c == '%':
-  22              digit_high, digit_low = s[i + 1], s[i + 2]
-  23              i += 2
-  24              if digit_high in hex_values and digit_low in hex_values:
-  25                  v = hex_values[digit_high] * 16 + hex_values[digit_low]
-  26                  t += chr(v)
-  27              else:
-  28                  raise ValueError("Invalid encoding")
-  29          else:
-# 30              t += c
-# 31          i += 1
-# 32      return t
-
-
-
-The `trace()` method returns the _trace_ – that is, the list of locations executed in order. Each location comes as a pair (`function name`, `line`).
-
->>> cov.trace()
+# 17      while i >> cov.trace()
 [('cgi_decode', 8),
  ('cgi_decode', 9),
  ('cgi_decode', 8),

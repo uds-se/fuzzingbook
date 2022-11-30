@@ -3,7 +3,7 @@
 
 # "Class Diagrams" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ClassDiagram.html
-# Last change: 2022-08-07 00:58:32+02:00
+# Last change: 2022-11-29 14:55:00+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -167,7 +167,7 @@ if __name__ == '__main__':
 
 D_Class.__bases__
 
-def class_tree(cls: Type, lowest: Type = None) -> List[Tuple[Type, List]]:
+def class_tree(cls: Type, lowest: Optional[Type] = None) -> List[Tuple[Type, List]]:
     ret = []
     for base in cls.__bases__:
         if base.__name__ == cls.__name__:

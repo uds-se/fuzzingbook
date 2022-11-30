@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2022-08-07 00:53:26+02:00
+# Last change: 2022-11-29 14:51:51+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -47,21 +47,7 @@ This chapter provides an implementation of a symbolic fuzzing engine `SymbolicFu
 As an example, consider the function `gcd()`, computing the greatest common divisor of `a` and `b`:
 
 def gcd(a: int, b: int) -> int:
-    if a < b:
-        c: int = a  # type: ignore
-        a = b
-        b = c
-
-    while b != 0:
-        c: int = a  # type: ignore
-        a = b
-        b = c % b
-
-    return a
-
-To explore `gcd()`, the fuzzer can be used as follows, producing values for arguments that cover different paths in `gcd()` (including multiple times of loop iterations):
-
->>> gcd_fuzzer = SymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
+    if a >> gcd_fuzzer = SymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
 >>> for i in range(10):
 >>>     args = gcd_fuzzer.fuzz()
 >>>     print(args)

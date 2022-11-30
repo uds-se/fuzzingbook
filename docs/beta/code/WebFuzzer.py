@@ -3,7 +3,7 @@
 
 # "Testing Web Applications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2022-11-12 15:34:35+08:00
+# Last change: 2022-11-29 14:52:31+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -811,7 +811,7 @@ from .Fuzzer import Runner
 class WebRunner(Runner):
     """Runner for a Web server"""
 
-    def __init__(self, base_url: str = None):
+    def __init__(self, base_url: Optional[str] = None):
         self.base_url = base_url
 
     def run(self, url: str) -> Tuple[str, str]:
