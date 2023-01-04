@@ -888,21 +888,21 @@ $(MYPY_TARGET).%.py.out: $(MYPY_TARGET)%.py $(MYPY_TARGET)mypy.ini
 		exit 0; \
 	else \
 		echo "Error type checking $<" >> $@; \
-		tail $@; \
+		cat $@; \
 		touch -r $< $@; \
 		touch -A -010000 $@; \
 		exit 1; \
 	fi
 
 UTILS_MYPY_OUT = $(MYPY_TARGET).$(UTILS).py.out
-$(UTILS_MYPY_OUT): $(UTILITY_FILES:%=$(SHARED)$(UTILS)/%)
+$(UTILS_MYPY_OUT): $(UTILITY_FILES:%=$(SHARED)$(UTILS)/%) $(MYPY_TARGET)mypy.ini
 	@echo Type-checking $(SHARED)$(UTILS)...
-	@if $(MYPY) --config-file $(MYPY_TARGET)mypy.ini $(SHARED)$(UTILS) > $@ 2>&1; then \
+	@if $(MYPY) --config-file $(MYPY_TARGET)mypy.ini --follow-imports=skip $(SHARED)$(UTILS) > $@ 2>&1; then \
 		echo $(PY_SUCCESS_MAGIC) >> $@; \
 		exit 0; \
 	else \
 		echo "Error type checking $<" >> $@; \
-		tail $@; \
+		cat $@; \
 		touch -r $< $@; \
 		touch -A -010000 $@; \
 		exit 1; \

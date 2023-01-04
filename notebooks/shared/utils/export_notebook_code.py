@@ -50,7 +50,7 @@ HEADER = """#!/usr/bin/env python3
 # Web site: https://www.{project}.org/html/{module}.html
 # Last change: {timestamp}
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
