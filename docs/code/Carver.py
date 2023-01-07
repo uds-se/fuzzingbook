@@ -3,9 +3,9 @@
 
 # "Carving Unit Tests" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2022-11-12 15:34:25+08:00
+# Last change: 2023-01-07 15:21:35+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -75,19 +75,19 @@ The `CallGrammarMiner` class turns a list of carved executions into a grammar.
 >>> my_sqrt_grammar
 {'': [''],
  '': [''],
- '': ['4', '2'],
+ '': ['2', '4'],
  '': ['my_sqrt()']}
 
 This grammar can be used to synthesize calls.
 
 >>> fuzzer = GrammarCoverageFuzzer(my_sqrt_grammar)
 >>> fuzzer.fuzz()
-'my_sqrt(2)'
+'my_sqrt(4)'
 
 These calls can be executed in isolation, effectively extracting unit tests from system tests:
 
 >>> eval(fuzzer.fuzz())
-2.0
+1.414213562373095
 
 
 For more details, source, and documentation, see

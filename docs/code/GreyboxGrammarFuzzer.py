@@ -3,9 +3,9 @@
 
 # "Greybox Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html
-# Last change: 2022-11-29 14:49:48+01:00
+# Last change: 2023-01-07 15:38:43+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -46,50 +46,14 @@ This chapter introduces advanced methods for language-based grey-box fuzzing ins
 
 ### Fuzzing with Dictionaries
 
-Rather than mutating strings randomly, the `DictMutator` class allows to insert tokens from a dictionary, thus increasing fuzzer performance. The dictionary comes as a list of strings, out of which random elements are picked and inserted - in addition to the given mutations such as deleting or inserting individual bytes.
+Rather than mutating strings randomly, the `DictMutator` class allows inserting tokens from a dictionary, thus increasing fuzzer performance. The dictionary comes as a list of strings, out of which random elements are picked and inserted - in addition to the given mutations such as deleting or inserting individual bytes.
 
 >>> dict_mutator = DictMutator(["", "", "", "='a'"])
 >>> seeds = ["HelloWorld"]
 >>> for i in range(10):
 >>>     print(dict_mutator.mutate(seeds[0]))
-HelloWorldhtml>
 HelloWorld
-HelloWorld
->html>HelloWorld
-HelloWorld
-HelloWorld
-HelloWorld
-Hello/head>World
-HelloWorld
-ml>HelloWorld
-
-
-This `DictMutator` can be used as an argument to `GreyboxFuzzer`:
-
->>> runner = FunctionCoverageRunner(my_parser)
->>> dict_fuzzer = GreyboxFuzzer(seeds, dict_mutator, PowerSchedule())
->>> dict_fuzzer_outcome = dict_fuzzer.runs(runner, trials=5)
-### Fuzzing with Input Fragments
-
-The `LangFuzzer` class introduces a _language-aware_ fuzzer that can recombine fragments from existing inputs – inspired by the highly effective `LangFuzz` fuzzer. At its core is a `FragmentMutator` class that that takes a [_parser_](Parser.ipynb) as argument:
-
->>> parser = EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS)
->>> mutator = FragmentMutator(parser)
-
-The fuzzer itself is initialized with a list of seeds, the above `FragmentMutator`, and a power schedule:
-
->>> seeds = ["HelloWorld"]
->>> schedule = PowerSchedule()
->>> lang_fuzzer = LangFuzzer(seeds, mutator, schedule)
->>> for i in range(10):
->>>     print(lang_fuzzer.fuzz())
-HelloWorld
-HelloWorld
-World
-HelloWorld
-HelloWorld
-
-HelloWorld
+tml>HelloWorld
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Greybox Fuzzing with Grammars"

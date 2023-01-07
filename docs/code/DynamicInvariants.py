@@ -3,9 +3,9 @@
 
 # "Mining Function Specifications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/DynamicInvariants.html
-# Last change: 2022-11-29 14:52:02+01:00
+# Last change: 2023-01-07 15:21:00+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -63,7 +63,7 @@ def sum(a: int, b: int) -> int:
     return a + b
 
 
-The invariant annotator works in a similar fashion:
+The invariant annotator works similarly:
 
 >>> with InvariantAnnotator() as inv_annotator:
 >>>     sum(1, 2)
@@ -133,9 +133,9 @@ if __name__ == '__main__':
 
 def any_sqrt(x):
     assert x >= 0  # Precondition
-    
+
     ...
-    
+
     assert result * result == x  # Postcondition
     return result
 

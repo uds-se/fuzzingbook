@@ -3,9 +3,9 @@
 
 # "Search-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
-# Last change: 2022-08-07 00:48:48+02:00
+# Last change: 2023-01-07 15:15:10+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -179,7 +179,7 @@ if __name__ == '__main__':
 MAX = 1000
 MIN = -MAX
 
-def neighbours(x, y):
+def neighbors(x, y):
     return [(x + dx, y + dy) for dx in [-1, 0, 1]
             for dy in [-1, 0, 1]
             if (dx != 0 or dy != 0)
@@ -187,7 +187,7 @@ def neighbours(x, y):
                  and (MIN <= y + dy <= MAX))]
 
 if __name__ == '__main__':
-    print(neighbours(10, 10))
+    print(neighbors(10, 10))
 
 ### Defining a Search Landscape: Fitness functions
 
@@ -284,8 +284,8 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     x, y = 274, 153
     print("Origin %d, %d has fitness %d" % (x, y, get_fitness(x, y)))
-    for nx, ny in neighbours(x, y):
-        print("Neighbour %d, %d has fitness %d" % (nx, ny, get_fitness(nx, ny)))
+    for nx, ny in neighbors(x, y):
+        print("neighbor %d, %d has fitness %d" % (nx, ny, get_fitness(nx, ny)))
 
 import random
 
@@ -302,8 +302,8 @@ def hillclimber():
     # Stop once we have found an optimal solution
     while fitness > 0:
         iterations += 1
-        # Move to first neighbour with a better fitness
-        for (nextx, nexty) in neighbours(x, y):
+        # Move to first neighbor with a better fitness
+        for (nextx, nexty) in neighbors(x, y):
             new_fitness = get_fitness(nextx, nexty)
 
             # Smaller fitness values are better
@@ -333,8 +333,8 @@ def steepest_ascent_hillclimber():
     # Stop once we have found an optimal solution
     while fitness > 0:
         iterations += 1
-        # Move to first neighbour with a better fitness
-        for (nextx, nexty) in neighbours(x, y):
+        # Move to first neighbor with a better fitness
+        for (nextx, nexty) in neighbors(x, y):
             new_fitness = get_fitness(nextx, nexty)
             if new_fitness < fitness:
                 x, y = nextx, nexty
@@ -362,8 +362,8 @@ def plotting_hillclimber(fitness_function):
     # Stop once we have found an optimal solution
     while fitness > 0:
         iterations += 1
-        # Move to first neighbour with a better fitness
-        for (nextx, nexty) in neighbours(x, y):
+        # Move to first neighbor with a better fitness
+        for (nextx, nexty) in neighbors(x, y):
             new_fitness = fitness_function(nextx, nexty)
             if new_fitness < fitness:
                 x, y = nextx, nexty
@@ -429,8 +429,8 @@ def restarting_hillclimber(fitness_function):
     while fitness > 0:
         changed = False
         iterations += 1
-        # Move to first neighbour with a better fitness
-        for (nextx, nexty) in neighbours(x, y):
+        # Move to first neighbor with a better fitness
+        for (nextx, nexty) in neighbors(x, y):
             new_fitness = fitness_function(nextx, nexty)
             if new_fitness < fitness:
                 x, y = nextx, nexty
@@ -520,7 +520,7 @@ if __name__ == '__main__':
 
 
 
-def neighbour_strings(x):
+def neighbor_strings(x):
     n = []
     for pos in range(len(x)):
         c = ord(x[pos])
@@ -531,7 +531,7 @@ def neighbour_strings(x):
     return n
 
 if __name__ == '__main__':
-    print(neighbour_strings("Hello"))
+    print(neighbor_strings("Hello"))
 
 ### Branch Distances
 
@@ -821,7 +821,7 @@ def hillclimb_cgi():
 
     while fitness > 0:
         changed = False
-        for (nextx) in neighbour_strings(x):
+        for (nextx) in neighbor_strings(x):
             new_fitness = get_fitness_cgi(nextx)
             if new_fitness < fitness:
                 x = nextx
@@ -856,7 +856,7 @@ def random_unicode_string(l):
         s = s + random_character
     return s
 
-def unicode_string_neighbours(x):
+def unicode_string_neighbors(x):
     n = []
     for pos in range(len(x)):
         c = ord(x[pos])
@@ -880,7 +880,7 @@ def hillclimb_cgi_limited(max_iterations):
     logs = 0
     while fitness > 0 and iteration < max_iterations:
         changed = False
-        for (nextx) in unicode_string_neighbours(x):
+        for (nextx) in unicode_string_neighbors(x):
             new_fitness = get_fitness_cgi(nextx)
             if new_fitness < fitness:
                 x = nextx

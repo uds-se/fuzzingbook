@@ -3,9 +3,9 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-11-29 14:51:39+01:00
+# Last change: 2023-01-07 15:20:37+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -68,7 +68,7 @@ We can solve these constraints to obtain a value for the function parameters tha
 >>> _.zeval()
 ('sat', {'s': ('A%20B', 'String')})
 
-The `zeval()` function also allows to pass _alternate_ or _negated_ constraints. See the chapter for examples.
+The `zeval()` function also allows passing _alternate_ or _negated_ constraints. See the chapter for examples.
 ### SimpleConcolicFuzzer
 
 The constraints obtained from `ConcolicTracer` are added to the concolic fuzzer as follows:
@@ -90,34 +90,31 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>     scf.add_trace(_, v)
 ' '
 '%'
+'AB'
 ''
-'AB'
-'A+'
-'%'
-'A'
-'AB'
-'+'
-'%'
-
-IndexError: string index out of range (expected)
-IndexError: string index out of range (expected)
-IndexError: string index out of range (expected)
-IndexError: string index out of range (expected)
-
-'A%'
-'%'
-'A+'
-'A'
-'AB'
-'A'
-'A+B'
 'ABC'
-'AB%'
+'A'
+'AB+'
+'AB'
+'ABCD'
+
+IndexError: string index out of range (expected)
+
+'ABC+'
+'A'
+'ABC'
+'ABC%'
 'A%'
+'ABC+DE'
+'AB'
+'AB+'
 
 IndexError: string index out of range (expected)
 IndexError: string index out of range (expected)
-IndexError: string index out of range (expected)
+
+'A'
+'ABCD'
+'A'
 
 
 We see how the additional inputs generated explore additional paths.
@@ -125,7 +122,7 @@ We see how the additional inputs generated explore additional paths.
 
 The `SimpleConcolicFuzzer` simply explores all paths near the original path traversed by the sample input. It uses a simple mechanism to explore the paths that are near the paths that it knows about, and other than code paths, knows nothing about the input.
 
-The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, and can collect feedback from the subject under fuzzing. It can lift some of the constraints encountered to the grammar, enabling deeper fuzzing. It is used as follows:
+The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, and can collect feedback from the subject under fuzzing. It can lift some constraints encountered to the grammar, enabling deeper fuzzing. It is used as follows:
 
 >>> from InformationFlow import INVENTORY_GRAMMAR, SQLException
 >>> cgf = ConcolicGrammarFuzzer(INVENTORY_GRAMMAR)
@@ -142,35 +139,26 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-insert into H (DZxQ) values (60366,'QR',-21.2981,6,38.7)
-Table ('H') was not found
+insert into W (Ru_2,.Wj186518W8) values ('@','}','h')
+Table ('W') was not found
 
-select 340.0 from i8g4
-Table ('i8g4') was not found
+select S>R(j),A from C3 where U4==9249
+Table ('C3') was not found
 
-delete from months where -16.98==Q000
-Invalid WHERE ('-16.98==Q000')
+select I/I*U/n1(M),T/E*d(S) from vehicles
+Invalid WHERE ('(I/I*U/n1(M),T/E*d(S))')
 
-update uKt set D=d,:=m,c=R,R=C where A==Q==M
-Table ('uKt') was not found
+select (v==X),t,h,E from months where r8(w)B/P(g)
 
-insert into months (q491) values ('Ib^|}',2,'8/','k')
-Column ('q491') was not found
+select x/z+.(L)-h from months where -9!=Y>G(A)
 
-select w from lU where 445==M(v/n*J!=a)>W-e/k-r(n)*G
-Table ('lU') was not found
+delete from h4OB60J where K-w/MA) from vehicles where B(e,R)>D
 
-select (r),k-Q*f>Z,((s)),i>N,f!=t from FK9
-Table ('FK9') was not found
 
-update m5 set name=U,name=W where (d*D>k)==(d)
-Table ('m5') was not found
-
-select H2==h!=R,j-e+F*t,(L),p,W from p_
-Table ('p_') was not found
-
-delete from vehicles where _(w)+q/D/x>(e+H>u*b)
-Invalid WHERE ('_(w)+q/D/x>(e+H>u*b)')
+TypeError: 'NotImplementedType' object is not callable (expected)
+TypeError: 'NotImplementedType' object is not callable (expected)
+TypeError: 'NotImplementedType' object is not callable (expected)
+TypeError: 'NotImplementedType' object is not callable (expected)
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"

@@ -3,9 +3,9 @@
 
 # "Fuzzing in the Large" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2022-11-29 14:54:42+01:00
+# Last change: 2023-01-07 15:55:19+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -42,7 +42,7 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
 
-The Python `FuzzManager` package allows for programmatic submission of failures from a large number of (fuzzed) programs.  One can query crashes and their details, collect them into buckets to ensure thay will be treated the same, and also retrieve coverage information for debugging both programs and their tests.
+The Python `FuzzManager` package allows for programmatic submission of failures from a large number of (fuzzed) programs.  One can query crashes and their details, collect them into buckets to ensure they will be treated the same, and also retrieve coverage information for debugging both programs and their tests.
 
 
 For more details, source, and documentation, see

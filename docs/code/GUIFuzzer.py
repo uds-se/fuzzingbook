@@ -3,9 +3,9 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2022-11-29 14:53:20+01:00
+# Last change: 2023-01-07 15:54:01+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -48,7 +48,7 @@ The function `start_webdriver()` starts a headless Web browser in the background
 
 >>> gui_driver = start_webdriver()
 
-We let the browser open the URL of the server we want to investigate (in this case, the vulnerable server from [the chapter on Web fuzzing](WebFuzzer.ipynb)) and obtain a screen shot.
+We let the browser open the URL of the server we want to investigate (in this case, the vulnerable server from [the chapter on Web fuzzing](WebFuzzer.ipynb)) and obtain a screenshot.
 
 >>> gui_driver.get(httpd_url)
 >>> Image(gui_driver.get_screenshot_as_png())
@@ -71,18 +71,18 @@ The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow pa
 >>> print(actions)
 fill('zip', '1')
 check('terms', False)
-fill('city', 'Q')
+fill('name', 'Q')
 fill('email', 'K@i')
-fill('name', 'lGd')
+fill('city', 'lGd')
 submit('submit')
 click('order form')
 click('terms and conditions')
 click('order form')
 fill('zip', '6')
 check('terms', True)
-fill('city', 'w')
+fill('name', 'w')
 fill('email', 'S@q')
-fill('name', 'h')
+fill('city', 'h')
 submit('submit')
 
 

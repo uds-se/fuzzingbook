@@ -3,9 +3,9 @@
 
 # "Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2022-11-12 15:28:51+08:00
+# Last change: 2023-01-07 15:15:27+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -839,7 +839,7 @@ def convert_ebnf_operators(ebnf_grammar: Grammar) -> Grammar:
                 if isinstance(exp, tuple):
                     (exp, opts) = exp
                 assert isinstance(exp, str)
-                    
+
                 new_exp = exp.replace(extended_symbol, new_sym, 1)
                 if opts:
                     grammar[nonterminal][i] = (new_exp, opts)

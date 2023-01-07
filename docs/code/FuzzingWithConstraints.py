@@ -3,9 +3,9 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-11-29 14:51:07+01:00
+# Last change: 2023-01-07 15:19:47+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -75,7 +75,7 @@ Here, we instantiate the ISLa solver with a constraint stating that the area cod
 With that, invoking `solver.solve()` returns a _solution_ for the constraints.
 
 >>> str(solver.solve())
-'(901)638-5426'
+'(902)649-3516'
 
 `solve()` returns a derivation tree, which typically is converted into a string using `str()` as above. The `print()` function does this implicitly.
 
@@ -83,16 +83,16 @@ Subsequent calls of `solve()` return more solutions:
 
 >>> for _ in range(10):
 >>>     print(solver.solve())
-(901)317-9701
-(901)797-2646
-(901)249-8254
-(901)845-5106
-(901)547-7322
-(901)416-7444
-(901)971-8098
-(901)434-9728
-(901)750-3441
-(904)598-0755
+(902)520-7480
+(902)401-9809
+(902)851-6086
+(902)384-8937
+(902)734-8347
+(902)918-9849
+(902)285-1666
+(902)621-6187
+(902)943-1442
+(905)695-2725
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
@@ -102,7 +102,8 @@ Additional `ISLaSolver` methods allow to check inputs against constraints, and p
 The ISLa functionality is also available on the command line:
 
 >>> !isla --help
-usage: isla [-h] [-v] {solve,fuzz,check,parse,repair,mutate,create,config} ...
+usage: isla [-h] [-v]
+            {solve,fuzz,check,find,parse,repair,mutate,create,config} ...
 
 The ISLa command line interface.
 
@@ -111,11 +112,13 @@ options:
   -v, --version         Print the ISLa version number
 
 Commands:
-  {solve,fuzz,check,parse,repair,mutate,create,config}
+  {solve,fuzz,check,find,parse,repair,mutate,create,config}
     solve               create solutions to ISLa constraints or check their
                         unsatisfiability
     fuzz                pass solutions to an ISLa constraint to a test subject
     check               check whether an input satisfies an ISLa constraint
+    find                filter files satisfying syntactic & semantic
+                        constraints
     parse               parse an input into a derivation tree if it satisfies
                         an ISLa constraint
     repair              try to repair an existing input such that it satisfies
