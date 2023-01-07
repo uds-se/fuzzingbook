@@ -2,11 +2,11 @@
 
 <!-- Badges to be shown on project page -->
 
-[![Python 3.9 Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml)
-&nbsp;
-[![Python 3.10 Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code-3-10.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code-3-10.yml)
+[![Python Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml)
 &nbsp;
 [![Notebook Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-notebooks.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-notebooks.yml)
+&nbsp;
+[![Static Type Checking](https://github.com/uds-se/fuzzingbook/actions/workflows/check-types.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-types.yml)
 &nbsp;
 [![Imports](https://github.com/uds-se/fuzzingbook/actions/workflows/check-imports.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-imports.yml)
 &nbsp;
