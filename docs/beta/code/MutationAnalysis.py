@@ -3,9 +3,9 @@
 
 # "Mutation Analysis" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationAnalysis.html
-# Last change: 2022-08-07 00:48:55+02:00
+# Last change: 2023-01-07 15:15:16+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -80,7 +80,7 @@ The second class `MuProgramAnalyzer` targets standalone programs with test suite
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71830/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_78662/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -92,7 +92,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71830/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_78662/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -104,7 +104,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71830/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_78662/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -116,7 +116,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71830/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_78662/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -128,7 +128,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71830/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_78662/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -140,7 +140,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71830/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_78662/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -152,7 +152,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71830/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_78662/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -939,10 +939,10 @@ if __name__ == '__main__':
 
 
 
-### Exercise 1:  Arithmetic Expression Mutators
+### Exercise 1: Arithmetic Expression Mutators
 
 if __name__ == '__main__':
-    print('\n### Exercise 1:  Arithmetic Expression Mutators')
+    print('\n### Exercise 1: Arithmetic Expression Mutators')
 
 
 

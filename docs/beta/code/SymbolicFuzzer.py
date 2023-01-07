@@ -3,9 +3,9 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2022-11-29 14:51:51+01:00
+# Last change: 2023-01-07 15:39:15+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -1634,10 +1634,10 @@ class ConcolicTracer(ConcolicTracer):
         assert len(self.lines) == self.current_line
         return [last_node]
 
-#### Tracing the Execution Concolicaly
+#### Tracing the Execution Concolically
 
 if __name__ == '__main__':
-    print('\n#### Tracing the Execution Concolicaly')
+    print('\n#### Tracing the Execution Concolically')
 
 
 

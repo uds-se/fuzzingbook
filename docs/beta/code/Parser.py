@@ -3,9 +3,9 @@
 
 # "Parsing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2022-11-29 14:47:44+01:00
+# Last change: 2023-01-07 15:16:26+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
 from typing import Dict, List, Tuple, Collection, Set, Iterable, Generator, cast
 
-from .Fuzzer import Fuzzer  # minor dependendcy
+from .Fuzzer import Fuzzer  # minor dependency
 
 from .Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL
 from .Grammars import is_valid_grammar, syntax_diagram, Grammar

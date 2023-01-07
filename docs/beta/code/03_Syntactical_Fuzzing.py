@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# "Part III: Syntactical Fuzzing" - a chapter of "The Fuzzing Book"
+# "Part III: Syntactic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/03_Syntactical_Fuzzing.html
-# Last change: 2022-08-07 00:48:59+02:00
+# Last change: 2023-01-07 15:52:35+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -28,7 +28,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 r'''
-The Fuzzing Book - Part III: Syntactical Fuzzing
+The Fuzzing Book - Part III: Syntactic Fuzzing
 
 This file can be _executed_ as a script, running all experiments:
 
@@ -44,7 +44,7 @@ but before you do so, _read_ it and _interact_ with it at:
 
 
 For more details, source, and documentation, see
-"The Fuzzing Book - Part III: Syntactical Fuzzing"
+"The Fuzzing Book - Part III: Syntactic Fuzzing"
 at https://www.fuzzingbook.org/html/03_Syntactical_Fuzzing.html
 '''
 
@@ -54,10 +54,10 @@ if __name__ == '__main__' and __package__ is None:
     __package__ = 'fuzzingbook'
 
 
-# Part III: Syntactical Fuzzing
-# =============================
+# Part III: Syntactic Fuzzing
+# ===========================
 
 if __name__ == '__main__':
-    print('# Part III: Syntactical Fuzzing')
+    print('# Part III: Syntactic Fuzzing')
 
 

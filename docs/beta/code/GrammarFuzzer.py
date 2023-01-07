@@ -3,9 +3,9 @@
 
 # "Efficient Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2022-11-29 14:47:13+01:00
+# Last change: 2023-01-07 15:15:56+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -49,13 +49,13 @@ This chapter introduces `GrammarFuzzer`, an efficient grammar fuzzer that takes 
 >>> from Grammars import US_PHONE_GRAMMAR
 >>> phone_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR)
 >>> phone_fuzzer.fuzz()
-'(743)745-4150'
+'(444)644-6163'
 
 The `GrammarFuzzer` constructor takes a number of keyword arguments to control its behavior.  `start_symbol`, for instance, allows to set the symbol that expansion starts with (instead of ``):
 
 >>> area_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR, start_symbol='')
 >>> area_fuzzer.fuzz()
-'755'
+'841'
 
 Here's how to parameterize the `GrammarFuzzer` constructor:
 
@@ -76,20 +76,20 @@ In the internal representation of a derivation tree, a _node_ is a pair (`symbol
  [('',
    [('(', []),
     ('',
-     [('', [('7', [])]),
+     [('', [('4', [])]),
       ('', [('4', [])]),
-      ('', [('3', [])])]),
+      ('', [('4', [])])]),
     (')', []),
     ('',
-     [('', [('7', [])]),
+     [('', [('6', [])]),
       ('', [('4', [])]),
-      ('', [('5', [])])]),
+      ('', [('4', [])])]),
     ('-', []),
     ('',
-     [('', [('4', [])]),
+     [('', [('6', [])]),
       ('', [('1', [])]),
-      ('', [('5', [])]),
-      ('', [('0', [])])])])])
+      ('', [('6', [])]),
+      ('', [('3', [])])])])])
 
 The chapter contains various helpers to work with derivation trees, including visualization tools – notably, `display_tree()`, above.
 
@@ -277,25 +277,62 @@ if __name__ == '__main__':
     from IPython.display import display
 
 import re
+import string
 
-def dot_escape(s: str) -> str:
-    """Return s in a form suitable for dot"""
+def dot_escape(s: str, show_ascii=None) -> str:
+    """Return s in a form suitable for dot.
+    If `show_ascii` is True or length of `s` is 1, also append ascii value."""
+    escaped_s = ''
+    if show_ascii is None:
+        show_ascii = (len(s) == 1)  # Default: Single chars only
+
+    if show_ascii and s == '\n':
+        return '\\\\n (10)'
+
     s = s.replace('\n', '\\n')
-    s = re.sub(r'([^a-zA-Z0-9" ])', r"\\\1", s)
-    return s
+    for c in s:
+        if re.match('[,<>\\\\"]', c):
+            escaped_s += '\\' + c
+        elif c in string.printable and 31 < ord(c) < 127:
+            escaped_s += c
+        else:
+            escaped_s += '\\\\x' + format(ord(c), '02x')
+
+        if show_ascii:
+            escaped_s += f' ({ord(c)})'
+
+    return escaped_s
 
 if __name__ == '__main__':
     assert dot_escape("hello") == "hello"
+
+if __name__ == '__main__':
     assert dot_escape("<hello>, world") == "\\<hello\\>\\, world"
+
+if __name__ == '__main__':
     assert dot_escape("\\n") == "\\\\n"
-    assert dot_escape("\n") == "\\\\n"
+
+if __name__ == '__main__':
+    assert dot_escape("\n", show_ascii=False) == "\\\\n"
+
+if __name__ == '__main__':
+    assert dot_escape("\n", show_ascii=True) == "\\\\n (10)"
+
+if __name__ == '__main__':
+    assert dot_escape("\n", show_ascii=True) == "\\\\n (10)"
+
+if __name__ == '__main__':
+    assert dot_escape('\x01', show_ascii=False) == "\\\\x01"
+
+if __name__ == '__main__':
+    assert dot_escape('\x01') == "\\\\x01 (1)"
 
 def extract_node(node, id):
     symbol, children, *annotation = node
     return symbol, children, ''.join(str(a) for a in annotation)
 
 def default_node_attr(dot, nid, symbol, ann):
-    dot.node(repr(nid), dot_escape(unicode_escape(symbol)))
+    dot.node(repr(nid), dot_escape(symbol))
 
 def default_edge_attr(dot, start_node, stop_node):
     dot.edge(repr(start_node), repr(stop_node))

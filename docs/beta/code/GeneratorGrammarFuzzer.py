@@ -3,9 +3,9 @@
 
 # "Fuzzing with Generators" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2022-11-29 14:48:07+01:00
+# Last change: 2023-01-07 15:16:47+01:00
 #
-# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -45,7 +45,7 @@ but before you do so, _read_ it and _interact_ with it at:
 This chapter introduces the ability to attach _functions_ to individual production rules:
 
 * A `pre` function is executed _before_ the expansion takes place.  Its result (typically a string) can _replace_ the actual expansion.
-* A `post` function is executed _after_ the expansion has taken place.  If it returns a string, the string replaces the expansion; it it returns `False`, it triggers a new expansion.
+* A `post` function is executed _after_ the expansion has taken place.  If it returns a string, the string replaces the expansion; if it returns `False`, it triggers a new expansion.
 
 Both functions can return `None` to not interfere with grammar production at all.
 
