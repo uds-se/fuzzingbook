@@ -196,6 +196,10 @@ def expansion_key(symbol: str,
     if isinstance(expansion, tuple):
         # Expansion or single derivation tree
         expansion, _ = expansion
+        
+    # Check for empty list expansion
+    if isinstance(expansion, list) and not expansion:
+        expansion = ""
 
     if not isinstance(expansion, str):
         # Derivation tree
