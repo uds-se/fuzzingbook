@@ -1,5 +1,7 @@
 # Run with Docker
 
+**Note: As of April 2023, the `fuzzingbook` images are no longer available from DockerHub. These instructions are still available for documentation purposes only.***
+
 The first step is to download and install [Docker](https://www.docker.com/). Follow the installation procedure recommended at docker.com, or, if you are using Linux, refer to your distribution for information on the installation process.
 
 Once installed, make sure Docker works by typing `docker info` in a shell.
