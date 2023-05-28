@@ -427,7 +427,7 @@ class LangFuzzer2(LangFuzzer):
             if self.check_diversity(pool):
                 return random.choice(self.fragments[name])
             else:
-                return None
+                return (name, None)
         else:
             return (name,
                     [self.generate_new_tree(c, choice) for c in children])
