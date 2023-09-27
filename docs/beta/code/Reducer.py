@@ -350,10 +350,10 @@ if __name__ == '__main__':
     dd_reducer = DeltaDebuggingReducer(eval_mystery, log_test=True)
     dd_reducer.reduce(expr_input)
 
-### A Grammmar-Based Reduction Approach
+### A Grammar-Based Reduction Approach
 
 if __name__ == '__main__':
-    print('\n### A Grammmar-Based Reduction Approach')
+    print('\n### A Grammar-Based Reduction Approach')
 
 
 
