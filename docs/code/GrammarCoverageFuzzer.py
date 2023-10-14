@@ -3,7 +3,7 @@
 
 # "Grammar Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2023-01-07 15:16:07+01:00
+# Last change: 2023-10-14 22:53:59+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -196,10 +196,6 @@ def expansion_key(symbol: str,
     if isinstance(expansion, tuple):
         # Expansion or single derivation tree
         expansion, _ = expansion
-        
-    # Check for empty list expansion
-    if isinstance(expansion, list) and not expansion:
-        expansion = ""
 
     if not isinstance(expansion, str):
         # Derivation tree

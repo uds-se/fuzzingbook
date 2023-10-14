@@ -205,11 +205,10 @@ def HTML(data: Optional[str] = None,
     # Get a webdriver
     global firefox
     if firefox is None:
-        options = Options()
-        options.headless = headless
-        profile = FirefoxProfile()
-        profile.set_preference("layout.css.devPixelsPerPx", repr(zoom))
-        firefox = webdriver.Firefox(firefox_profile=profile, options=options)
+        options = webdriver.FirefoxOptions()
+        options.headless = headless  # type: ignore
+        options.set_preference("layout.css.devPixelsPerPx", repr(zoom))
+        firefox = webdriver.Firefox(options=options)
 
     # Create a URL argument
     if data is not None:

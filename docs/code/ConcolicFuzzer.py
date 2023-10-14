@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2023-01-07 15:20:37+01:00
+# Last change: 2023-10-14 22:58:07+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -89,32 +89,34 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>             _[cgi_decode](v)
 >>>     scf.add_trace(_, v)
 ' '
-'%'
-'AB'
 ''
-'ABC'
-'A'
-'AB+'
+'+'
 'AB'
-'ABCD'
+'+'
+'%'
+'A+'
+'%'
+'+'
+'ABC'
 
 IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
 
-'ABC+'
-'A'
-'ABC'
-'ABC%'
 'A%'
-'ABC+DE'
-'AB'
-'AB+'
-
-IndexError: string index out of range (expected)
-IndexError: string index out of range (expected)
-
-'A'
+'A+'
 'ABCD'
-'A'
+'ABCDEF'
+'AB+'
+'%'
+'A%'
+'ABCD%'
+'ABC+'
+'ABCDE'
+
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
 
 
 We see how the additional inputs generated explore additional paths.
@@ -139,27 +141,18 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-insert into W (Ru_2,.Wj186518W8) values ('@','}','h')
-Table ('W') was not found
+delete from g6M where (H(J)-r+Z)==b+p!=h==o
+Table ('g6M') was not found
 
-select S>R(j),A from C3 where U4==9249
-Table ('C3') was not found
+insert into A7 (U,v) values (98.3)
+Table ('A7') was not found
 
-select I/I*U/n1(M),T/E*d(S) from vehicles
-Invalid WHERE ('(I/I*U/n1(M),T/E*d(S))')
+select (j/c/WX==d+f/jb5(W))(X-I)
+Invalid WHERE ('J+R+z/b-O+C/W>(X-I)')
 
-select (v==X),t,h,E from months where r8(w)B/P(g)
+select e(p)/D-g(X) from months where N+T>O-y-D
 
-select x/z+.(L)-h from months where -9!=Y>G(A)
-
-delete from h4OB60J where K-w/MA) from vehicles where B(e,R)>D
-
-
-TypeError: 'NotImplementedType' object is not callable (expected)
-TypeError: 'NotImplementedType' object is not callable (expected)
-TypeError: 'NotImplementedType' object is not callable (expected)
-TypeError: 'NotImplementedType' object is not callable (expected)
-
+select ((A!=S)TT
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
 at https://www.fuzzingbook.org/html/ConcolicFuzzer.html

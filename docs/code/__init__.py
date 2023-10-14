@@ -27,6 +27,7 @@
 # from . import ConfigurationFuzzer
 # from . import APIFuzzer
 # from . import Carver
+# from . import PythonFuzzer
 # from . import WebFuzzer
 # from . import GUIFuzzer
 # from . import FuzzingInTheLarge

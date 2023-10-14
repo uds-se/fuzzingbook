@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2023-01-07 15:19:47+01:00
+# Last change: 2023-10-14 22:57:18+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -75,7 +75,7 @@ Here, we instantiate the ISLa solver with a constraint stating that the area cod
 With that, invoking `solver.solve()` returns a _solution_ for the constraints.
 
 >>> str(solver.solve())
-'(902)649-3516'
+'(903)805-6934'
 
 `solve()` returns a derivation tree, which typically is converted into a string using `str()` as above. The `print()` function does this implicitly.
 
@@ -83,16 +83,16 @@ Subsequent calls of `solve()` return more solutions:
 
 >>> for _ in range(10):
 >>>     print(solver.solve())
-(902)520-7480
-(902)401-9809
-(902)851-6086
-(902)384-8937
-(902)734-8347
-(902)918-9849
-(902)285-1666
-(902)621-6187
-(902)943-1442
-(905)695-2725
+(903)671-8520
+(903)308-8044
+(903)737-2584
+(903)500-2834
+(903)429-5794
+(903)292-0499
+(903)977-9111
+(903)209-4775
+(903)565-2710
+(902)223-7794
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
@@ -312,7 +312,7 @@ if __name__ == '__main__':
          [
              "`<pagesize> is <bufsize>`",
              "`str.to.int(<pagesize>) = str.to.int(<bufsize>)`",
-             "`<pagesize>) = <bufsize>`",
+             "`<pagesize> = <bufsize>`",
              "`atoi(<pagesize>) == atoi(<bufsize>)`",
          ], "[4 ** 0.5, 9 ** 0.5]")
 

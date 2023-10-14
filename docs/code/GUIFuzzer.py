@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2023-01-07 15:54:01+01:00
+# Last change: 2023-10-14 23:06:13+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -47,6 +47,9 @@ This chapter demonstrates how to programmatically interact with user interfaces,
 The function `start_webdriver()` starts a headless Web browser in the background and returns a _GUI driver_ as handle for further communication.
 
 >>> gui_driver = start_webdriver()
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_58567/389487971.py:10: DeprecationWarning: headless property is deprecated, instead use add_argument('-headless')
+  options.headless = headless
+
 
 We let the browser open the URL of the server we want to investigate (in this case, the vulnerable server from [the chapter on Web fuzzing](WebFuzzer.ipynb)) and obtain a screenshot.
 
@@ -69,20 +72,20 @@ The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow pa
 >>> gui_driver.get(httpd_url)
 >>> actions = gui_fuzzer.fuzz()
 >>> print(actions)
-fill('zip', '1')
-check('terms', False)
-fill('name', 'Q')
-fill('email', 'K@i')
-fill('city', 'lGd')
-submit('submit')
-click('order form')
 click('terms and conditions')
 click('order form')
+check('terms', False)
+fill('email', 'S@qy')
+fill('city', 'x')
 fill('zip', '6')
-check('terms', True)
+fill('name', 'Cf')
+submit('submit')
+click('order form')
+check('terms', False)
+fill('email', 'L@U')
+fill('city', 'G')
+fill('zip', '5')
 fill('name', 'w')
-fill('email', 'S@q')
-fill('city', 'h')
 submit('submit')
 
 
