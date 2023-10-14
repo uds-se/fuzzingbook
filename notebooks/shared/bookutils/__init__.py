@@ -206,7 +206,7 @@ def HTML(data: Optional[str] = None,
     global firefox
     if firefox is None:
         options = webdriver.FirefoxOptions()
-        options.headless = headless
+        options.headless = headless  # type: ignore
         options.set_preference("layout.css.devPixelsPerPx", repr(zoom))
         firefox = webdriver.Firefox(options=options)
 
