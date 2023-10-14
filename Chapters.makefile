@@ -11,7 +11,7 @@ TWITTER = @FuzzingBook
 
 # Chapter(s) to be marked as "new" in menu
 NEW_CHAPTERS = \
-	FuzzingWithConstraints.ipynb
+	PythonFuzzer.ipynb \
 
 # Chapters to include in the book, in this order.
 # * Chapters in `..._PART` get published.
@@ -66,6 +66,7 @@ DOMAINS_PART = \
 	ConfigurationFuzzer.ipynb \
 	APIFuzzer.ipynb \
 	Carver.ipynb \
+	PythonFuzzer.ipynb \
 	WebFuzzer.ipynb \
 	GUIFuzzer.ipynb
 DOMAINS_PART_READY = 
