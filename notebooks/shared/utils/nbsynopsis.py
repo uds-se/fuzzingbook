@@ -224,11 +224,9 @@ def update_synopsis(notebook_name, synopsis):
     # Convert notebook to 4.5
     notebook = nbformat.convert(notebook, 4)
     
-    try:
+    if 'normalize' in dir(nbformat):
         # Normalize notebook - only in recent nbformat versions
         notebook = nbformat.normalize(notebook, 4)
-    except AttributeError:
-        pass
 
     # Write notebook out again
     with io.open(notebook_path, 'w', encoding='utf-8') as f:
