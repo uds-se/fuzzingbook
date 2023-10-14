@@ -1,5 +1,12 @@
 # Fuzzingbook/Debuggingbook Makefile
 
+# HINT: This Makefile has hundreds of goals. The most important are:
+# * To see the most important goals, do "make help"
+# * To build the book HTML (in html/), do "make"
+# * To build the book with all components (in docs/), do "make docs"
+
+# This Makefile requires GNU make.
+
 # Get chapter files
 CHAPTERS_MAKEFILE = Chapters.makefile
 include $(CHAPTERS_MAKEFILE)
