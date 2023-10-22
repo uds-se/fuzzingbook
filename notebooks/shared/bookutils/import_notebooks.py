@@ -22,12 +22,13 @@ from typing import Optional, List, Any, Dict
 # * functions: `def func()`
 # * classes: `class X:`
 # * constants: `UPPERCASE_VARIABLES`
-# * types: `TypeVariables`, and
-# * imports: `import foo`
+# * types: `TypeVariables`
+# * imports: `import foo`, and
+# * any code that starts with a comment `# do import`
 #
 # PLEASE NOTE: if you change this, also change the corresponding 
 # definition in utils/export_notebook_code.py
-RE_CODE = re.compile(r"^(def |class |@|[A-Z][A-Za-z0-9_]+ [-+*/]?= |[A-Z][A-Za-z0-9_]+[.:]|import |from )")
+RE_CODE = re.compile(r"^(def |class |@|[A-Z][A-Za-z0-9_]+ [-+*/]?= |[A-Z][A-Za-z0-9_]+[.:]|import |from |#\s*do import)")
 
 def do_import(code: str) -> bool:
     """Return True if code is to be exported"""
