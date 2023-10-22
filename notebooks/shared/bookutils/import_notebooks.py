@@ -32,6 +32,9 @@ RE_CODE = re.compile(r"^(def |class |@|[A-Z][A-Za-z0-9_]+ [-+*/]?= |[A-Z][A-Za-z
 
 def do_import(code: str) -> bool:
     """Return True if code is to be exported"""
+    if RE_CODE.match(code) is not None:
+        return True
+
     while code.startswith('#') or code.startswith('\n'):
         # Skip leading comments
         code = code[code.find('\n') + 1:]
@@ -41,6 +44,7 @@ def do_import(code: str) -> bool:
 assert do_import("def foo():\n    pass")
 assert do_import("# ignore\ndef foo():\n    pass")
 assert do_import("# ignore\nclass Bar:\n    pass")
+assert do_import("# do import this\nfoo = bar")
 assert do_import("XYZ = 123")
 assert do_import("Timeout = A if f() else B")
 assert do_import("Zoo: Set[Animal] = {...}")
