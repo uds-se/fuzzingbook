@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2023-10-16 20:11:40+02:00
+# Last change: 2023-10-22 19:05:34+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -109,6 +109,13 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     from .bookutils import YouTubeVideo
     YouTubeVideo('AJfRBF8NEWU')
+
+import sys
+
+if __name__ == '__main__':
+    if sys.version_info > (3, 11):
+        print("This code requires Python 3.11 or earlier")
+        sys.exit(0)
 
 ## Synopsis
 ## --------
