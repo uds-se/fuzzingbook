@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2023-10-14 22:57:18+02:00
+# Last change: 2023-10-16 20:10:41+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -75,7 +75,7 @@ Here, we instantiate the ISLa solver with a constraint stating that the area cod
 With that, invoking `solver.solve()` returns a _solution_ for the constraints.
 
 >>> str(solver.solve())
-'(903)805-6934'
+'(902)957-8639'
 
 `solve()` returns a derivation tree, which typically is converted into a string using `str()` as above. The `print()` function does this implicitly.
 
@@ -83,22 +83,22 @@ Subsequent calls of `solve()` return more solutions:
 
 >>> for _ in range(10):
 >>>     print(solver.solve())
-(903)671-8520
-(903)308-8044
-(903)737-2584
-(903)500-2834
-(903)429-5794
-(903)292-0499
-(903)977-9111
-(903)209-4775
-(903)565-2710
-(902)223-7794
+(902)502-1436
+(902)474-8543
+(902)272-3243
+(902)372-2492
+(902)887-2797
+(902)640-7715
+(902)767-9108
+(902)377-4904
+(902)401-3406
+(908)257-9854
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
 
 The `ISLaSolver()` constructor provides several additional parameters to configure the solver, as documented below.
-Additional `ISLaSolver` methods allow to check inputs against constraints, and provide additional functionality.
+Additional `ISLaSolver` methods allow checking inputs against constraints, and provide additional functionality.
 The ISLa functionality is also available on the command line:
 
 >>> !isla --help

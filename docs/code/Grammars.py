@@ -3,7 +3,7 @@
 
 # "Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2023-10-14 22:53:22+02:00
+# Last change: 2023-10-16 20:06:38+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -607,6 +607,7 @@ if __name__ == '__main__':
     nonterminal_grammar
 
 def extend_grammar(grammar: Grammar, extension: Grammar = {}) -> Grammar:
+    """Create a copy of `grammar`, updated with `extension`."""
     new_grammar = copy.deepcopy(grammar)
     new_grammar.update(extension)
     return new_grammar
@@ -1062,7 +1063,7 @@ def is_valid_grammar(grammar: Grammar,
         used_nonterminals.add(START_SYMBOL)
 
     for unused_nonterminal in defined_nonterminals - used_nonterminals:
-        print(repr(unused_nonterminal) + ": defined, but not used",
+        print(repr(unused_nonterminal) + ": defined, but not used. Consider applying trim_grammar() on the grammar",
               file=sys.stderr)
     for undefined_nonterminal in used_nonterminals - defined_nonterminals:
         print(repr(undefined_nonterminal) + ": used, but not defined",
@@ -1079,7 +1080,7 @@ def is_valid_grammar(grammar: Grammar,
             msg_start_symbol += " or " + START_SYMBOL
 
     for unreachable_nonterminal in unreachable:
-        print(repr(unreachable_nonterminal) + ": unreachable from " + msg_start_symbol,
+        print(repr(unreachable_nonterminal) + ": unreachable from " + msg_start_symbol + ". Consider applying trim_grammar() on the grammar",
               file=sys.stderr)
 
     used_but_not_supported_opts = set()
@@ -1094,6 +1095,21 @@ def is_valid_grammar(grammar: Grammar,
                 file=sys.stderr)
 
     return used_nonterminals == defined_nonterminals and len(unreachable) == 0
+
+def trim_grammar(grammar: Grammar, start_symbol=START_SYMBOL) -> Grammar:
+    """Create a copy of `grammar` where all unused and unreachable nonterminals are removed."""
+    new_grammar = extend_grammar(grammar)
+    defined_nonterminals, used_nonterminals = \
+        def_used_nonterminals(grammar, start_symbol)
+    if defined_nonterminals is None or used_nonterminals is None:
+        return new_grammar
+
+    unused = defined_nonterminals - used_nonterminals
+    unreachable = unreachable_nonterminals(grammar, start_symbol)
+    for nonterminal in unused | unreachable:
+        del new_grammar[nonterminal]
+
+    return new_grammar
 
 ### End of Excursion
 

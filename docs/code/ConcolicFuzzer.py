@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2023-10-14 22:58:07+02:00
+# Last change: 2023-10-16 20:11:27+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -89,32 +89,29 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>             _[cgi_decode](v)
 >>>     scf.add_trace(_, v)
 ' '
-''
 '+'
+'%'
+'+A'
 'AB'
+'++'
+'++A'
+'+++'
+'A'
+
+IndexError: string index out of range (expected)
+
+'+A'
+'+++A'
+'+AB'
+'++'
+'%'
+'++AB'
+'++A+'
+'+A'
+'++'
 '+'
-'%'
-'A+'
-'%'
-'+'
-'ABC'
+'+%'
 
-IndexError: string index out of range (expected)
-IndexError: string index out of range (expected)
-IndexError: string index out of range (expected)
-
-'A%'
-'A+'
-'ABCD'
-'ABCDEF'
-'AB+'
-'%'
-'A%'
-'ABCD%'
-'ABC+'
-'ABCDE'
-
-IndexError: string index out of range (expected)
 IndexError: string index out of range (expected)
 IndexError: string index out of range (expected)
 
@@ -141,18 +138,26 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-delete from g6M where (H(J)-r+Z)==b+p!=h==o
-Table ('g6M') was not found
+select 245 from :2 where r(_)-N+e>n
+Table (':2') was not found
 
-insert into A7 (U,v) values (98.3)
-Table ('A7') was not found
+delete from vehicles where Q/x/j/q(p)/H*h-B==cz
+Invalid WHERE ('Q/x/j/q(p)/H*h-B==cz')
 
-select (j/c/WX==d+f/jb5(W))(X-I)
-Invalid WHERE ('J+R+z/b-O+C/W>(X-I)')
+insert into months (:b) values (22.72)
+Column (':b') was not found
 
-select e(p)/D-g(X) from months where N+T>O-y-D
+select i*q!=(4) from months where L*S/l/u/b+b==W
 
-select ((A!=S)TT
+delete from months where W/V!=A(f)+tW*x>L
+Invalid WHERE ('(b==D)-_/W+z/s/e>W*x>L')
+
+select E((f),C) from vehicles where I+g-y-v+G>y-P*l
+
+select _ from vehicles
+Invalid WHERE ('(_)')
+
+delete from vehicles where _*A-w-R
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
 at https://www.fuzzingbook.org/html/ConcolicFuzzer.html

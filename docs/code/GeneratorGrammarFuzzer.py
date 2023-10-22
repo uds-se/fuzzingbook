@@ -3,7 +3,7 @@
 
 # "Fuzzing with Generators" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2023-10-14 22:54:40+02:00
+# Last change: 2023-10-16 20:08:03+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -77,7 +77,7 @@ A `GeneratorGrammarFuzzer` will extract and interpret these options.  Here is an
  '(553)455-2577',
  '(553)263-8511']
 
-As you can see, the area codes now all stem from `pick_area_code()`.  Such definitions allow to closely tie program code (such as `pick_area_code()`) to grammars.
+As you can see, the area codes now all stem from `pick_area_code()`.  Such definitions allow  closely tying program code (such as `pick_area_code()`) to grammars.
 
 The `PGGCFuzzer` class incorporates all features from [the `GrammarFuzzer` class](GrammarFuzzer.ipynb) and its [coverage-based](GrammarCoverageFuzzer.ipynb), [probabilistic-based](ProbabilisticGrammarFuzzer.ipynb), and [generator-based](GeneratorGrammarFuzzer.ipynb) derivatives.
 

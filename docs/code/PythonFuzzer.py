@@ -3,7 +3,7 @@
 
 # "Testing Compilers" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/PythonFuzzer.html
-# Last change: 2023-10-14 23:29:59+02:00
+# Last change: 2023-10-22 17:29:45+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -42,26 +42,27 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/PythonFuzzer.html
 
-This chapter provides a `PythonFuzzer` class which allows to produce arbitrary Python code elements:
+This chapter provides a `PythonFuzzer` class that allows producing arbitrary Python code elements:
 
 >>> fuzzer = PythonFuzzer()
 >>> print(fuzzer.fuzz())
-assert None
-[(*D[:][set():set():set()].S4J,)[:], KXdlTfIChZkHpgOymN] >>= V
+def Hw(): # type: 
+    pass
 
 
-By default, `PythonFuzzer` produces a _module_ – that is, a list of statements as above.
-You can pass a `start_symbol` parameter to state which Python element you'd like to have:
+By default, `PythonFuzzer` produces a _function definition_ – that is, a list of statements as above.
+You can pass a `start_symbol` argument to state which Python element you'd like to have:
 
->>> fuzzer = PythonFuzzer(start_symbol='')
+>>> fuzzer = PythonFuzzer('')
 >>> print(fuzzer.fuzz())
-def z():
-    return
+while 
+'' or {Z: *(set() ^ set())}:
+    del 
 
 
 Here is a list of all possible start symbols. Their names reflect the nonterminals from the [Python `ast` module documentation](https://docs.python.org/3/library/ast.html).
 
->>> list(AST_GRAMMAR.keys())
+>>> sorted(list(PYTHON_AST_GRAMMAR.keys()))
 ['',
  '',
  '',
@@ -153,43 +154,48 @@ Here is a list of all possible start symbols. Their names reflect the nontermina
  '']
 
 If you'd like more control over Python code generation, here is what is happening behind the scenes.
-The EBNF grammar `AST_GRAMMAR` can parse and produce _abstract syntax trees_ for Python.
+The EBNF grammar `PYTHON_AST_GRAMMAR` can parse and produce _abstract syntax trees_ for Python.
 To produce a Python module without `PythonFuzzer`, you would take these steps:
 
-* Create a non-EBNF grammar suitable for `ISLaSolver` (or any other grammar fuzzer):
+**Step 1:** Create a non-EBNF grammar suitable for `ISLaSolver` (or any other grammar fuzzer):
 
->>> ast_grammar = convert_ebnf_grammar(AST_GRAMMAR)
+>>> python_ast_grammar = convert_ebnf_grammar(PYTHON_AST_GRAMMAR)
 
-* Feed the resulting grammar into a grammar fuzzer such as ISLa:
+**Step 2:**  Feed the resulting grammar into a grammar fuzzer such as ISLa:
 
->>> solver = ISLaSolver(ast_grammar, start_symbol='')
+>>> solver = ISLaSolver(python_ast_grammar, start_symbol='')
 
-* Have the grammar fuzzer produce a string. This string represents an AST.
+**Step 3:**  Have the grammar fuzzer produce a string. This string represents an AST.
 
 >>> ast_string = str(solver.solve())
 >>> ast_string
-"FunctionDef(name='C', args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return()], decorator_list=[])"
+'FunctionDef(name=\'t\', args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Break()], decorator_list=[], returns=Call(func=Name(id="set", ctx=Load()), args=[], keywords=[]), type_comment=\'\')'
 
-* Convert the AST into an actual Python AST data structure.
+**Step 4:**  Convert the AST into an actual Python AST data structure.
 
 >>> from ast import *
 >>> abstract_syntax_tree = eval(ast_string)
 
-* Finally, convert the AST structure back into readable Python code:
+**Step 5:** Finally, convert the AST structure back into readable Python code:
 
 >>> ast.fix_missing_locations(abstract_syntax_tree)
 >>> print(ast.unparse(abstract_syntax_tree))
-def C():
-    return
+def t() -> set(): # type: 
+    break
 
 
 The chapter has many more applications, including parsing and mutating Python code, evolutionary fuzzing, and more.
 
-The `PythonFuzzer` constructor passes all arguments to the `ISLaSolver` superclass:
+Here are the details on the `PythonFuzzer` constructor:
 
-Produce Python code. All parameters provided are passed to the `ISLaSolver` superclass, notably
-* `constraint` (an optional positional parameter), specifiying an ISLa constraint (if any); and
-* `start_symbol` (an optional keyword parameter), specifying a start symbol (default: ``)
+PythonFuzzer(self, start_symbol: Optional[str] = None, *, grammar: Optional[Dict[str, List[Union[str, Tuple[str, Dict[str, Any]]]]]] = None, constraint: Optional[str] = None, **kw_params) -> None
+Produce Python code. Parameters are:
+
+start_symbol: The grammatical entity to be generated (default: <FunctionDef>)
+grammar: The EBNF grammar to be used (default: PYTHON__AST_GRAMMAR); and
+constraint an ISLa constraint (if any).
+
+Additional keyword parameters are passed to the ISLaSolver superclass.
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Testing Compilers"
@@ -209,6 +215,13 @@ if __name__ == '__main__':
     print('# Testing Compilers')
 
 
+
+import sys
+
+if __name__ == '__main__':
+    if sys.version_info < (3, 10):
+        print("This code requires Python 3.10 or later")
+        sys.exit(0)
 
 ## Synopsis
 ## --------
@@ -232,7 +245,9 @@ if __name__ == '__main__':
     random.seed(2001)
 
 from .Grammars import Grammar
-from .Grammars import is_valid_grammar, convert_ebnf_grammar, extend_grammar
+from .Grammars import is_valid_grammar, convert_ebnf_grammar, extend_grammar, trim_grammar
+
+from typing import Optional
 
 EXPR_GRAMMAR: Grammar = {
     "<start>":
@@ -381,7 +396,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     ANYTHING_BUT_SINGLE_QUOTES_AND_BACKSLASH
 
-AST_CONSTANTS_GRAMMAR: Grammar = {
+PYTHON_AST_CONSTANTS_GRAMMAR: Grammar = {
     '<start>': [ '<expr>' ],
 
     # Expressions
@@ -416,10 +431,10 @@ AST_CONSTANTS_GRAMMAR: Grammar = {
 }
 
 if __name__ == '__main__':
-    assert is_valid_grammar(AST_CONSTANTS_GRAMMAR)
+    assert is_valid_grammar(PYTHON_AST_CONSTANTS_GRAMMAR)
 
 if __name__ == '__main__':
-    constants_grammar = convert_ebnf_grammar(AST_CONSTANTS_GRAMMAR)
+    constants_grammar = convert_ebnf_grammar(PYTHON_AST_CONSTANTS_GRAMMAR)
     constants_solver = ISLaSolver(constants_grammar)
     constants_tree_str = str(constants_solver.solve())
     print(constants_tree_str)
@@ -440,7 +455,7 @@ def test_samples(grammar: Grammar, iterations: int = 10, start_symbol = None, lo
             print(f'{code:40} # {tree_str}')
 
 if __name__ == '__main__':
-    test_samples(AST_CONSTANTS_GRAMMAR)
+    test_samples(PYTHON_AST_CONSTANTS_GRAMMAR)
 
 if __name__ == '__main__':
     sample_constant_code = "4711"
@@ -484,9 +499,9 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     print(ast.dump(ast.parse("{ 'a': set() }"), indent=4))
 
-AST_COMPOSITES_GRAMMAR: Grammar = extend_grammar(
-    AST_CONSTANTS_GRAMMAR, {
-    '<expr>': AST_CONSTANTS_GRAMMAR['<expr>'] + [
+PYTHON_AST_COMPOSITES_GRAMMAR: Grammar = extend_grammar(
+    PYTHON_AST_CONSTANTS_GRAMMAR, {
+    '<expr>': PYTHON_AST_CONSTANTS_GRAMMAR['<expr>'] + [
         '<Dict>', '<Set>', '<List>', '<Tuple>'
     ],
 
@@ -509,12 +524,12 @@ AST_COMPOSITES_GRAMMAR: Grammar = extend_grammar(
 })
 
 if __name__ == '__main__':
-    assert is_valid_grammar(AST_COMPOSITES_GRAMMAR)
+    assert is_valid_grammar(PYTHON_AST_COMPOSITES_GRAMMAR)
 
 if __name__ == '__main__':
     for elt in [ '<Constant>', '<Dict>', '<Set>', '<List>', '<Tuple>' ]:
         print(elt)
-        test_samples(AST_COMPOSITES_GRAMMAR, start_symbol=elt)
+        test_samples(PYTHON_AST_COMPOSITES_GRAMMAR, start_symbol=elt)
         print()
 
 if __name__ == '__main__':
@@ -540,8 +555,8 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     print(ast.dump(ast.parse("2 + 2 is not False"), indent=4))
 
-AST_EXPRS_GRAMMAR: Grammar = extend_grammar(AST_COMPOSITES_GRAMMAR, {
-    '<expr>': AST_COMPOSITES_GRAMMAR['<expr>'] + [
+PYTHON_AST_EXPRS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_COMPOSITES_GRAMMAR, {
+    '<expr>': PYTHON_AST_COMPOSITES_GRAMMAR['<expr>'] + [
         '<BoolOp>', '<BinOp>', '<UnaryOp>', '<Compare>',
     ],
 
@@ -571,19 +586,19 @@ AST_EXPRS_GRAMMAR: Grammar = extend_grammar(AST_COMPOSITES_GRAMMAR, {
 })
 
 if __name__ == '__main__':
-    assert is_valid_grammar(AST_EXPRS_GRAMMAR)
+    assert is_valid_grammar(PYTHON_AST_EXPRS_GRAMMAR)
 
 if __name__ == '__main__':
     for elt in [ '<BoolOp>', '<BinOp>', '<UnaryOp>', '<Compare>' ]:
         print(elt)
-        test_samples(AST_EXPRS_GRAMMAR, start_symbol=elt)
+        test_samples(PYTHON_AST_EXPRS_GRAMMAR, start_symbol=elt)
         print()
 
 if __name__ == '__main__':
     expr_iterations = 20
     bad_syntax = 0
     bad_type = 0
-    ast_exprs_grammar = convert_ebnf_grammar(AST_EXPRS_GRAMMAR)
+    ast_exprs_grammar = convert_ebnf_grammar(PYTHON_AST_EXPRS_GRAMMAR)
     expr_solver = ISLaSolver(ast_exprs_grammar, max_number_free_instantiations=expr_iterations)
     for i in range(expr_iterations):
         expr_tree = eval(str(expr_solver.solve()))
@@ -630,8 +645,8 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     print(ast.dump(ast.parse("xyzzy(a, b=c)"), indent=4))
 
-AST_IDS_GRAMMAR: Grammar = extend_grammar(AST_EXPRS_GRAMMAR, {
-    '<expr>': AST_EXPRS_GRAMMAR['<expr>'] + [
+PYTHON_AST_IDS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_EXPRS_GRAMMAR, {
+    '<expr>': PYTHON_AST_EXPRS_GRAMMAR['<expr>'] + [
         '<Name>', '<Call>'
     ],
 
@@ -656,16 +671,16 @@ AST_IDS_GRAMMAR: Grammar = extend_grammar(AST_EXPRS_GRAMMAR, {
 })
 
 if __name__ == '__main__':
-    assert is_valid_grammar(AST_IDS_GRAMMAR)
+    assert is_valid_grammar(PYTHON_AST_IDS_GRAMMAR)
 
 if __name__ == '__main__':
     for elt in [ '<Name>', '<Call>' ]:
         print(elt)
-        test_samples(AST_IDS_GRAMMAR, start_symbol=elt)
+        test_samples(PYTHON_AST_IDS_GRAMMAR, start_symbol=elt)
         print()
 
 if __name__ == '__main__':
-    ast_ids_grammar = convert_ebnf_grammar(AST_IDS_GRAMMAR)
+    ast_ids_grammar = convert_ebnf_grammar(PYTHON_AST_IDS_GRAMMAR)
 
 if __name__ == '__main__':
     id_solver = ISLaSolver(ast_ids_grammar, start_symbol='<id>')
@@ -701,8 +716,8 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     print(ast.dump(ast.parse("a[b].c"), indent=4))
 
-AST_ATTRS_GRAMMAR: Grammar = extend_grammar(AST_IDS_GRAMMAR, {
-    '<expr>': AST_IDS_GRAMMAR['<expr>'] + [
+PYTHON_AST_ATTRS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_IDS_GRAMMAR, {
+    '<expr>': PYTHON_AST_IDS_GRAMMAR['<expr>'] + [
         '<Attribute>', '<Subscript>', '<Starred>',
     ],
 
@@ -735,12 +750,12 @@ AST_ATTRS_GRAMMAR: Grammar = extend_grammar(AST_IDS_GRAMMAR, {
 })
 
 if __name__ == '__main__':
-    assert is_valid_grammar(AST_ATTRS_GRAMMAR)
+    assert is_valid_grammar(PYTHON_AST_ATTRS_GRAMMAR)
 
 if __name__ == '__main__':
     for elt in [ '<Attribute>', '<Subscript>', '<Starred>' ]:
         print(elt)
-        test_samples(AST_ATTRS_GRAMMAR, start_symbol=elt)
+        test_samples(PYTHON_AST_ATTRS_GRAMMAR, start_symbol=elt)
         print()
 
 ### End of Excursion
@@ -757,7 +772,7 @@ if __name__ == '__main__':
 
 
 
-AST_ASSIGNMENTS_GRAMMAR: Grammar = extend_grammar(AST_ATTRS_GRAMMAR, {
+PYTHON_AST_ASSIGNMENTS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_ATTRS_GRAMMAR, {
     '<start>': [ '<stmt>' ],
 
     '<stmt>': [
@@ -808,12 +823,12 @@ AST_ASSIGNMENTS_GRAMMAR: Grammar = extend_grammar(AST_ATTRS_GRAMMAR, {
 })
 
 if __name__ == '__main__':
-    assert is_valid_grammar(AST_ASSIGNMENTS_GRAMMAR)
+    assert is_valid_grammar(PYTHON_AST_ASSIGNMENTS_GRAMMAR)
 
 if __name__ == '__main__':
     for elt in ['<Assign>', '<AugAssign>']:
         print(elt)
-        test_samples(AST_ASSIGNMENTS_GRAMMAR, start_symbol=elt)
+        test_samples(PYTHON_AST_ASSIGNMENTS_GRAMMAR, start_symbol=elt)
         print()
 
 ### End of Excursion
@@ -830,13 +845,14 @@ if __name__ == '__main__':
 
 
 
-AST_STMTS_GRAMMAR: Grammar = extend_grammar(AST_ASSIGNMENTS_GRAMMAR, {
+PYTHON_AST_STMTS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_ASSIGNMENTS_GRAMMAR, {
     '<start>': [ '<stmt>' ],
 
-    '<stmt>': AST_ASSIGNMENTS_GRAMMAR['<stmt>'] + [
+    '<stmt>': PYTHON_AST_ASSIGNMENTS_GRAMMAR['<stmt>'] + [
         '<For>', '<While>', '<If>',
         '<Return>', '<Delete>', '<Assert>',
         '<Pass>', '<Break>', '<Continue>',
+        '<With>'
     ],
 
     # Control structures
@@ -853,6 +869,16 @@ AST_STMTS_GRAMMAR: Grammar = extend_grammar(AST_ASSIGNMENTS_GRAMMAR, {
 
     '<If>': [
         'If(test=<expr>, body=<nonempty_stmt_list>, orelse=<stmt_list>)'
+    ],
+
+    '<With>': [
+        'With(items=<withitem_list>, body=<nonempty_stmt_list><type_comment>?)'
+    ],
+    '<withitem_list>': [ '[<withitems>?]' ],
+    '<withitems>': [ '<withitem>', '<withitems>, <withitem>' ],
+    '<withitem>': [
+        'withitem(context_expr=<expr>)',
+        'withitem(context_expr=<expr>, optional_vars=<lhs_expr>)',
     ],
 
     # Other statements
@@ -876,44 +902,26 @@ AST_STMTS_GRAMMAR: Grammar = extend_grammar(AST_ASSIGNMENTS_GRAMMAR, {
 })
 
 if __name__ == '__main__':
-    assert is_valid_grammar(AST_STMTS_GRAMMAR)
+    assert is_valid_grammar(PYTHON_AST_STMTS_GRAMMAR)
 
 if __name__ == '__main__':
-    for elt in AST_STMTS_GRAMMAR['<stmt>']:
+    for elt in PYTHON_AST_STMTS_GRAMMAR['<stmt>']:
         print(elt)
-        test_samples(AST_STMTS_GRAMMAR, start_symbol=elt)
-        print()
-
-AST_WITH_GRAMMAR: Grammar = extend_grammar(AST_STMTS_GRAMMAR, {
-    '<stmt>': AST_STMTS_GRAMMAR['<stmt>'] + [ '<With>' ],
-    '<With>': [ 'With(items=<withitem_list>, body=<nonempty_stmt_list><type_comment>?)' ],
-
-    '<withitem_list>': [ '[<withitems>?]' ],
-    '<withitems>': [ '<withitem>', '<withitems>, <withitem>' ],
-    '<withitem>': [ 'withitem(context_expr=<expr>)',
-                    'withitem(context_expr=<expr>, optional_vars=<lhs_expr>)',
-                    ]
-})
-
-if __name__ == '__main__':
-    assert is_valid_grammar(AST_WITH_GRAMMAR)
-
-if __name__ == '__main__':
-    for elt in ['<With>']:
-        print(elt)
-        test_samples(AST_WITH_GRAMMAR, start_symbol=elt)
+        test_samples(PYTHON_AST_STMTS_GRAMMAR, start_symbol=elt)
         print()
 
 if __name__ == '__main__':
     with_tree = ast.parse("""
 with open('foo.txt') as myfile:
     content = myfile.readlines()
+    if content is not None:
+        print(content)
 """)
 
 if __name__ == '__main__':
-    ast_with_grammar = convert_ebnf_grammar(AST_WITH_GRAMMAR)
+    python_ast_stmts_grammar = convert_ebnf_grammar(PYTHON_AST_STMTS_GRAMMAR)
     with_tree_str = ast.dump(with_tree.body[0])  # get the `With(...)` subtree
-    with_solver = ISLaSolver(ast_with_grammar)
+    with_solver = ISLaSolver(python_ast_stmts_grammar)
     assert with_solver.check(with_tree_str)
 
 ### End of Excursion
@@ -937,8 +945,8 @@ def f(a, b=1):
 """
     ), indent=4))
 
-AST_DEFS_GRAMMAR: Grammar = extend_grammar(AST_WITH_GRAMMAR, {
-    '<stmt>': AST_WITH_GRAMMAR['<stmt>'] + [ '<FunctionDef>' ],
+PYTHON_AST_DEFS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_STMTS_GRAMMAR, {
+    '<stmt>': PYTHON_AST_STMTS_GRAMMAR['<stmt>'] + [ '<FunctionDef>' ],
 
     '<FunctionDef>': [
         'FunctionDef(name=<identifier>, args=<arguments>, body=<nonempty_stmt_list>, decorator_list=<expr_list><returns>?<type_comment>?)'
@@ -958,13 +966,36 @@ AST_DEFS_GRAMMAR: Grammar = extend_grammar(AST_WITH_GRAMMAR, {
     # FIXME: Not handled: AsyncFunctionDef, ClassDef
 })
 
+import sys
+
+if sys.version_info >= (3, 12):
+    PYTHON_AST_DEFS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_DEFS_GRAMMAR, {
+    '<FunctionDef>': [
+        'FunctionDef(name=<identifier>, args=<arguments>, body=<nonempty_stmt_list>, decorator_list=<expr_list><returns>?<type_comment>?<type_params>?)'
+    ],
+    '<type_params>': [
+        ', type_params=<type_param_list>',
+    ],
+    '<type_param_list>': [ '[<type_param>?]' ],
+    '<type_param>': [ '<TypeVar>', '<ParamSpec>', '<TypeVarTuple>' ],
+    '<TypeVar>': [
+        'TypeVar(name=<identifier>(, bound=<expr>)?)'
+    ],
+    '<ParamSpec>': [
+        'ParamSpec(name=<identifier>)'
+    ],
+    '<TypeVarTuple>': [
+        'TypeVarTuple(name=<identifier>)'
+    ]
+    })
+
 if __name__ == '__main__':
-    assert is_valid_grammar(AST_DEFS_GRAMMAR)
+    assert is_valid_grammar(PYTHON_AST_DEFS_GRAMMAR)
 
 if __name__ == '__main__':
     for elt in [ '<arguments>', '<FunctionDef>' ]:
         print(elt)
-        test_samples(AST_DEFS_GRAMMAR, start_symbol=elt)
+        test_samples(PYTHON_AST_DEFS_GRAMMAR, start_symbol=elt)
         print()
 
 ### End of Excursion
@@ -981,7 +1012,7 @@ if __name__ == '__main__':
 
 
 
-AST_MODULE_GRAMMAR: Grammar = extend_grammar(AST_DEFS_GRAMMAR, {
+PYTHON_AST_MODULE_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_DEFS_GRAMMAR, {
     '<start>': [ '<mod>' ],
     '<mod>': [ '<Module>' ],
     '<Module>': [ 'Module(body=<nonempty_stmt_list>, type_ignores=<type_ignore_list>)'],
@@ -992,12 +1023,12 @@ AST_MODULE_GRAMMAR: Grammar = extend_grammar(AST_DEFS_GRAMMAR, {
 })
 
 if __name__ == '__main__':
-    assert is_valid_grammar(AST_MODULE_GRAMMAR)
+    assert is_valid_grammar(PYTHON_AST_MODULE_GRAMMAR)
 
 if __name__ == '__main__':
     for elt in [ '<Module>' ]:
         print(elt)
-        test_samples(AST_MODULE_GRAMMAR, start_symbol=elt)
+        test_samples(PYTHON_AST_MODULE_GRAMMAR, start_symbol=elt)
         print()
 
 ### End of Excursion
@@ -1007,13 +1038,13 @@ if __name__ == '__main__':
 
 
 
-AST_GRAMMAR = AST_MODULE_GRAMMAR
-ast_grammar = convert_ebnf_grammar(AST_GRAMMAR)
+PYTHON_AST_GRAMMAR = PYTHON_AST_MODULE_GRAMMAR
+python_ast_grammar = convert_ebnf_grammar(PYTHON_AST_GRAMMAR)
 
 if __name__ == '__main__':
     for elt in [ '<FunctionDef>' ]:
         print(elt)
-        test_samples(AST_GRAMMAR, start_symbol=elt)
+        test_samples(PYTHON_AST_GRAMMAR, start_symbol=elt)
         print()
 
 ## A Class for Fuzzing Python
@@ -1027,12 +1058,30 @@ if __name__ == '__main__':
 class PythonFuzzer(ISLaSolver):
     """Produce Python code."""
 
-    def __init__(self, *params, **kw_params) -> None:
-        """Produce Python code. All parameters provided are passed to the `ISLaSolver` superclass, notably
-        * `constraint` (an optional positional parameter), specifiying an ISLa constraint (if any); and
-        * `start_symbol` (an optional keyword parameter), specifying a start symbol (default: `<Module>`)
+    def __init__(self,
+                 start_symbol: Optional[str] = None, *,
+                 grammar: Optional[Grammar] = None,
+                 constraint: Optional[str] =None,
+                 **kw_params) -> None:
+        """Produce Python code. Parameters are:
+
+        * `start_symbol`: The grammatical entity to be generated (default: `<FunctionDef>`)
+        * `grammar`: The EBNF grammar to be used (default: `PYTHON__AST_GRAMMAR`); and
+        * `constraint` an ISLa constraint (if any).
+
+        Additional keyword parameters are passed to the `ISLaSolver` superclass.
         """
-        super().__init__(convert_ebnf_grammar(AST_GRAMMAR), *params, **kw_params)
+        if start_symbol is None:
+            start_symbol = '<FunctionDef>'
+        if grammar is None:
+            grammar = PYTHON_AST_GRAMMAR
+        assert start_symbol in grammar
+
+        g = convert_ebnf_grammar(grammar)
+        if constraint is None:
+            super().__init__(g, start_symbol=start_symbol, **kw_params)
+        else:
+            super().__init__(g, constraint, start_symbol=start_symbol, **kw_params)
 
     def fuzz(self) -> str:
         """Produce a Python code string."""
@@ -1045,42 +1094,84 @@ if __name__ == '__main__':
     print(fuzzer.fuzz())
 
 if __name__ == '__main__':
-    fuzzer = PythonFuzzer(start_symbol='<FunctionDef>')
-    fuzzer.fuzz()
-
-if __name__ == '__main__':
-    list(AST_GRAMMAR.keys())
-
-## Adding Constraints
-## ------------------
-
-if __name__ == '__main__':
-    print('\n## Adding Constraints')
-
-
-
-if __name__ == '__main__':
-    fuzzer = PythonFuzzer('str.len(<id>) = 10', start_symbol='<FunctionDef>')
+    fuzzer = PythonFuzzer('<While>')
     print(fuzzer.fuzz())
 
 if __name__ == '__main__':
-    fuzzer = PythonFuzzer('<FunctionDef>.<identifier> = "\'my_favorite_function\'"',
-                          start_symbol='<FunctionDef>')
+    sorted(list(PYTHON_AST_GRAMMAR.keys()))
+
+## Customizing the Python Fuzzer
+## -----------------------------
+
+if __name__ == '__main__':
+    print('\n## Customizing the Python Fuzzer')
+
+
+
+### Adjusting the Grammar
+
+if __name__ == '__main__':
+    print('\n### Adjusting the Grammar')
+
+
+
+if __name__ == '__main__':
+    PYTHON_AST_GRAMMAR['<FunctionDef>']
+
+if __name__ == '__main__':
+    python_ast_grammar_without_decorators: Grammar = extend_grammar(PYTHON_AST_GRAMMAR,
+    {
+        '<FunctionDef>' :
+            ['FunctionDef(name=<identifier>, args=<arguments>, body=<nonempty_stmt_list>, decorator_list=[])']
+    })
+
+from .ExpectError import ExpectError
+
+if __name__ == '__main__':
+    with ExpectError():
+        assert is_valid_grammar(python_ast_grammar_without_decorators)
+
+if __name__ == '__main__':
+    python_ast_grammar_without_decorators = trim_grammar(python_ast_grammar_without_decorators)
+
+if __name__ == '__main__':
+    assert is_valid_grammar(python_ast_grammar_without_decorators)
+
+if __name__ == '__main__':
+    fuzzer = PythonFuzzer(grammar=python_ast_grammar_without_decorators)
+    print(fuzzer.fuzz())
+
+### Using Constraints for Customizing
+
+if __name__ == '__main__':
+    print('\n### Using Constraints for Customizing')
+
+
+
+if __name__ == '__main__':
+    fuzzer = PythonFuzzer(constraint='str.len(<id>) = 10')
     print(fuzzer.fuzz())
 
 if __name__ == '__main__':
-    fuzzer = PythonFuzzer(
+    fuzzer = PythonFuzzer(constraint='<FunctionDef>.<identifier> = "\'my_favorite_function\'"')
+    print(fuzzer.fuzz())
+
+if __name__ == '__main__':
+    fuzzer = PythonFuzzer(constraint=
     """
     exists <integer> x:
         (inside(x, <nonempty_stmt_list>) and str.to.int(x) > 1000)
-""", start_symbol='<FunctionDef>')
+""")
     print(fuzzer.fuzz())
 
 if __name__ == '__main__':
-    fuzzer = PythonFuzzer(
-    """
+    fuzzer = PythonFuzzer(constraint="""
     forall <FunctionDef> def: count(def, "<stmt>", "3")
-""", start_symbol='<FunctionDef>')
+""")
+    print(fuzzer.fuzz())
+
+if __name__ == '__main__':
+    fuzzer = PythonFuzzer(constraint='<FunctionDef>..<expr_list> = "[]"')
     print(fuzzer.fuzz())
 
 ## Mutating Code
@@ -1112,14 +1203,17 @@ if __name__ == '__main__':
     sum_str
 
 if __name__ == '__main__':
-    solver = ISLaSolver(ast_grammar)
+    solver = ISLaSolver(python_ast_grammar)
     solver.check(sum_str)
 
 if __name__ == '__main__':
     sum_tree = solver.parse(sum_str)
 
 if __name__ == '__main__':
-    sum_tree
+    len(repr(sum_tree))
+
+if __name__ == '__main__':
+    repr(sum_tree)[:200]
 
 from .GrammarFuzzer import display_tree
 
@@ -1127,13 +1221,13 @@ if __name__ == '__main__':
     display_tree(sum_tree)
 
 if __name__ == '__main__':
-    ast_grammar['<start>']
+    python_ast_grammar['<start>']
 
 if __name__ == '__main__':
-    ast_grammar['<mod>']
+    python_ast_grammar['<mod>']
 
 if __name__ == '__main__':
-    ast_grammar['<Module>']
+    python_ast_grammar['<Module>']
 
 if __name__ == '__main__':
     str(sum_tree)
@@ -1201,7 +1295,7 @@ if __name__ == '__main__':
     has_distributive_law(ast.parse("def f(a, b):\n    return a * (b + 10)"))
 
 def how_many_mutations(code: str) -> int:
-    solver = ISLaSolver(ast_grammar)
+    solver = ISLaSolver(python_ast_grammar)
 
     code_ast = ast.parse(code)
     code_ast = ast.fix_missing_locations(code_ast)
@@ -1328,7 +1422,7 @@ if __name__ == '__main__':
 OFFSPRING = 2
 
 def evolve(population, min_fitness=-1):
-    solver = ISLaSolver(ast_grammar)
+    solver = ISLaSolver(python_ast_grammar)
 
     for (candidate, _) in list(population):
         for i in range(OFFSPRING):
@@ -1387,32 +1481,39 @@ if __name__ == '__main__':
 
 
 
-if __name__ == '__main__':
-    sum_population = initial_population(sum_tree)
-
-GENERATIONS = 100
+GENERATIONS = 100  # Upper bound
 
 if __name__ == '__main__':
-    prev_best_fitness = -1
-    for generation in range(GENERATIONS):
-        sum_population = evolve(sum_population, min_fitness=prev_best_fitness)
-        sum_population = select(sum_population)
-        best_candidate, best_fitness = sum_population[0]
-        if best_fitness > prev_best_fitness:
-            print(f"Generation {generation}: found new best candidate (fitness={best_fitness}):")
-            best_ast = ast.fix_missing_locations(eval(str(best_candidate)))
-            print(ast.unparse(best_ast))
-            prev_best_fitness = best_fitness
+    trial = 1
+    found = False
 
-            if has_distributive_law(best_ast):
-                print("Done!")
-                break
+    while not found:
+        sum_population = initial_population(sum_tree)
+        prev_best_fitness = -1
+
+        for generation in range(GENERATIONS):
+            sum_population = evolve(sum_population, min_fitness=prev_best_fitness)
+            sum_population = select(sum_population)
+            best_candidate, best_fitness = sum_population[0]
+            if best_fitness > prev_best_fitness:
+                print(f"Generation {generation}: found new best candidate (fitness={best_fitness}):")
+                best_ast = ast.fix_missing_locations(eval(str(best_candidate)))
+                print(ast.unparse(best_ast))
+                prev_best_fitness = best_fitness
+
+                if has_distributive_law(best_ast):
+                    print("Done!")
+                    found = True
+                    break
+
+        trial = trial + 1
+        print(f"\n\nRestarting; trial #{trial}")
 
 if __name__ == '__main__':
     print(ast.unparse(best_ast))
 
 if __name__ == '__main__':
-    has_distributive_law(best_ast)
+    assert has_distributive_law(best_ast)
 
 ### Chances of Evolutionary Fuzzing
 
@@ -1422,23 +1523,23 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    assert '<BinOp>' in ast_grammar['<expr>']
+    assert '<BinOp>' in python_ast_grammar['<expr>']
 
 if __name__ == '__main__':
-    len(ast_grammar['<expr>'])
+    len(python_ast_grammar['<expr>'])
 
 if __name__ == '__main__':
-    assert 'Add()' in ast_grammar['<operator>']
-    assert 'Mult()' in ast_grammar['<operator>']
+    assert 'Add()' in python_ast_grammar['<operator>']
+    assert 'Mult()' in python_ast_grammar['<operator>']
 
 if __name__ == '__main__':
-    len(ast_grammar['<operator>'])
+    len(python_ast_grammar['<operator>'])
 
 if __name__ == '__main__':
-    (len(ast_grammar['<expr>'])       # chances of choosing a `BinOp`
-    * len(ast_grammar['<operator>'])  # chances of choosing a `*`
-    * len(ast_grammar['<expr>'])      # chances of choosing a `BinOp` as a child
-    * len(ast_grammar['<operator>'])  # chances of choosing a `+`
+    (len(python_ast_grammar['<expr>'])       # chances of choosing a `BinOp`
+    * len(python_ast_grammar['<operator>'])  # chances of choosing a `*`
+    * len(python_ast_grammar['<expr>'])      # chances of choosing a `BinOp` as a child
+    * len(python_ast_grammar['<operator>'])  # chances of choosing a `+`
     / 2)   # two chances - one for the left child, one for the right
 
 ## Synopsis
@@ -1454,17 +1555,17 @@ if __name__ == '__main__':
     print(fuzzer.fuzz())
 
 if __name__ == '__main__':
-    fuzzer = PythonFuzzer(start_symbol='<FunctionDef>')
+    fuzzer = PythonFuzzer('<While>')
     print(fuzzer.fuzz())
 
 if __name__ == '__main__':
-    list(AST_GRAMMAR.keys())
+    sorted(list(PYTHON_AST_GRAMMAR.keys()))
 
 if __name__ == '__main__':
-    ast_grammar = convert_ebnf_grammar(AST_GRAMMAR)
+    python_ast_grammar = convert_ebnf_grammar(PYTHON_AST_GRAMMAR)
 
 if __name__ == '__main__':
-    solver = ISLaSolver(ast_grammar, start_symbol='<FunctionDef>')
+    solver = ISLaSolver(python_ast_grammar, start_symbol='<FunctionDef>')
 
 if __name__ == '__main__':
     ast_string = str(solver.solve())
@@ -1480,9 +1581,14 @@ if __name__ == '__main__':
     print(ast.unparse(abstract_syntax_tree))
 
 import inspect
+import markdown
+from .bookutils import HTML
 
 if __name__ == '__main__':
-    print(inspect.getdoc(PythonFuzzer.__init__))
+    sig = inspect.signature(PythonFuzzer.__init__)
+    sig_str = str(sig) if sig else ""
+    doc = inspect.getdoc(PythonFuzzer.__init__) or ""
+    HTML(markdown.markdown('`PythonFuzzer' + sig_str + '`\n\n' + doc))
 
 from .ClassDiagram import display_class_hierarchy
 

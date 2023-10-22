@@ -3,7 +3,7 @@
 
 # "Tracking Information Flow" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2023-10-14 22:57:45+02:00
+# Last change: 2023-10-16 20:11:06+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -46,7 +46,7 @@ This chapter provides two wrappers to Python _strings_ that allow one to track v
 
 ### Tracking String Taints
 
-`tstr` objects are replacements for Python strings that allows to track and check _taints_ – that is, information on from where a string originated. For instance, one can mark strings that originate from third party input with a taint of "LOW", meaning that they have a low security level. The taint is passed in the constructor of a `tstr` object:
+`tstr` objects are replacements for Python strings that allows tracking and checking _taints_ – that is, information on from where a string originated. For instance, one can mark strings that originate from third party input with a taint of "LOW", meaning that they have a low security level. The taint is passed in the constructor of a `tstr` object:
 
 >>> thello = tstr('hello', taint='LOW')
 

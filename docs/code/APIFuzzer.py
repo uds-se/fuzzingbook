@@ -3,7 +3,7 @@
 
 # "Fuzzing APIs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2023-10-14 22:58:57+02:00
+# Last change: 2023-10-16 20:12:16+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -185,7 +185,7 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    call = "urlparse('http://www.example.com/')"
+    call = "urlparse('http://www.cispa.de/')"
 
 if __name__ == '__main__':
     eval(call)

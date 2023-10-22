@@ -2,9 +2,9 @@ import { HORIZONTAL_SLIDES_SELECTOR } from '../utils/constants.js'
 import { queryAll } from '../utils/util.js'
 
 const HIDE_SCROLLBAR_TIMEOUT = 500;
-const PROGRESS_SPACING = 4;
+const MAX_PROGRESS_SPACING = 4;
 const MIN_PROGRESS_SEGMENT_HEIGHT = 6;
-const MIN_PLAYHEAD_HEIGHT = 18;
+const MIN_PLAYHEAD_HEIGHT = 8;
 
 /**
  * The reader mode lets you read a reveal.js presentation
@@ -31,10 +31,12 @@ export default class Reader {
 
 		if( this.active ) return;
 
-		const state = this.Reveal.getState();
+		const stateBeforeActivation = this.Reveal.getState();
 
 		this.active = true;
 
+		// Store the full presentation HTML so that we can restore it
+		// when/if the reader mode is deactivated
 		this.slideHTMLBeforeActivation = this.Reveal.getSlidesElement().innerHTML;
 
 		const horizontalSlides = queryAll( this.Reveal.getRevealElement(), HORIZONTAL_SLIDES_SELECTOR );
@@ -52,38 +54,55 @@ export default class Reader {
 		const pageElements = [];
 		const pageContainer = horizontalSlides[0].parentNode;
 
-		function createPage( slide, h, v ) {
+		let previousSlide;
 
-			// Wrap the slide in a page element and hide its overflow
-			// so that no page ever flows onto another
-			const page = document.createElement( 'div' );
-			page.className = 'reader-page';
-			pageElements.push( page );
+		// Creates a new page element and appends the given slide/bg
+		// to it.
+		const createPageElement = ( slide, h, v ) => {
 
-			// Copy the presentation-wide background to each page
-			if( presentationBackground ) {
-				page.style.background = presentationBackground;
+			let contentContainer;
+
+			// If this slide is part of an auto-animation sequence, we
+			// group it under the same page element as the previous slide
+			if( previousSlide && this.Reveal.shouldAutoAnimateBetween( previousSlide, slide ) ) {
+				contentContainer = document.createElement( 'div' );
+				contentContainer.className = 'reader-page-content reader-auto-animate-page';
+				contentContainer.style.display = 'none';
+				previousSlide.closest( '.reader-page-content' ).parentNode.appendChild( contentContainer );
 			}
+			else {
+				// Wrap the slide in a page element and hide its overflow
+				// so that no page ever flows onto another
+				const page = document.createElement( 'div' );
+				page.className = 'reader-page';
+				pageElements.push( page );
 
-			const stickyContainer = document.createElement( 'div' );
-			stickyContainer.className = 'reader-page-sticky';
-			page.appendChild( stickyContainer );
+				// Copy the presentation-wide background to each page
+				if( presentationBackground ) {
+					page.style.background = presentationBackground;
+				}
 
-			const contentContainer = document.createElement( 'div' );
-			contentContainer.className = 'reader-page-content';
-			stickyContainer.appendChild( contentContainer );
+				const stickyContainer = document.createElement( 'div' );
+				stickyContainer.className = 'reader-page-sticky';
+				page.appendChild( stickyContainer );
+
+				contentContainer = document.createElement( 'div' );
+				contentContainer.className = 'reader-page-content';
+				stickyContainer.appendChild( contentContainer );
+			}
 
 			contentContainer.appendChild( slide );
 
 			slide.classList.remove( 'past', 'future' );
-
-			if( typeof h === 'number' ) slide.setAttribute( 'data-index-h', h );
-			if( typeof v === 'number' ) slide.setAttribute( 'data-index-v', v );
+			slide.setAttribute( 'data-index-h', h );
+			slide.setAttribute( 'data-index-v', v );
 
 			if( slide.slideBackgroundElement ) {
 				slide.slideBackgroundElement.remove( 'past', 'future' );
 				contentContainer.insertBefore( slide.slideBackgroundElement, slide );
 			}
+
+			previousSlide = slide;
 
 		}
 
@@ -92,11 +111,11 @@ export default class Reader {
 
 			if( this.Reveal.isVerticalStack( horizontalSlide ) ) {
 				horizontalSlide.querySelectorAll( 'section' ).forEach( ( verticalSlide, v ) => {
-					createPage( verticalSlide, h, v );
+					createPageElement( verticalSlide, h, v );
 				});
 			}
 			else {
-				createPage( horizontalSlide, h, 0 );
+				createPageElement( horizontalSlide, h, 0 );
 			}
 
 		}, this );
@@ -106,13 +125,14 @@ export default class Reader {
 		// Remove leftover stacks
 		queryAll( this.Reveal.getRevealElement(), '.stack' ).forEach( stack => stack.remove() );
 
+		// Add our newly created pages to the DOM
 		pageElements.forEach( page => pageContainer.appendChild( page ) );
 
 		// Re-run JS-based content layout after the slide is added to page DOM
 		this.Reveal.slideContent.layout( this.Reveal.getSlidesElement() );
 
 		this.Reveal.layout();
-		this.Reveal.setState( state );
+		this.Reveal.setState( stateBeforeActivation );
 
 		this.viewportElement.classList.remove( 'loading-scroll-mode' );
 
@@ -129,7 +149,7 @@ export default class Reader {
 
 		if( !this.active ) return;
 
-		const state = this.Reveal.getState();
+		const stateBeforeDeactivation = this.Reveal.getState();
 
 		this.active = false;
 
@@ -140,7 +160,9 @@ export default class Reader {
 
 		this.Reveal.getSlidesElement().innerHTML = this.slideHTMLBeforeActivation;
 		this.Reveal.sync();
-		this.Reveal.setState( state );
+		this.Reveal.setState( stateBeforeDeactivation );
+
+		this.slideHTMLBeforeActivation = null;
 
 	}
 
@@ -165,22 +187,6 @@ export default class Reader {
 	}
 
 	/**
-	 * Retrieve a slide by its original h/v index (i.e. the indices the
-	 * slide had before being linearized).
-	 *
-	 * @param {number} h
-	 * @param {number} v
-	 * @returns {HTMLElement}
-	 */
-	getSlideByIndices( h, v ) {
-
-		const page = this.pages.find( page => page.indexh === h && page.indexv === v );
-
-		return page ? page.slideElement : null;
-
-	}
-
-	/**
 	 * Renders the progress bar component.
 	 */
 	createProgressBar() {
@@ -201,7 +207,6 @@ export default class Reader {
 		const handleDocumentMouseMove	= ( event ) => {
 
 			let progress = ( event.clientY - this.progressBarInner.getBoundingClientRect().top ) / this.progressBarHeight;
-
 			progress = Math.max( Math.min( progress, 1 ), 0 );
 
 			this.viewportElement.scrollTop = progress * ( this.viewportElement.scrollHeight - this.viewportElement.offsetHeight );
@@ -270,59 +275,70 @@ export default class Reader {
 		const pageHeight = readerLayout === 'full' ? viewportHeight : compactHeight;
 
 		// The height that needs to be scrolled between scroll triggers
-		const scrollTriggerHeight = viewportHeight / 2;
+		const scrollTriggerHeight = viewportHeight;
 
 		this.viewportElement.style.setProperty( '--page-height', pageHeight + 'px' );
 		this.viewportElement.style.scrollSnapType = typeof config.readerScrollSnap === 'string' ?
 												`y ${config.readerScrollSnap}` : '';
 
+		// This will hold all scroll triggers used to show/hide slides
+		this.slideTriggers = [];
+
 		const pageElements = Array.from( this.Reveal.getRevealElement().querySelectorAll( '.reader-page' ) );
 
 		this.pages = pageElements.map( pageElement => {
-			const page = {
-				pageElement: pageElement,
-				stickyElement: pageElement.querySelector( '.reader-page-sticky' ),
+			const page = this.createPage({
+				pageElement,
 				slideElement: pageElement.querySelector( 'section' ),
+				stickyElement: pageElement.querySelector( '.reader-page-sticky' ),
+				contentElement: pageElement.querySelector( '.reader-page-content' ),
 				backgroundElement: pageElement.querySelector( '.slide-background' ),
-				top: pageElement.offsetTop,
-				scrollTriggers: [],
-				scrollTriggerHeight
-			};
+				autoAnimateElements: pageElement.querySelectorAll( '.reader-auto-animate-page' ),
+				autoAnimatePages: []
+			});
 
-			page.indexh = parseInt( page.slideElement.getAttribute( 'data-index-h' ), 10 );
-			page.indexv = parseInt( page.slideElement.getAttribute( 'data-index-v' ), 10 );
+			page.pageElement.style.setProperty( '--slide-height', config.center === true ? 'auto' : slideSize.height + 'px' );
 
-			page.slideElement.style.width = slideSize.width + 'px';
-			page.slideElement.style.height = config.center === true ? '' : slideSize.height + 'px';
-
-			// Each fragment 'group' is an array containing one or more
-			// fragments. Multiple fragments that appear at the same time
-			// are part of the same group.
-			page.fragments = this.Reveal.fragments.sort( pageElement.querySelectorAll( '.fragment:not(.disabled)' ) );
-			page.fragmentGroups = this.Reveal.fragments.sort( pageElement.querySelectorAll( '.fragment' ), true );
+			this.slideTriggers.push({
+				page: page,
+				activate: () => this.activatePage( page ),
+				deactivate: () => this.deactivatePage( page )
+			});
 
 			// Create scroll triggers that show/hide fragments
-			if( page.fragmentGroups.length ) {
-				const segmentSize = 1 / page.fragmentGroups.length;
-				let segmentY = segmentSize / 4;
-				page.scrollTriggers.push(
-					// Trigger for the initial state with no fragments visible
-					{ range: [ 0, segmentY ], fragmentIndex: -1 },
+			this.createFragmentTriggersForPage( page );
 
-					// Triggers for each fragment group
-					...page.fragmentGroups.map( ( fragments, i ) => {
-						segmentY += segmentSize;
-							return {
-								range: [ segmentY - segmentSize, segmentY ],
-								fragmentIndex: i
-							};
-						}
-					)
-				);
+			// Create scroll triggers for triggering auto-animate steps
+			if( page.autoAnimateElements.length > 0 ) {
+				this.createAutoAnimateTriggersForPage( page );
 			}
 
-			// Add scroll padding based on how many scroll triggers we have
-			page.scrollPadding = scrollTriggerHeight * Math.max( page.scrollTriggers.length - 1, 0 );
+			let totalScrollTriggerCount = Math.max( page.scrollTriggers.length - 1, 0 );
+
+			// Each auto-animate step may include its own scroll triggers
+			// for fragments, ensure we count those as well
+			totalScrollTriggerCount += page.autoAnimatePages.reduce( ( total, page ) => {
+				return total + Math.max( page.scrollTriggers.length - 1, 0 );
+			}, page.autoAnimatePages.length );
+
+			// Clean up from previous renders
+			page.pageElement.querySelectorAll( '.reader-snap-point' ).forEach( el => el.remove() );
+
+			// Create snap points for all scroll triggers
+			// - Can't be absolute in FF
+			// - Can't be 0-height in Safari
+			// - Can't use snap-align on parent in Safari because then
+			//   inner triggers won't work
+			for( let i = 0; i < totalScrollTriggerCount + 1; i++ ) {
+				const triggerStick = document.createElement( 'div' );
+				triggerStick.className = 'reader-snap-point';
+				triggerStick.style.height = scrollTriggerHeight + 'px';
+				page.pageElement.appendChild( triggerStick );
+
+				if( i === 0 ) {
+					triggerStick.style.marginTop = -scrollTriggerHeight + 'px';
+				}
+			}
 
 			// In the compact layout, only slides with scroll triggers cover the
 			// full viewport height. This helps avoid empty gaps before or after
@@ -336,34 +352,44 @@ export default class Reader {
 				page.pageElement.style.removeProperty( '--page-height' );
 			}
 
-			page.pageElement.style.scrollSnapAlign = page.pageHeight < viewportHeight ? 'center' : 'start';
-
-			// This variable is used to pad the height of our page in CSS
-			page.pageElement.style.setProperty( '--page-scroll-padding', page.scrollPadding + 'px' );
+			// Add scroll padding based on how many scroll triggers we have
+			page.scrollPadding = scrollTriggerHeight * totalScrollTriggerCount;
 
 			// The total height including scrollable space
 			page.totalHeight = page.pageHeight + page.scrollPadding;
 
-			page.bottom = page.top + page.totalHeight;
+			// This is used to pad the height of our page in CSS
+			page.pageElement.style.setProperty( '--page-scroll-padding', page.scrollPadding + 'px' );
 
 			// If this is a sticky page, stick it to the vertical center
-			if( page.scrollTriggers.length > 0 ) {
+			if( totalScrollTriggerCount > 0 ) {
 				page.stickyElement.style.position = 'sticky';
 				page.stickyElement.style.top = Math.max( ( viewportHeight - page.pageHeight ) / 2, 0 ) + 'px';
-
-				// Make this page freeze at the vertical center of the viewport
-				page.top -= ( viewportHeight - page.pageHeight ) / 2;
 			}
 			else {
 				page.stickyElement.style.position = 'relative';
+				page.pageElement.style.scrollSnapAlign = page.pageHeight < viewportHeight ? 'center' : 'start';
 			}
 
 			return page;
 		} );
 
-		this.viewportElement.setAttribute( 'data-reader-scroll-bar', config.readerScrollbar )
+		this.setTriggerRanges();
 
-		if( config.readerScrollbar ) {
+		/*
+		console.log(this.slideTriggers.map( t => {
+			return {
+				range: `${t.range[0].toFixed(2)}-${t.range[1].toFixed(2)}`,
+				triggers: t.page.scrollTriggers.map( t => {
+					return `${t.globalRange[0].toFixed(2)}-${t.globalRange[1].toFixed(2)}`
+				}).join( ', ' ),
+			}
+		}))
+		*/
+
+		this.viewportElement.setAttribute( 'data-reader-scroll-bar', config.readerScrollbar );
+
+		if( config.readerScrollbar && this.totalScrollTriggerCount > 1 ) {
 			// Create the progress bar if it doesn't already exist
 			if( !this.progressBar ) this.createProgressBar();
 
@@ -376,6 +402,131 @@ export default class Reader {
 	}
 
 	/**
+	 * Calculates and sets the scroll range for all of our scroll
+	 * triggers.
+	 */
+	setTriggerRanges() {
+
+		// Calculate the total number of scroll triggers
+		this.totalScrollTriggerCount = this.slideTriggers.reduce( ( total, trigger ) => {
+			return total + Math.max( trigger.page.scrollTriggers.length, 1 );
+		}, 0 );
+
+		let rangeStart = 0;
+
+		// Calculate the scroll range of each scroll trigger on a scale
+		// of 0-1
+		this.slideTriggers.forEach( ( trigger, i ) => {
+			trigger.range = [
+				rangeStart,
+				rangeStart + Math.max( trigger.page.scrollTriggers.length, 1 ) / this.totalScrollTriggerCount
+			];
+
+			const slideRange = trigger.range[1] - trigger.range[0];
+			const slideRangeSegmentSize = 1 / trigger.page.scrollTriggers.length;
+
+			// Set the range for each inner scroll trigger
+			trigger.page.scrollTriggers.forEach( ( scrollTrigger, i ) => {
+				scrollTrigger.range = [i * slideRangeSegmentSize, ( i + 1 ) * slideRangeSegmentSize];
+				scrollTrigger.globalRange = [
+					rangeStart + scrollTrigger.range[0] * slideRange,
+					rangeStart + scrollTrigger.range[1] * slideRange
+				];
+			} );
+			rangeStart = trigger.range[1];
+		} );
+
+	}
+
+	/**
+	 * Creates one scroll trigger for each fragments in the given page.
+	 *
+	 * @param {*} page
+	 */
+	createFragmentTriggersForPage( page, slideElement ) {
+
+		slideElement = slideElement || page.slideElement;
+
+		// Each fragment 'group' is an array containing one or more
+		// fragments. Multiple fragments that appear at the same time
+		// are part of the same group.
+		const fragmentGroups = this.Reveal.fragments.sort( slideElement.querySelectorAll( '.fragment' ), true );
+
+		// Create scroll triggers that show/hide fragments
+		if( fragmentGroups.length ) {
+			page.fragments = this.Reveal.fragments.sort( slideElement.querySelectorAll( '.fragment:not(.disabled)' ) );
+			page.scrollTriggers.push(
+				// Trigger for the initial state with no fragments visible
+				{
+					activate: () => {
+						this.Reveal.fragments.update( -1, page.fragments, slideElement );
+					}
+				},
+
+				// Triggers for each fragment group
+				...fragmentGroups.map( ( fragments, i ) => ({
+						activate: () => {
+							this.Reveal.fragments.update( i, page.fragments, slideElement );
+						}
+					})
+				)
+			);
+		}
+
+
+		return page.scrollTriggers.length;
+
+	}
+
+	/**
+	 * Creates scroll triggers for the auto-animate steps in the
+	 * given page.
+	 *
+	 * @param {*} page
+	 */
+	createAutoAnimateTriggersForPage( page ) {
+
+		if( page.autoAnimateElements.length > 0 ) {
+
+			// Triggers for each subsequent auto-animate slide
+			this.slideTriggers.push( ...Array.from( page.autoAnimateElements ).map( ( autoAnimateElement, i ) => {
+				let autoAnimatePage = this.createPage({
+					slideElement: autoAnimateElement.querySelector( 'section' ),
+					contentElement: autoAnimateElement,
+					backgroundElement: autoAnimateElement.querySelector( '.slide-background' )
+				});
+
+				// Create fragment scroll triggers for the auto-animate slide
+				this.createFragmentTriggersForPage( autoAnimatePage, autoAnimatePage.slideElement );
+
+				page.autoAnimatePages.push( autoAnimatePage );
+
+				// Return our slide trigger
+				return {
+					page: autoAnimatePage,
+					activate: () => this.activatePage( autoAnimatePage ),
+					deactivate: () => this.deactivatePage( autoAnimatePage )
+				};
+			}));
+		}
+
+	}
+
+	/**
+	 * Helper method for creating a page definition and adding
+	 * required fields. A "page" is a slide or auto-animate step.
+	 */
+	createPage( page ) {
+
+		page.scrollTriggers = [];
+		page.indexh = parseInt( page.slideElement.getAttribute( 'data-index-h' ), 10 );
+		page.indexv = parseInt( page.slideElement.getAttribute( 'data-index-v' ), 10 );
+
+		return page;
+
+	}
+
+	/**
 	 * Rerenders progress bar segments so that they match the current
 	 * reveal.js config and size.
 	 */
@@ -383,39 +534,43 @@ export default class Reader {
 
 		this.progressBarInner.querySelectorAll( '.reader-progress-slide' ).forEach( slide => slide.remove() );
 
-		const viewportHeight = this.viewportElement.offsetHeight;
 		const scrollHeight = this.viewportElement.scrollHeight;
+		const viewportHeight = this.viewportElement.offsetHeight;
+		const viewportHeightFactor = viewportHeight / scrollHeight;
 
 		this.progressBarHeight = this.progressBarInner.offsetHeight;
-		this.playheadHeight = Math.max( this.pages[0].pageHeight / scrollHeight * this.progressBarHeight, MIN_PLAYHEAD_HEIGHT );
+		this.playheadHeight = Math.max( viewportHeightFactor * this.progressBarHeight, MIN_PLAYHEAD_HEIGHT );
 		this.progressBarScrollableHeight = this.progressBarHeight - this.playheadHeight;
 
-		this.progressBarPlayhead.style.height = this.playheadHeight - PROGRESS_SPACING + 'px';
-
 		const progressSegmentHeight = viewportHeight / scrollHeight * this.progressBarHeight;
+		const spacing = Math.min( progressSegmentHeight / 8, MAX_PROGRESS_SPACING );
+
+		this.progressBarPlayhead.style.height = this.playheadHeight - spacing + 'px';
 
 		// Don't show individual segments if they're too small
 		if( progressSegmentHeight > MIN_PROGRESS_SEGMENT_HEIGHT ) {
 
-			this.pages.forEach( page => {
+			this.slideTriggers.forEach( trigger => {
 
+				const { page } = trigger;
+
+				// Visual representation of a slide
 				page.progressBarSlide = document.createElement( 'div' );
 				page.progressBarSlide.className = 'reader-progress-slide';
+				page.progressBarSlide.style.top = trigger.range[0] * this.progressBarHeight + 'px';
+				page.progressBarSlide.style.height = ( trigger.range[1] - trigger.range[0] ) * this.progressBarHeight - spacing + 'px';
 				page.progressBarSlide.classList.toggle( 'has-triggers', page.scrollTriggers.length > 0 );
-				page.progressBarSlide.style.top = page.top / scrollHeight * this.progressBarHeight + 'px';
-				page.progressBarSlide.style.height = page.totalHeight / scrollHeight * this.progressBarHeight - PROGRESS_SPACING + 'px';
 				this.progressBarInner.appendChild( page.progressBarSlide );
 
-				const scrollTriggerTopOffset = page.scrollTriggerHeight / scrollHeight * this.progressBarHeight;
-				const scrollPaddingProgressHeight = page.scrollPadding / scrollHeight * this.progressBarHeight;
+				const scrollBarSlideHeight = ( trigger.range[1] - trigger.range[0] ) * this.progressBarHeight;
 
-				// Create visual representations for each scroll trigger
-				page.scrollTriggerElements = page.scrollTriggers.map( ( trigger, i ) => {
+				// Visual representations of each scroll trigger
+				trigger.page.scrollTriggerElements = page.scrollTriggers.map( ( trigger, i ) => {
 
 					const triggerElement = document.createElement( 'div' );
 					triggerElement.className = 'reader-progress-trigger';
-					triggerElement.style.top = scrollTriggerTopOffset + trigger.range[0] * scrollPaddingProgressHeight + 'px';
-					triggerElement.style.height = ( trigger.range[1] - trigger.range[0] ) * scrollPaddingProgressHeight - PROGRESS_SPACING + 'px';
+					triggerElement.style.top = trigger.range[0] * scrollBarSlideHeight + 'px';
+					triggerElement.style.height = ( trigger.range[1] - trigger.range[0] ) * scrollBarSlideHeight - spacing + 'px';
 					page.progressBarSlide.appendChild( triggerElement );
 
 					if( i === 0 ) triggerElement.style.display = 'none';
@@ -446,13 +601,13 @@ export default class Reader {
 
 			this.progressBarPlayhead.style.transform = `translateY(${progress * this.progressBarScrollableHeight}px)`;
 
-			this.pages
+			this.getAllPages()
 				.filter( page => page.progressBarSlide )
 				.forEach( ( page ) => {
-					page.progressBarSlide.classList.toggle( 'active', !!page.active );
+					page.progressBarSlide.classList.toggle( 'active', page.active === true );
 
 					page.scrollTriggers.forEach( ( trigger, i ) => {
-						page.scrollTriggerElements[i].classList.toggle( 'active', page.active && trigger.active );
+						page.scrollTriggerElements[i].classList.toggle( 'active', page.active === true && trigger.active === true );
 					} );
 				} );
 
@@ -489,100 +644,191 @@ export default class Reader {
 	 */
 	scrollToSlide( slideElement ) {
 
+		// If the reader mode isn't active yet, queue this action
 		if( !this.active ) {
 			this.activatedCallbacks.push( () => this.scrollToSlide( slideElement ) );
 		}
 		else {
-			slideElement.parentNode.scrollIntoView();
+			// Find the trigger for this slide
+			const trigger = this.getScrollTriggerBySlide( slideElement );
+
+			if( trigger ) {
+				// Use the trigger's range to calculate the scroll position
+				this.viewportElement.scrollTop = trigger.range[0] * ( this.viewportElement.scrollHeight - this.viewportElement.offsetHeight );
+			}
 		}
+
+	}
+
+	/**
+	 * Activates the given page and starts its embedded conten
+	 * if there is any.
+	 *
+	 * @param {object} page
+	 */
+	activatePage( page ) {
+
+		if( !page.active ) {
+
+			page.active = true;
+
+			const { slideElement, backgroundElement, contentElement, indexh, indexv } = page;
+
+			contentElement.style.display = 'block';
+
+			slideElement.classList.add( 'present' );
+			backgroundElement.classList.add( 'present' );
+
+			this.Reveal.setCurrentReaderPage( slideElement, indexh, indexv );
+			this.Reveal.backgrounds.bubbleSlideContrastClassToElement( slideElement, this.viewportElement );
+
+			// If this page is part of an auto-animation there will be one
+			// content element per auto-animated page. We need to show the
+			// current page and hide all others.
+			Array.from( contentElement.parentNode.querySelectorAll( '.reader-page-content' ) ).forEach( sibling => {
+				if( sibling !== contentElement ) {
+					sibling.style.display = 'none';
+				}
+			});
+
+		}
+
+	}
+
+	/**
+	 * Deactivates the page after it has been visible.
+	 *
+	 * @param {object} page
+	 */
+	deactivatePage( page ) {
+
+		if( page.active ) {
+
+			page.active = false;
+			page.slideElement.classList.remove( 'present' );
+			page.backgroundElement.classList.remove( 'present' );
+
+		}
+
+	}
+
+	activateTrigger( trigger ) {
+
+		if( !trigger.active ) {
+			trigger.active = true;
+			trigger.activate();
+		}
+
+	}
+
+	deactivateTrigger( trigger ) {
+
+		if( trigger.active ) {
+			trigger.active = false;
+
+			if( trigger.deactivate ) {
+				trigger.deactivate();
+			}
+		}
+
+	}
+
+	/**
+	 * Retrieve a slide by its original h/v index (i.e. the indices the
+	 * slide had before being linearized).
+	 *
+	 * @param {number} h
+	 * @param {number} v
+	 * @returns {HTMLElement}
+	 */
+	getSlideByIndices( h, v ) {
+
+		const page = this.getAllPages().find( page => {
+			return page.indexh === h && page.indexv === v;
+		} );
+
+		return page ? page.slideElement : null;
+
+	}
+
+	/**
+	 * Retrieve a list of all scroll triggers for the given slide
+	 * DOM element.
+	 *
+	 * @param {HTMLElement} slide
+	 * @returns {Array}
+	 */
+	getScrollTriggerBySlide( slide ) {
+
+		return this.slideTriggers.find( trigger => trigger.page.slideElement === slide );
+
+	}
+
+	/**
+	 * Get a list of all pages in the reader moder. This includes
+	 * both top-level slides and auto-animate steps.
+	 *
+	 * @returns {Array}
+	 */
+	getAllPages() {
+
+		return this.pages.flatMap( page => [page, ...(page.autoAnimatePages || [])] );
 
 	}
 
 	onScroll() {
 
 		const viewportHeight = this.viewportElement.offsetHeight;
+		const viewportHeightFactor = viewportHeight / this.viewportElement.scrollHeight;
+
 		const scrollTop = this.viewportElement.scrollTop;
+		const scrollHeight = this.viewportElement.scrollHeight - viewportHeight
+		const scrollProgress = Math.max( Math.min( scrollTop / scrollHeight, 1 ), 0 );
+		const scrollProgressMid = Math.max( Math.min( ( scrollTop + viewportHeight / 2 ) / this.viewportElement.scrollHeight, 1 ), 0 );
 
-		// Find the page closest to the center of the viewport, this
-		// is the page we want to focus and activate
-		const activePage = this.pages.reduce( ( closestPage, page ) => {
+		let activePage;
 
-			// For tall pages with multiple scroll triggers we need to
-			// check the distnace from both the top of the page and the
-			// bottom
-			const distance = Math.min(
-				Math.abs( ( page.top + page.pageHeight / 2 ) - scrollTop - viewportHeight / 2 ),
-				Math.abs( ( page.top + ( page.totalHeight - page.pageHeight / 2 ) ) - scrollTop - viewportHeight / 2 )
-			);
+		this.slideTriggers.forEach( ( trigger ) => {
+			const { page } = trigger;
 
-			return distance < closestPage.distance ? { page, distance } : closestPage;
+			const shouldPreload = scrollProgress >= trigger.range[0] - viewportHeightFactor*2 &&
+														scrollProgress <= trigger.range[1] + viewportHeightFactor*2;
 
-		}, { page: this.pages[0], distance: Infinity } ).page;
-
-		this.pages.forEach( ( page, pageIndex ) => {
-			const isWithinPreloadRange = scrollTop + viewportHeight >= page.top - viewportHeight && scrollTop < page.top + page.bottom + viewportHeight;
-			const isPartiallyVisible = scrollTop + viewportHeight >= page.top && scrollTop < page.top + page.bottom;
-
-			// Preload content when it appears within range
-			if( isWithinPreloadRange ) {
-				if( !page.preloaded ) {
-					page.preloaded = true;
-					this.Reveal.slideContent.load( page.slideElement );
-				}
+			// Load slides that are within the preload range
+			if( shouldPreload && !page.loaded ) {
+				page.loaded = true;
+				this.Reveal.slideContent.load( page.slideElement );
 			}
-			else if( page.preloaded ) {
-				page.preloaded = false;
+			else if( page.loaded ) {
+				page.loaded = false;
 				this.Reveal.slideContent.unload( page.slideElement );
 			}
 
-			// Activate the current page
-			if( page === activePage ) {
-				// Ignore if the page is already active
-				if( !page.active ) {
-					page.active = true;
-					page.pageElement.classList.add( 'present' );
-					page.slideElement.classList.add( 'present' );
-
-					this.Reveal.setCurrentReaderPage( page.pageElement, page.indexh, page.indexv );
-					this.Reveal.slideContent.startEmbeddedContent( page.slideElement );
-					this.Reveal.backgrounds.bubbleSlideContrastClassToElement( page.slideElement, this.viewportElement );
-
-					if( page.backgroundElement ) {
-						this.Reveal.slideContent.startEmbeddedContent( page.backgroundElement );
-					}
-				}
+			// If we're within this trigger range, activate it
+			if( scrollProgress >= trigger.range[0] && scrollProgress <= trigger.range[1] ) {
+				this.activateTrigger( trigger );
+				activePage = trigger.page;
 			}
-			// Deactivate previously active pages
-			else if( page.active ) {
-				page.active = false;
-				page.pageElement.classList.remove( 'present' );
-				page.slideElement.classList.remove( 'present' );
-				this.Reveal.slideContent.stopEmbeddedContent( page.slideElement );
-
-				if( page.backgroundElement ) {
-					this.Reveal.slideContent.stopEmbeddedContent( page.backgroundElement );
-				}
-			}
-
-			// Handle scroll triggers for slides in view
-			if( isPartiallyVisible && page.totalHeight > page.pageHeight ) {
-				let scrollProgress = ( scrollTop - page.top ) / page.scrollPadding;
-				scrollProgress = Math.max( Math.min( scrollProgress, 1 ), 0 );
-
-				page.scrollTriggers.forEach( trigger => {
-					if( scrollProgress >= trigger.range[0] && scrollProgress < trigger.range[1] ) {
-						if( !trigger.active ) {
-							trigger.active = true;
-							this.Reveal.fragments.update( trigger.fragmentIndex, page.fragments, page.slideElement );
-						}
-					}
-					else {
-						trigger.active = false;
-					}
-				} );
+			// .. otherwise deactivate
+			else if( trigger.active ) {
+				this.deactivateTrigger( trigger );
 			}
 		} );
 
+		// Each page can have its own scroll triggers, check if any of those
+		// need to be activated/deactivated
+		if( activePage ) {
+			activePage.scrollTriggers.forEach( ( trigger ) => {
+				if( scrollProgressMid >= trigger.globalRange[0] && scrollProgressMid <= trigger.globalRange[1] ) {
+					this.activateTrigger( trigger );
+				}
+				else if( trigger.active ) {
+					this.deactivateTrigger( trigger );
+				}
+			} );
+		}
+
+		// Update our visual progress indication
 		this.setProgressBarValue( scrollTop / ( this.viewportElement.scrollHeight - viewportHeight ) );
 
 	}
