@@ -3,7 +3,7 @@
 
 # "Carving Unit Tests" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2023-01-07 15:21:35+01:00
+# Last change: 2023-10-16 20:03:09+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -66,7 +66,7 @@ Complex arguments are properly serialized, such that they can be easily restored
 
 ### Synthesizing Calls
 
-While such recorded arguments already could be turned into arguments and calls, a much nicer alternative is to create a _grammar_ for recorded calls.  This allows to synthesize arbitrary _combinations_ of arguments, and also offers a base for further customization of calls.
+While such recorded arguments already could be turned into arguments and calls, a much nicer alternative is to create a _grammar_ for recorded calls.  This allows synthesizing arbitrary _combinations_ of arguments, and also offers a base for further customization of calls.
 
 The `CallGrammarMiner` class turns a list of carved executions into a grammar.
 
@@ -75,19 +75,19 @@ The `CallGrammarMiner` class turns a list of carved executions into a grammar.
 >>> my_sqrt_grammar
 {'': [''],
  '': [''],
- '': ['2', '4'],
+ '': ['4', '2'],
  '': ['my_sqrt()']}
 
 This grammar can be used to synthesize calls.
 
 >>> fuzzer = GrammarCoverageFuzzer(my_sqrt_grammar)
 >>> fuzzer.fuzz()
-'my_sqrt(4)'
+'my_sqrt(2)'
 
 These calls can be executed in isolation, effectively extracting unit tests from system tests:
 
 >>> eval(fuzzer.fuzz())
-1.414213562373095
+2.0
 
 
 For more details, source, and documentation, see
@@ -321,7 +321,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     with CallCarver() as webbrowser_carver:
-        webbrowser("http://www.example.com")
+        webbrowser("https://www.fuzzingbook.org")
 
 if __name__ == '__main__':
     function_list = webbrowser_carver.called_functions(qualified=True)
@@ -691,7 +691,6 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     with CallCarver() as webbrowser_carver:
         webbrowser("https://www.fuzzingbook.org")
-        webbrowser("http://www.example.com")
 
 if __name__ == '__main__':
     m = CallGrammarMiner(webbrowser_carver)
@@ -705,19 +704,16 @@ if __name__ == '__main__':
     print(call_list[:20])
 
 if __name__ == '__main__':
-    webbrowser_grammar["<urlsplit>"]
+    webbrowser_grammar["<urlparse>"]
 
 if __name__ == '__main__':
-    webbrowser_grammar["<urlsplit-url>"]
+    webbrowser_grammar["<urlparse-url>"]
 
 if __name__ == '__main__':
-    webbrowser_grammar["<urlsplit-scheme>"]
-
-if __name__ == '__main__':
-    urlsplit_fuzzer = GrammarCoverageFuzzer(
-        webbrowser_grammar, start_symbol="<urlsplit>")
+    urlparse_fuzzer = GrammarCoverageFuzzer(
+        webbrowser_grammar, start_symbol="<urlparse>")
     for i in range(5):
-        print(urlsplit_fuzzer.fuzz())
+        print(urlparse_fuzzer.fuzz())
 
 from urllib.parse import urlsplit
 
@@ -898,42 +894,47 @@ if __name__ == '__main__':
 
 
 
-if __name__ == '__main__':
-    with ResultCarver() as webbrowser_result_carver:
-        webbrowser("http://www.example.com")
+import sys
 
 if __name__ == '__main__':
-    for function_name in ["urllib.parse.urlparse", "urllib.parse.urlsplit"]:
-        for arguments in webbrowser_result_carver.arguments(function_name):
-            try:
-                call = call_string(function_name, arguments)
-                result = webbrowser_result_carver.result(function_name, arguments)
-                print("assert", call, "==", call_value(result))
-            except Exception:
-                continue
+    if sys.version_info >= (3, 11):  # Requires Python 3.11 or later
+        with ResultCarver() as webbrowser_result_carver:
+            webbrowser("https://www.cispa.de")
+
+if __name__ == '__main__':
+    if sys.version_info >= (3, 11):
+        for function_name in ["urllib.parse.urlparse"]:
+            for arguments in webbrowser_result_carver.arguments(function_name):
+                try:
+                    call = call_string(function_name, arguments)
+                    result = webbrowser_result_carver.result(function_name, arguments)
+                    print("assert", call, "==", call_value(result))
+                except Exception:
+                    continue
 
 from urllib.parse import SplitResult, ParseResult, urlparse, urlsplit
 
 if __name__ == '__main__':
-    assert urlparse(
-        url='http://www.example.com',
-        scheme='',
-        allow_fragments=True) == ParseResult(
-            scheme='http',
-            netloc='www.example.com',
-            path='',
-            params='',
-            query='',
-        fragment='')
-    assert urlsplit(
-        url='http://www.example.com',
-        scheme='',
-        allow_fragments=True) == SplitResult(
-            scheme='http',
-            netloc='www.example.com',
-            path='',
-            query='',
-        fragment='')
+    if sys.version_info >= (3, 11):
+        assert urlparse(
+            url='http://www.cispa.de',
+            scheme='',
+            allow_fragments=True) == ParseResult(
+                scheme='http',
+                netloc='www.cispa.de',
+                path='',
+                params='',
+                query='',
+            fragment='')
+        assert urlsplit(
+            url='http://www.cispa.de',
+            scheme='',
+            allow_fragments=True) == SplitResult(
+                scheme='http',
+                netloc='www.cispa.de',
+                path='',
+                query='',
+            fragment='')
 
 ### Exercise 2: Abstracting Arguments
 

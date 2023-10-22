@@ -3,7 +3,7 @@
 
 # "When To Stop Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2023-01-07 15:42:44+01:00
+# Last change: 2023-10-16 19:54:08+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
-from typing import Dict
+from typing import Dict, List
 
 ## The Enigma Machine
 ## ------------------
@@ -324,8 +324,8 @@ if __name__ == '__main__':
     # frequency of rare trigrams
     plt.figure(num=None, figsize=(12, 4), dpi=80, facecolor='w', edgecolor='k')
     plt.subplot(1, 2, 1)
-    plt.hist(frequencies, range=[1, 21], bins=numpy.arange(1, 21) - 0.5)
-    plt.xticks(range(1, 21))
+    plt.hist(frequencies, range=[1, 21], bins=numpy.arange(1, 21) - 0.5)  # type: ignore
+    plt.xticks(range(1, 21))  # type: ignore
     plt.xlabel('# of occurances (e.g., 1 represents singleton trigrams)')
     plt.ylabel('Frequency of occurances')
     plt.title('Figure 1. Frequency of Rare Trigrams')
@@ -646,7 +646,7 @@ if __name__ == '__main__':
     line_gt, = plt.semilogy(gt_timeseries, label="Good-Turing")
     plt.legend(handles=[line_emp, line_gt])
     plt.xticks(range(0, measurements + 1, int(measurements / 5)),
-               range(0, trials + 1, int(trials / 5)))
+               range(0, trials + 1, int(trials / 5)))  # type: ignore
     plt.xlabel('# of fuzz inputs')
     plt.ylabel('discovery probability')
     plt.title('Discovery Probability Over Time');
@@ -722,7 +722,7 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    prediction_ts = [None] * time
+    prediction_ts: List[float] = [None] * time  # type: ignore
     f0 = hat_S - Sn
 
     for m in range(trials - time):
@@ -743,7 +743,7 @@ if __name__ == '__main__':
     line_pred, = plt.plot(prediction_ts, linestyle='--',
                           color='black', label="Predicted progress")
     plt.legend(handles=[line_cur, line_pred])
-    plt.xticks(range(0, trials + 1, int(time)))
+    plt.xticks(range(0, trials + 1, int(time)))  # type: ignore
     plt.xlabel('# of fuzz inputs')
     plt.ylabel('# of traces exercised')
 
@@ -753,7 +753,7 @@ if __name__ == '__main__':
     line_pred, = plt.plot(prediction_ts, linestyle='--',
                           color='black', label="Predicted progress")
     plt.legend(handles=[line_emp, line_cur, line_pred])
-    plt.xticks(range(0, trials + 1, int(time)))
+    plt.xticks(range(0, trials + 1, int(time)))  # type: ignore
     plt.xlabel('# of fuzz inputs')
     plt.ylabel('# of traces exercised');
 
@@ -921,7 +921,7 @@ if __name__ == '__main__':
     line_gt, = plt.semilogy(gt_timeseries, label="Good-Turing")
     plt.legend(handles=[line_emp, line_gt])
     plt.xticks(range(0, measurements + 1, int(measurements / 5)),
-               range(0, trials + 1, int(trials / 5)))
+               range(0, trials + 1, int(trials / 5)))  # type: ignore
     plt.xlabel('# of fuzz inputs')
     plt.ylabel('discovery probability')
     plt.title('Discovery Probability Over Time');
@@ -980,7 +980,7 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    prediction_ts = [None] * time
+    prediction_ts: List[float] = [None] * time  # type: ignore
     Q0 = hat_S - Sn
 
     for m in range(trials - time):

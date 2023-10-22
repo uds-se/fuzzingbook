@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2023-01-07 15:19:47+01:00
+# Last change: 2023-10-16 20:10:41+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -75,7 +75,7 @@ Here, we instantiate the ISLa solver with a constraint stating that the area cod
 With that, invoking `solver.solve()` returns a _solution_ for the constraints.
 
 >>> str(solver.solve())
-'(902)649-3516'
+'(902)957-8639'
 
 `solve()` returns a derivation tree, which typically is converted into a string using `str()` as above. The `print()` function does this implicitly.
 
@@ -83,22 +83,22 @@ Subsequent calls of `solve()` return more solutions:
 
 >>> for _ in range(10):
 >>>     print(solver.solve())
-(902)520-7480
-(902)401-9809
-(902)851-6086
-(902)384-8937
-(902)734-8347
-(902)918-9849
-(902)285-1666
-(902)621-6187
-(902)943-1442
-(905)695-2725
+(902)502-1436
+(902)474-8543
+(902)272-3243
+(902)372-2492
+(902)887-2797
+(902)640-7715
+(902)767-9108
+(902)377-4904
+(902)401-3406
+(908)257-9854
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
 
 The `ISLaSolver()` constructor provides several additional parameters to configure the solver, as documented below.
-Additional `ISLaSolver` methods allow to check inputs against constraints, and provide additional functionality.
+Additional `ISLaSolver` methods allow checking inputs against constraints, and provide additional functionality.
 The ISLa functionality is also available on the command line:
 
 >>> !isla --help
@@ -312,7 +312,7 @@ if __name__ == '__main__':
          [
              "`<pagesize> is <bufsize>`",
              "`str.to.int(<pagesize>) = str.to.int(<bufsize>)`",
-             "`<pagesize>) = <bufsize>`",
+             "`<pagesize> = <bufsize>`",
              "`atoi(<pagesize>) == atoi(<bufsize>)`",
          ], "[4 ** 0.5, 9 ** 0.5]")
 

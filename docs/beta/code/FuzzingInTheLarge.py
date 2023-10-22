@@ -3,7 +3,7 @@
 
 # "Fuzzing in the Large" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2023-01-07 15:55:19+01:00
+# Last change: 2023-10-16 19:53:16+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -240,8 +240,11 @@ if __name__ == '__main__':
 
 import time
 
+DELAY_AFTER_START = 3
+DELAY_AFTER_CLICK = 1.5
+
 if __name__ == '__main__':
-    time.sleep(2)
+    time.sleep(DELAY_AFTER_START)
 
 ### End of Excursion
 
@@ -292,7 +295,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     login = gui_driver.find_element(By.TAG_NAME, "button")
     login.click()
-    time.sleep(1)
+    time.sleep(DELAY_AFTER_CLICK)
 
 if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
@@ -420,7 +423,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     crash = gui_driver.find_element(By.XPATH, '//td/a[contains(@href,"/crashmanager/crashes/")]')
     crash.click()
-    time.sleep(1)
+    time.sleep(DELAY_AFTER_CLICK)
 
 if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
@@ -439,7 +442,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     create = gui_driver.find_element(By.XPATH, '//a[contains(@href,"/signatures/new/")]')
     create.click()
-    time.sleep(1)
+    time.sleep(DELAY_AFTER_CLICK)
 
 if __name__ == '__main__':
     gui_driver.set_window_size(1400, 1200)
@@ -450,7 +453,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     save = gui_driver.find_element(By.NAME, "submit_save")
     save.click()
-    time.sleep(1)
+    time.sleep(DELAY_AFTER_CLICK)
 
 ### Crash Signatures
 
@@ -662,7 +665,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     first_id = gui_driver.find_element(By.XPATH, '//td/a[contains(@href,"/browse")]')
     first_id.click()
-    time.sleep(1)
+    time.sleep(DELAY_AFTER_CLICK)
 
 if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
@@ -670,7 +673,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     maze_cpp = gui_driver.find_element(By.XPATH, "//*[contains(text(), 'maze.cpp')]")
     maze_cpp.click()
-    time.sleep(1)
+    time.sleep(DELAY_AFTER_CLICK)
 
 if __name__ == '__main__':
     gui_driver.set_window_size(1400, 1400)
