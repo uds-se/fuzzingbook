@@ -512,6 +512,7 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--title="$(BOOKTITLE)" \
 	--authors="$(AUTHORS)" \
 	--twitter="$(TWITTER)" \
+	--mastodon="$(MASTODON)" \
 	--all-chapters="$(ALL_CHAPTER_SOURCES) $(APPENDICES_SOURCES)" \
 	--public-chapters="$(CHAPTER_SOURCES) $(APPENDICES_SOURCES)" \
 	--ready-chapters="$(READY_SOURCES)" \

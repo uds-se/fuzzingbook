@@ -35,6 +35,7 @@ parser.add_argument("--project", help="project name", default="fuzzingbook")
 parser.add_argument("--title", help="book title", default="The Fuzzing Book")
 parser.add_argument("--authors", help="list of authors", default="A. Zeller et al.")
 parser.add_argument("--twitter", help="twitter handle", default="@FuzzingBook")
+parser.add_argument("--mastodon", help="mastodon.social handle", default="@TheFuzzingBook")
 parser.add_argument("--menu-prefix", help="prefix to html files in menu")
 parser.add_argument("--all-chapters", help="List of all chapters")
 parser.add_argument("--public-chapters", help="List of public chapters")
@@ -49,6 +50,7 @@ project = args.project
 booktitle = args.title
 authors = args.authors
 twitter = args.twitter
+mastodon = args.mastodon
 
 site_html = f"https://www.{project}.org/"
 github_html = f"https://github.com/uds-se/{project}/"
@@ -74,8 +76,10 @@ menu_start = r"""
 menu_end = r"""
      <li class="has-sub"><a href="#"><span title="Share"><i class="fa fa-fw fa-comments"></i> </span> <span class="menu_4">Share</span></a>
         <ul>
-            <li><a href="__SHARE_TWITTER__" target="popup" __TWITTER_ONCLICK__><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
+<!--
+            <li><a href="__SHARE_TWITTER__" target="popup" __TWITTER_ONCLICK__><i class="fa fa-fw fa-twitter"></i> Share on X</a>
             <li><a href="__SHARE_FACEBOOK__" target="popup" __FACEBOOK_ONCLICK__><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
+-->
             <li><a href="__SHARE_MAIL__"><i class="fa fa-fw fa-envelope"></i> Share by Email</a>
             <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
         </ul>
@@ -1005,6 +1009,7 @@ if args.home:
 chapter_contents = re.sub(r"<title>.*</title>", 
     "<title>" + page_title + "</title>", chapter_contents, 1)
 
+# Add a beta warning
 beta_warning = None
 if is_todo_chapter:
     beta_warning = '<p><em class="beta">' + todo_suffix + '&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p>'
@@ -1013,6 +1018,10 @@ elif is_ready_chapter:
 
 if beta_warning is not None:
     chapter_contents = chapter_contents.replace("</h1>", "</h1>" + beta_warning)
+
+# Add a Mastodon verification link
+chapter_contents = re.sub(r"</title>", 
+    f'</title>\n<link rel="me" href="https://mastodon.social/{mastodon}">', chapter_contents, 1)
 
 # And write it out again
 print("post_html.py: Writing", chapter_html_file)
