@@ -995,7 +995,8 @@ publish-html: html publish-html-setup \
 	$(DOCS_TARGET)html/00_Index.html \
 	$(DOCS_TARGET)html/00_Table_of_Contents.html \
 	$(DOCS_TARGET)html/custom.css \
-	$(DOCS_TARGET)html/favicon \
+	$(DOCS_TARGET)html/mastodon-timeline.css \
+	$(DOCS_TARGET)html/mastodon-timeline.js \
 	$(DOCS:%=$(DOCS_TARGET)html/%.html) \
 	$(DOCS:%=$(DOCS_TARGET)html/%_files)
 
