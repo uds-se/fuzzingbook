@@ -30,7 +30,7 @@ UTILITY_FILES = \
 	PrettyTable.py \
 	README.md \
 	import_notebooks.py \
-	set_fixed_seed.py
+	setup.py
 
 # Where the notebooks are
 NOTEBOOKS = notebooks
