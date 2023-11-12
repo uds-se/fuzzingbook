@@ -48,7 +48,7 @@ RENDERED_NOTEBOOKS = rendered
 # Git repo
 GITHUB_REPO = https://github.com/uds-se/$(PROJECT)/
 BINDER_URL = https://mybinder.org/v2/gh/uds-se/$(PROJECT)/master?filepath=docs/beta/notebooks/00_Table_of_Contents.ipynb
-PROJECT_URL = https://beta.$(PROJECT).org
+PROJECT_URL = https://www.$(PROJECT).org/beta/
 
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
