@@ -3,7 +3,7 @@
 
 # "Timeout" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Timeout.html
-# Last change: 2023-10-16 20:13:12+02:00
+# Last change: 2023-11-12 13:56:13+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
