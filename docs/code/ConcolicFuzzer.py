@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2023-10-16 20:11:27+02:00
+# Last change: 2023-11-12 13:47:22+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -97,11 +97,11 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 '++A'
 '+++'
 'A'
+'+A'
+'+++A'
 
 IndexError: string index out of range (expected)
 
-'+A'
-'+++A'
 '+AB'
 '++'
 '%'
@@ -141,23 +141,15 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 select 245 from :2 where r(_)-N+e>n
 Table (':2') was not found
 
-delete from vehicles where Q/x/j/q(p)/H*h-B==cz
+delete from months where Q/x/j/q(p)/H*h-B==cz
 Invalid WHERE ('Q/x/j/q(p)/H*h-B==cz')
 
-insert into months (:b) values (22.72)
+insert into vehicles (:b) values (22.72)
 Column (':b') was not found
 
-select i*q!=(4) from months where L*S/l/u/b+b==W
+select i*q!=(4) from vehicles where L*S/l/u/b+b==W
 
-delete from months where W/V!=A(f)+tW*x>L
-Invalid WHERE ('(b==D)-_/W+z/s/e>W*x>L')
-
-select E((f),C) from vehicles where I+g-y-v+G>y-P*l
-
-select _ from vehicles
-Invalid WHERE ('(_)')
-
-delete from vehicles where _*A-w-R
+delete from vehicles where W/V!=A(f)+tL+S))==((:+lL+S))==((:+l
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
 at https://www.fuzzingbook.org/html/ConcolicFuzzer.html

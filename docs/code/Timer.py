@@ -3,7 +3,7 @@
 
 # "Timer" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Timer.html
-# Last change: 2023-10-16 20:13:07+02:00
+# Last change: 2023-11-12 13:56:07+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -47,7 +47,7 @@ The `Timer` class allows you to measure elapsed real time (in fractional seconds
 >>> with Timer() as t:
 >>>     some_long_running_function()
 >>> t.elapsed_time()
-0.024697457993170246
+0.024873708998711663
 
 
 For more details, source, and documentation, see
