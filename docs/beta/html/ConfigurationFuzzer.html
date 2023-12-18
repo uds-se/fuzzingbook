@@ -12,6 +12,7 @@ with fuzzingbook adaptations -->
 <html>
 <head>
 <meta charset="utf-8" /><title>Testing Configurations - The Fuzzing Book</title>
+<link rel="me" href="https://mastodon.social/@TheFuzzingBook">
 
 <style type="text/css">
     /*!
@@ -11901,7 +11902,7 @@ MathJax.Hub.Config({
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs</a></li>
 </ul><li class="has-sub"><a href="04_Semantical_Fuzzing.html" class="chapters"><span class="part_number">IV</span> Semantic Fuzzing <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
-<li><a href="FuzzingWithConstraints.html">Fuzzing with Constraints <strong class="new_chapter">&bull;</strong></a></li>
+<li><a href="FuzzingWithConstraints.html">Fuzzing with Constraints</a></li>
 <li><a href="GrammarMiner.html">Mining Input Grammars</a></li>
 <li><a href="InformationFlow.html">Tracking Information Flow</a></li>
 <li><a href="ConcolicFuzzer.html">Concolic Fuzzing</a></li>
@@ -11912,6 +11913,7 @@ MathJax.Hub.Config({
 <li><a href="ConfigurationFuzzer.html" class="this_page">Testing Configurations</a></li>
 <li><a href="APIFuzzer.html">Fuzzing APIs</a></li>
 <li><a href="Carver.html">Carving Unit Tests</a></li>
+<li><a href="PythonFuzzer.html">Testing Compilers <strong class="new_chapter">&bull;</strong></a></li>
 <li><a href="WebFuzzer.html">Testing Web Applications</a></li>
 <li><a href="GUIFuzzer.html">Testing Graphical User Interfaces</a></li>
 </ul><li class="has-sub"><a href="06_Managing_Fuzzing.html" class="chapters"><span class="part_number">VI</span> Managing Fuzzing <i class="fa fa-fw fa-caret-right"></i></a>
@@ -11975,12 +11977,14 @@ MathJax.Hub.Config({
      
      <li class="has-sub"><a href="#"><span title="Share"><i class="fa fa-fw fa-comments"></i> </span> <span class="menu_4">Share</span></a>
         <ul>
+<!--
             <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22Testing%20Configurations%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fConfigurationFuzzer.html" target="popup" 
 onclick="window.open('https://twitter.com/intent/tweet?text=I%20just%20read%20%22Testing%20Configurations%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fConfigurationFuzzer.html','popup','width=600,height=600'); return false;"
-><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
+><i class="fa fa-fw fa-twitter"></i> Share on X</a>
             <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fConfigurationFuzzer.html" target="popup" 
 onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fConfigurationFuzzer.html','popup','width=600,height=600'); return false;"
 ><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
+-->
             <li><a href="mailto:?subject=Testing%20Configurations&body=I%20just%20read%20%22Testing%20Configurations%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fConfigurationFuzzer.html"><i class="fa fa-fw fa-envelope"></i> Share by Email</a>
             <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
         </ul>
@@ -12061,7 +12065,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils.setup</a></span>
 </pre></div>
 
 </div>
@@ -12242,17 +12246,17 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">convert_ebnf_grammar</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">convert_ebnf_grammar</span><span class="p">(</span><span class="n">option_ebnf_grammar</span><span class="p">))</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
-<span class="p">[</span><span class="s1">&#39; foo.py&#39;</span><span class="p">,</span>
- <span class="s1">&#39; --verbose --ignore-local-config --line-range -1 78 --jobs -43 --pep8-passes 6 -i --indent-size 2 --range -59330 -0 -r --diff --exit-code --global-config KC --aggressive --recursive --ignore 37~ --help --experimental -v -p 7 --hang-closing --exclude t -d -h --in-place --version -a --list-fixes --max-line-length 4 --select e* -j 635 --select 5ulP --ignore G --global-config -E --ignore q --exclude 2^ --global-config &quot;r --select z --ignore F6 --exclude Xd --exclude ,8 --global-config A --ignore L --ignore Q --global-config 4 --ignore O= --ignore /.m[ --ignore Dy --ignore :s --ignore v --exclude R --ignore B&lt; --exclude $ --select ko --global-config N --global-config @ --ignore hZU</span><span class="si">% --g</span><span class="s1">lobal-config 0) --exclude n!JT --ignore ? --exclude #&amp;M --select ; --exclude </span><span class="se">\\</span><span class="s1"> --ignore 1 --global-config |I --select &gt; --global-config pb --select V --global-config 9 --global-config Hcwg{Sj --global-config ` --global-config i}W --ignore x --select _ --select ](</span><span class="se">\&#39;</span><span class="s1">f+6 --select a]Y --exclude * --global-config z --ignore-local-config --aggressive foo.py&#39;</span><span class="p">,</span>
- <span class="s1">&#39; foo.py&#39;</span><span class="p">]</span>
+<span class="p">[</span><span class="s1">&#39; --list-fixes foo.py&#39;</span><span class="p">,</span>
+ <span class="s1">&#39; --version -i --range -5 04 --aggressive --diff -j 817 --help -d --hang-closing -p 26 -a --verbose --exclude |g -v --global-config f --recursive --ignore .= -r --experimental -h --line-range -317 9 --pep8-passes 8 --max-line-length 2 --indent-size 0 --in-place foo.py&#39;</span><span class="p">,</span>
+ <span class="s1">&#39; --ignore-local-config --jobs 92 --exit-code --select Q&quot;6 --global-config (h --ignore )` --select M --select t,</span><span class="se">\\</span><span class="s1">Z --global-config u5 --global-config ! --ignore &lt;*p --ignore # --global-config c8N[ --ignore </span><span class="se">\&#39;</span><span class="s1">x --global-config 09+ --select Y --ignore @ --global-config K --global-config T --exclude E --select odCAH --global-config DFR --ignore s --select ; --global-config Wyi --global-config q2 --exclude - --ignore r --global-config { --global-config zv$} --global-config 3O --ignore e]&gt;lUSb --exclude V^ --global-config LBj --global-config X --select _ --exclude n4 --global-config %&amp;/: --select a --global-config k --ignore 1 --ignore G~m?7 --exclude PJX --select I --select w -d foo.py&#39;</span><span class="p">]</span>
 </pre></div>
 <p>The <code>OptionFuzzer</code> class summarizes these steps.  Its constructor takes an <code>OptionRunner</code> to automatically extract the grammar; it does the necessary steps to extract the grammar and fuzz with it.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">autopep8_runner</span> <span class="o">=</span> <span class="n">OptionRunner</span><span class="p">(</span><span class="s2">&quot;autopep8&quot;</span><span class="p">,</span> <span class="s2">&quot;foo.py&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">autopep8_fuzzer</span> <span class="o">=</span> <span class="n">OptionFuzzer</span><span class="p">(</span><span class="n">autopep8_runner</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">autopep8_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
 <span class="p">[</span><span class="s1">&#39; foo.py&#39;</span><span class="p">,</span>
- <span class="s2">&quot; -a -d -i --help --verbose --exclude + --in-place --max-line-length -29 --line-range -7 3 -v --aggressive --indent-size -01 --jobs 6489550 --global-config !KGD&#39;V -r -j 106 --list-fixes --hang-closing foo.py&quot;</span><span class="p">,</span>
- <span class="s1">&#39; --exit-code -h --recursive --pep8-passes -0 --ignore ) --ignore-local-config --diff --experimental --version --range 3 -542 -p 56 --select k --diff -h --diff foo.py&#39;</span><span class="p">]</span>
+ <span class="s1">&#39; -a --hang-closing --aggressive --help -h --ignore : --verbose --diff --jobs 68 --line-range 4 -159 --indent-size -0 -d -i --range 27 38 --experimental --global-config gt --ignore-local-config --exit-code --in-place -v foo.py&#39;</span><span class="p">,</span>
+ <span class="s1">&#39; --select ?H --pep8-passes 7 --max-line-length -154 -r --exclude P --recursive --list-fixes -j 77 --version -p 71 --global-config )c --select 4!m/ --ignore 1d3 --select ~ --ignore b[^ --global-config qn --exclude &gt;V --exclude 2 --select $_iUzQ].0 --select ; --ignore 5M --ignore 9 --select pN`C --ignore 76(J --select Dh --exclude ov&quot; -h foo.py&#39;</span><span class="p">]</span>
 </pre></div>
 <p>The final step in testing would now to invoke the program with these arguments.</p>
 <p>Note that <code>OptionRunner</code> is experimental: It assumes that the Python program in question uses the <code>argparse</code> module; and not all <code>argparse</code> features are supported.  Still, it does a pretty good job even on nontrivial programs.</p>
@@ -12260,58 +12264,58 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 7.0.2 (20221119.0110)
+<!-- Generated by graphviz version 9.0.0 (20230911.1827)
  -->
 <!-- Pages: 1 -->
-<svg width="589pt" height="704pt"
- viewBox="0.00 0.00 589.00 704.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 700)">
+<svg width="586pt" height="729pt"
+ viewBox="0.00 0.00 586.12 729.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 725)">
 <g id="a_graph0"><a xlink:title="OptionRunner class hierarchy">
-<polygon fill="white" stroke="none" points="-4,4 -4,-700 585,-700 585,4 -4,4"/>
+<polygon fill="white" stroke="none" points="-4,4 -4,-725 582.12,-725 582.12,4 -4,4"/>
 </a>
 </g>
 <!-- OptionRunner -->
 <g id="node1" class="node">
 <title>OptionRunner</title>
 <g id="a_node1"><a xlink:href="#" xlink:title="class OptionRunner:&#10;Run a program while determining its option grammar">
-<polygon fill="none" stroke="black" points="1.5,-32 1.5,-162 114.5,-162 114.5,-32 1.5,-32"/>
-<text text-anchor="start" x="14" y="-147.8" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">OptionRunner</text>
-<polyline fill="none" stroke="black" points="1.5,-139 114.5,-139"/>
+<polygon fill="none" stroke="black" points="1.5,-32.62 1.5,-167.88 113.5,-167.88 113.5,-32.62 1.5,-32.62"/>
+<text text-anchor="start" x="14" y="-151.57" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">OptionRunner</text>
+<polyline fill="none" stroke="black" points="1.5,-141.88 113.5,-141.88"/>
 <g id="a_node1_0"><a xlink:href="#" xlink:title="OptionRunner">
 <g id="a_node1_1"><a xlink:href="#" xlink:title="__init__(self, program: Union[str, List[str]], arguments: Optional[str] = None, *, log: bool = False, miner_class: Optional[Type[OptionGrammarMiner]] = None):&#10;Constructor.&#10;`program` &#45; the (Python) program to be executed&#10;`arguments` &#45; an (optional) string with arguments for `program`&#10;`log` &#45; if True, enable logging in miner&#10;`miner_class` &#45; the `OptionGrammarMiner` class to be used&#10;(default: `OptionGrammarMiner`)">
-<text text-anchor="start" x="10" y="-127.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+<text text-anchor="start" x="9.5" y="-129.38" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
 </a>
 </g>
 <g id="a_node1_2"><a xlink:href="#" xlink:title="ebnf_grammar(self):&#10;Return extracted grammar in EBNF form">
-<text text-anchor="start" x="10" y="-116.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">ebnf_grammar()</text>
+<text text-anchor="start" x="9.5" y="-118.12" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">ebnf_grammar()</text>
 </a>
 </g>
 <g id="a_node1_3"><a xlink:href="#" xlink:title="grammar(self):&#10;Return extracted grammar in BNF form">
-<text text-anchor="start" x="10" y="-105.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">grammar()</text>
+<text text-anchor="start" x="9.5" y="-106.88" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">grammar()</text>
 </a>
 </g>
 <g id="a_node1_4"><a xlink:href="#" xlink:title="executable(self)">
-<text text-anchor="start" x="10" y="-93.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">executable()</text>
+<text text-anchor="start" x="9.5" y="-94.62" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">executable()</text>
 </a>
 </g>
 <g id="a_node1_5"><a xlink:href="#" xlink:title="find_contents(self)">
-<text text-anchor="start" x="10" y="-82.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">find_contents()</text>
+<text text-anchor="start" x="9.5" y="-83.38" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">find_contents()</text>
 </a>
 </g>
 <g id="a_node1_6"><a xlink:href="#" xlink:title="find_grammar(self)">
-<text text-anchor="start" x="10" y="-71.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">find_grammar()</text>
+<text text-anchor="start" x="9.5" y="-72.12" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">find_grammar()</text>
 </a>
 </g>
 <g id="a_node1_7"><a xlink:href="#" xlink:title="invoker(self)">
-<text text-anchor="start" x="10" y="-60.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">invoker()</text>
+<text text-anchor="start" x="9.5" y="-60.88" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">invoker()</text>
 </a>
 </g>
 <g id="a_node1_8"><a xlink:href="#" xlink:title="set_arguments(self, args)">
-<text text-anchor="start" x="10" y="-49.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">set_arguments()</text>
+<text text-anchor="start" x="9.5" y="-49.62" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">set_arguments()</text>
 </a>
 </g>
 <g id="a_node1_9"><a xlink:href="#" xlink:title="set_invocation(self, program)">
-<text text-anchor="start" x="10" y="-38.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">set_invocation()</text>
+<text text-anchor="start" x="9.5" y="-38.38" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">set_invocation()</text>
 </a>
 </g>
 </a>
@@ -12323,12 +12327,12 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <g id="node2" class="node">
 <title>ProgramRunner</title>
 <g id="a_node2"><a xlink:href="Fuzzer.html" xlink:title="class ProgramRunner:&#10;Test a program with inputs.">
-<polygon fill="none" stroke="black" points="0,-230.5 0,-272.5 116,-272.5 116,-230.5 0,-230.5"/>
-<text text-anchor="start" x="8" y="-258.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">ProgramRunner</text>
-<polyline fill="none" stroke="black" points="0,-249.5 116,-249.5"/>
+<polygon fill="none" stroke="black" points="0,-237 0,-282.25 115,-282.25 115,-237 0,-237"/>
+<text text-anchor="start" x="8" y="-265.95" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">ProgramRunner</text>
+<polyline fill="none" stroke="black" points="0,-256.25 115,-256.25"/>
 <g id="a_node2_10"><a xlink:href="#" xlink:title="ProgramRunner">
 <g id="a_node2_11"><a xlink:href="Fuzzer.html" xlink:title="__init__(self, program: Union[str, List[str]]) &#45;&gt; None:&#10;Initialize.&#10;`program` is a program spec as passed to `subprocess.run()`">
-<text text-anchor="start" x="28" y="-238" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+<text text-anchor="start" x="27.5" y="-243.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
 </a>
 </g>
 </a>
@@ -12339,39 +12343,39 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <!-- OptionRunner&#45;&gt;ProgramRunner -->
 <g id="edge1" class="edge">
 <title>OptionRunner&#45;&gt;ProgramRunner</title>
-<path fill="none" stroke="black" d="M58,-161.79C58,-181.76 58,-202.89 58,-219.53"/>
-<polygon fill="none" stroke="black" points="54.5,-219.25 58,-229.25 61.5,-219.25 54.5,-219.25"/>
+<path fill="none" stroke="black" d="M57.5,-167.99C57.5,-187.81 57.5,-208.66 57.5,-225.37"/>
+<polygon fill="none" stroke="black" points="54,-225.21 57.5,-235.21 61,-225.21 54,-225.21"/>
 </g>
 <!-- Runner -->
 <g id="node3" class="node">
 <title>Runner</title>
 <g id="a_node3"><a xlink:href="Fuzzer.html" xlink:title="class Runner:&#10;Base class for testing inputs.">
-<polygon fill="none" stroke="black" points="19.5,-309.5 19.5,-403.5 96.5,-403.5 96.5,-309.5 19.5,-309.5"/>
-<text text-anchor="start" x="35" y="-389.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">Runner</text>
-<polyline fill="none" stroke="black" points="19.5,-380.5 96.5,-380.5"/>
+<polygon fill="none" stroke="black" points="19.5,-319.25 19.5,-417.5 95.5,-417.5 95.5,-319.25 19.5,-319.25"/>
+<text text-anchor="start" x="34.62" y="-401.2" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">Runner</text>
+<polyline fill="none" stroke="black" points="19.5,-391.5 95.5,-391.5"/>
 <g id="a_node3_12"><a xlink:href="#" xlink:title="Runner">
 <g id="a_node3_13"><a xlink:href="Fuzzer.html" xlink:title="FAIL = &#39;FAIL&#39;">
-<text text-anchor="start" x="28" y="-368" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">FAIL</text>
+<text text-anchor="start" x="27.5" y="-378" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">FAIL</text>
 </a>
 </g>
 <g id="a_node3_14"><a xlink:href="Fuzzer.html" xlink:title="PASS = &#39;PASS&#39;">
-<text text-anchor="start" x="28" y="-357" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">PASS</text>
+<text text-anchor="start" x="27.5" y="-366.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">PASS</text>
 </a>
 </g>
 <g id="a_node3_15"><a xlink:href="Fuzzer.html" xlink:title="UNRESOLVED = &#39;UNRESOLVED&#39;">
-<text text-anchor="start" x="28" y="-346" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">UNRESOLVED</text>
+<text text-anchor="start" x="27.5" y="-355.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">UNRESOLVED</text>
 </a>
 </g>
 </a>
 </g>
-<polyline fill="none" stroke="black" points="19.5,-339.5 96.5,-339.5"/>
+<polyline fill="none" stroke="black" points="19.5,-349.75 95.5,-349.75"/>
 <g id="a_node3_16"><a xlink:href="#" xlink:title="Runner">
 <g id="a_node3_17"><a xlink:href="Fuzzer.html" xlink:title="__init__(self) &#45;&gt; None:&#10;Initialize">
-<text text-anchor="start" x="28" y="-328.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+<text text-anchor="start" x="27.5" y="-337.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
 </a>
 </g>
 <g id="a_node3_18"><a xlink:href="Fuzzer.html" xlink:title="run(self, inp: str) &#45;&gt; Any:&#10;Run the runner with the given input">
-<text text-anchor="start" x="28" y="-317.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">run()</text>
+<text text-anchor="start" x="27.5" y="-326" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">run()</text>
 </a>
 </g>
 </a>
@@ -12382,23 +12386,23 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <!-- ProgramRunner&#45;&gt;Runner -->
 <g id="edge2" class="edge">
 <title>ProgramRunner&#45;&gt;Runner</title>
-<path fill="none" stroke="black" d="M58,-272.36C58,-279.92 58,-288.97 58,-298.28"/>
-<polygon fill="none" stroke="black" points="54.5,-298.15 58,-308.15 61.5,-298.15 54.5,-298.15"/>
+<path fill="none" stroke="black" d="M57.5,-282.74C57.5,-290.13 57.5,-298.75 57.5,-307.6"/>
+<polygon fill="none" stroke="black" points="54,-307.36 57.5,-317.36 61,-307.36 54,-307.36"/>
 </g>
 <!-- OptionFuzzer -->
 <g id="node4" class="node">
 <title>OptionFuzzer</title>
 <g id="a_node4"><a xlink:href="#" xlink:title="class OptionFuzzer:&#10;Fuzz a (Python) program using its arguments">
-<polygon fill="none" stroke="black" points="172.5,-70.5 172.5,-123.5 271.5,-123.5 271.5,-70.5 172.5,-70.5"/>
-<text text-anchor="start" x="180.5" y="-109.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">OptionFuzzer</text>
-<polyline fill="none" stroke="black" points="172.5,-100.5 271.5,-100.5"/>
+<polygon fill="none" stroke="black" points="171.25,-72 171.25,-128.5 269.75,-128.5 269.75,-72 171.25,-72"/>
+<text text-anchor="start" x="179.25" y="-112.2" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">OptionFuzzer</text>
+<polyline fill="none" stroke="black" points="171.25,-102.5 269.75,-102.5"/>
 <g id="a_node4_19"><a xlink:href="#" xlink:title="OptionFuzzer">
 <g id="a_node4_20"><a xlink:href="#" xlink:title="__init__(self, runner: OptionRunner, *args, **kwargs):&#10;Constructor. `runner` is an OptionRunner.">
-<text text-anchor="start" x="192" y="-89.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+<text text-anchor="start" x="190.5" y="-90" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
 </a>
 </g>
 <g id="a_node4_21"><a xlink:href="#" xlink:title="run(self, runner=None, inp=&#39;&#39;):&#10;Run `runner` with fuzz input">
-<text text-anchor="start" x="192" y="-78.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">run()</text>
+<text text-anchor="start" x="190.5" y="-78.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">run()</text>
 </a>
 </g>
 </a>
@@ -12410,42 +12414,42 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <g id="node5" class="node">
 <title>GrammarCoverageFuzzer</title>
 <g id="a_node5"><a xlink:href="GrammarCoverageFuzzer.html" xlink:title="class GrammarCoverageFuzzer:&#10;Produce from grammars, aiming for coverage of all expansions.">
-<polygon fill="none" stroke="black" points="135,-233.5 135,-269.5 309,-269.5 309,-233.5 135,-233.5"/>
-<text text-anchor="start" x="143" y="-248.8" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">GrammarCoverageFuzzer</text>
+<polygon fill="none" stroke="black" points="133.75,-241.62 133.75,-277.62 307.25,-277.62 307.25,-241.62 133.75,-241.62"/>
+<text text-anchor="start" x="141.75" y="-256.32" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">GrammarCoverageFuzzer</text>
 </a>
 </g>
 </g>
 <!-- OptionFuzzer&#45;&gt;GrammarCoverageFuzzer -->
 <g id="edge3" class="edge">
 <title>OptionFuzzer&#45;&gt;GrammarCoverageFuzzer</title>
-<path fill="none" stroke="black" d="M222,-123.18C222,-150.57 222,-194.23 222,-222.63"/>
-<polygon fill="none" stroke="black" points="218.5,-222.26 222,-232.26 225.5,-222.26 218.5,-222.26"/>
+<path fill="none" stroke="black" d="M220.5,-128.66C220.5,-157.02 220.5,-201.11 220.5,-229.93"/>
+<polygon fill="none" stroke="black" points="217,-229.74 220.5,-239.74 224,-229.74 217,-229.74"/>
 </g>
 <!-- SimpleGrammarCoverageFuzzer -->
 <g id="node6" class="node">
 <title>SimpleGrammarCoverageFuzzer</title>
 <g id="a_node6"><a xlink:href="GrammarCoverageFuzzer.html" xlink:title="class SimpleGrammarCoverageFuzzer:&#10;When choosing expansions, prefer expansions not covered.">
-<polygon fill="none" stroke="black" points="114.5,-338.5 114.5,-374.5 329.5,-374.5 329.5,-338.5 114.5,-338.5"/>
-<text text-anchor="start" x="122.5" y="-353.8" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">SimpleGrammarCoverageFuzzer</text>
+<polygon fill="none" stroke="black" points="113.12,-350.38 113.12,-386.38 327.88,-386.38 327.88,-350.38 113.12,-350.38"/>
+<text text-anchor="start" x="121.12" y="-365.07" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">SimpleGrammarCoverageFuzzer</text>
 </a>
 </g>
 </g>
 <!-- GrammarCoverageFuzzer&#45;&gt;SimpleGrammarCoverageFuzzer -->
 <g id="edge4" class="edge">
 <title>GrammarCoverageFuzzer&#45;&gt;SimpleGrammarCoverageFuzzer</title>
-<path fill="none" stroke="black" d="M222,-269.05C222,-284.72 222,-308.57 222,-327.26"/>
-<polygon fill="none" stroke="black" points="218.5,-327.14 222,-337.14 225.5,-327.14 218.5,-327.14"/>
+<path fill="none" stroke="black" d="M220.5,-277.78C220.5,-294.18 220.5,-319.21 220.5,-338.66"/>
+<polygon fill="none" stroke="black" points="217,-338.4 220.5,-348.4 224,-338.4 217,-338.4"/>
 </g>
 <!-- TrackingGrammarCoverageFuzzer -->
 <g id="node7" class="node">
 <title>TrackingGrammarCoverageFuzzer</title>
 <g id="a_node7"><a xlink:href="GrammarCoverageFuzzer.html" xlink:title="class TrackingGrammarCoverageFuzzer:&#10;Track grammar coverage during production">
-<polygon fill="none" stroke="black" points="107.5,-440.5 107.5,-482.5 336.5,-482.5 336.5,-440.5 107.5,-440.5"/>
-<text text-anchor="start" x="115.5" y="-468.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">TrackingGrammarCoverageFuzzer</text>
-<polyline fill="none" stroke="black" points="107.5,-459.5 336.5,-459.5"/>
+<polygon fill="none" stroke="black" points="106.38,-454.5 106.38,-499.75 334.62,-499.75 334.62,-454.5 106.38,-454.5"/>
+<text text-anchor="start" x="114.38" y="-483.45" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">TrackingGrammarCoverageFuzzer</text>
+<polyline fill="none" stroke="black" points="106.38,-473.75 334.62,-473.75"/>
 <g id="a_node7_22"><a xlink:href="#" xlink:title="TrackingGrammarCoverageFuzzer">
 <g id="a_node7_23"><a xlink:href="GrammarCoverageFuzzer.html" xlink:title="__init__(self, *args, **kwargs) &#45;&gt; None:&#10;Produce strings from `grammar`, starting with `start_symbol`.&#10;If `min_nonterminals` or `max_nonterminals` is given, use them as limits&#10;for the number of nonterminals produced.&#10;If `disp` is set, display the intermediate derivation trees.&#10;If `log` is set, show intermediate steps as text on standard output.">
-<text text-anchor="start" x="192" y="-448" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+<text text-anchor="start" x="190.5" y="-461.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
 </a>
 </g>
 </a>
@@ -12456,27 +12460,27 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <!-- SimpleGrammarCoverageFuzzer&#45;&gt;TrackingGrammarCoverageFuzzer -->
 <g id="edge5" class="edge">
 <title>SimpleGrammarCoverageFuzzer&#45;&gt;TrackingGrammarCoverageFuzzer</title>
-<path fill="none" stroke="black" d="M222,-374.05C222,-388.98 222,-411.32 222,-429.55"/>
-<polygon fill="none" stroke="black" points="218.5,-429.31 222,-439.31 225.5,-429.31 218.5,-429.31"/>
+<path fill="none" stroke="black" d="M220.5,-386.53C220.5,-401.68 220.5,-424.22 220.5,-442.89"/>
+<polygon fill="none" stroke="black" points="217,-442.69 220.5,-452.69 224,-442.69 217,-442.69"/>
 </g>
 <!-- GrammarFuzzer -->
 <g id="node8" class="node">
 <title>GrammarFuzzer</title>
 <g id="a_node8"><a xlink:href="GrammarFuzzer.html" xlink:title="class GrammarFuzzer:&#10;Produce strings from grammars efficiently, using derivation trees.">
-<polygon fill="none" stroke="black" points="164,-519.5 164,-583.5 280,-583.5 280,-519.5 164,-519.5"/>
-<text text-anchor="start" x="172" y="-569.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">GrammarFuzzer</text>
-<polyline fill="none" stroke="black" points="164,-560.5 280,-560.5"/>
+<polygon fill="none" stroke="black" points="162.62,-536.75 162.62,-604.5 278.38,-604.5 278.38,-536.75 162.62,-536.75"/>
+<text text-anchor="start" x="170.62" y="-588.2" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">GrammarFuzzer</text>
+<polyline fill="none" stroke="black" points="162.62,-578.5 278.38,-578.5"/>
 <g id="a_node8_24"><a xlink:href="#" xlink:title="GrammarFuzzer">
 <g id="a_node8_25"><a xlink:href="GrammarFuzzer.html" xlink:title="__init__(self, grammar: Dict[str, List[Expansion]], start_symbol: str = &#39;&lt;start&gt;&#39;, min_nonterminals: int = 0, max_nonterminals: int = 10, disp: bool = False, log: Union[bool, int] = False) &#45;&gt; None:&#10;Produce strings from `grammar`, starting with `start_symbol`.&#10;If `min_nonterminals` or `max_nonterminals` is given, use them as limits&#10;for the number of nonterminals produced.&#10;If `disp` is set, display the intermediate derivation trees.&#10;If `log` is set, show intermediate steps as text on standard output.">
-<text text-anchor="start" x="189" y="-549" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+<text text-anchor="start" x="187.5" y="-566" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
 </a>
 </g>
 <g id="a_node8_26"><a xlink:href="GrammarFuzzer.html" xlink:title="fuzz(self) &#45;&gt; str:&#10;Produce a string from the grammar.">
-<text text-anchor="start" x="189" y="-538" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
+<text text-anchor="start" x="187.5" y="-554.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
 </a>
 </g>
 <g id="a_node8_27"><a xlink:href="GrammarFuzzer.html" xlink:title="fuzz_tree(self) &#45;&gt; DerivationTree:&#10;Produce a derivation tree from the grammar.">
-<text text-anchor="start" x="189" y="-527" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">fuzz_tree()</text>
+<text text-anchor="start" x="187.5" y="-543.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">fuzz_tree()</text>
 </a>
 </g>
 </a>
@@ -12487,31 +12491,31 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <!-- TrackingGrammarCoverageFuzzer&#45;&gt;GrammarFuzzer -->
 <g id="edge6" class="edge">
 <title>TrackingGrammarCoverageFuzzer&#45;&gt;GrammarFuzzer</title>
-<path fill="none" stroke="black" d="M222,-482.47C222,-490.17 222,-499.29 222,-508.31"/>
-<polygon fill="none" stroke="black" points="218.5,-508.05 222,-518.05 225.5,-508.05 218.5,-508.05"/>
+<path fill="none" stroke="black" d="M220.5,-499.81C220.5,-507.38 220.5,-516.18 220.5,-524.92"/>
+<polygon fill="none" stroke="black" points="217,-524.77 220.5,-534.77 224,-524.77 217,-524.77"/>
 </g>
 <!-- Fuzzer -->
 <g id="node9" class="node">
 <title>Fuzzer</title>
 <g id="a_node9"><a xlink:href="Fuzzer.html" xlink:title="class Fuzzer:&#10;Base class for fuzzers.">
-<polygon fill="none" stroke="black" points="183.5,-620.5 183.5,-695.5 260.5,-695.5 260.5,-620.5 183.5,-620.5"/>
-<text text-anchor="start" x="201" y="-681.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">Fuzzer</text>
-<polyline fill="none" stroke="black" points="183.5,-672.5 260.5,-672.5"/>
+<polygon fill="none" stroke="black" points="182.5,-641.5 182.5,-720.5 258.5,-720.5 258.5,-641.5 182.5,-641.5"/>
+<text text-anchor="start" x="199.88" y="-704.2" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">Fuzzer</text>
+<polyline fill="none" stroke="black" points="182.5,-694.5 258.5,-694.5"/>
 <g id="a_node9_28"><a xlink:href="#" xlink:title="Fuzzer">
 <g id="a_node9_29"><a xlink:href="Fuzzer.html" xlink:title="__init__(self) &#45;&gt; None:&#10;Constructor">
-<text text-anchor="start" x="192" y="-661.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+<text text-anchor="start" x="190.5" y="-682" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
 </a>
 </g>
 <g id="a_node9_30"><a xlink:href="Fuzzer.html" xlink:title="fuzz(self) &#45;&gt; str:&#10;Return fuzz input">
-<text text-anchor="start" x="192" y="-650.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
+<text text-anchor="start" x="190.5" y="-670.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
 </a>
 </g>
 <g id="a_node9_31"><a xlink:href="Fuzzer.html" xlink:title="run(self, runner: Fuzzer.Runner = &lt;Fuzzer.Runner object&gt;) &#45;&gt; Tuple[subprocess.CompletedProcess, str]:&#10;Run `runner` with fuzz input">
-<text text-anchor="start" x="192" y="-639.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">run()</text>
+<text text-anchor="start" x="190.5" y="-659.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">run()</text>
 </a>
 </g>
 <g id="a_node9_32"><a xlink:href="Fuzzer.html" xlink:title="runs(self, runner: Fuzzer.Runner = &lt;Fuzzer.PrintRunner object&gt;, trials: int = 10) &#45;&gt; List[Tuple[subprocess.CompletedProcess, str]]:&#10;Run `runner` with fuzz input, `trials` times">
-<text text-anchor="start" x="192" y="-628.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">runs()</text>
+<text text-anchor="start" x="190.5" y="-648.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">runs()</text>
 </a>
 </g>
 </a>
@@ -12522,75 +12526,75 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <!-- GrammarFuzzer&#45;&gt;Fuzzer -->
 <g id="edge7" class="edge">
 <title>GrammarFuzzer&#45;&gt;Fuzzer</title>
-<path fill="none" stroke="black" d="M222,-583.29C222,-591.41 222,-600.37 222,-609.16"/>
-<polygon fill="none" stroke="black" points="218.5,-609.02 222,-619.02 225.5,-609.02 218.5,-609.02"/>
+<path fill="none" stroke="black" d="M220.5,-604.73C220.5,-612.6 220.5,-621.18 220.5,-629.64"/>
+<polygon fill="none" stroke="black" points="217,-629.49 220.5,-639.49 224,-629.49 217,-629.49"/>
 </g>
 <!-- OptionGrammarMiner -->
 <g id="node10" class="node">
 <title>OptionGrammarMiner</title>
 <g id="a_node10"><a xlink:href="#" xlink:title="class OptionGrammarMiner:&#10;Helper class for extracting option grammars">
-<polygon fill="none" stroke="black" points="289.5,-0.5 289.5,-193.5 442.5,-193.5 442.5,-0.5 289.5,-0.5"/>
-<text text-anchor="start" x="297.5" y="-179.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">OptionGrammarMiner</text>
-<polyline fill="none" stroke="black" points="289.5,-170.5 442.5,-170.5"/>
+<polygon fill="none" stroke="black" points="288.25,-0.5 288.25,-200 440.75,-200 440.75,-0.5 288.25,-0.5"/>
+<text text-anchor="start" x="296.25" y="-183.7" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">OptionGrammarMiner</text>
+<polyline fill="none" stroke="black" points="288.25,-174 440.75,-174"/>
 <g id="a_node10_33"><a xlink:href="#" xlink:title="OptionGrammarMiner">
 <g id="a_node10_34"><a xlink:href="#" xlink:title="ARGUMENTS_SYMBOL = &#39;&lt;arguments&gt;&#39;">
-<text text-anchor="start" x="318" y="-158.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">ARGUMENTS_SYMBOL</text>
+<text text-anchor="start" x="316.5" y="-160.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">ARGUMENTS_SYMBOL</text>
 </a>
 </g>
 <g id="a_node10_35"><a xlink:href="#" xlink:title="OPTION_SYMBOL = &#39;&lt;option&gt;&#39;">
-<text text-anchor="start" x="318" y="-147.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">OPTION_SYMBOL</text>
+<text text-anchor="start" x="316.5" y="-149.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">OPTION_SYMBOL</text>
 </a>
 </g>
 </a>
 </g>
-<polyline fill="none" stroke="black" points="289.5,-140.5 442.5,-140.5"/>
+<polyline fill="none" stroke="black" points="288.25,-143.5 440.75,-143.5"/>
 <g id="a_node10_36"><a xlink:href="#" xlink:title="OptionGrammarMiner">
 <g id="a_node10_37"><a xlink:href="#" xlink:title="__init__(self, function: Callable, log: bool = False):&#10;Constructor.&#10;`function` &#45; a function processing arguments using argparse()&#10;`log` &#45; output diagnostics if True">
-<text text-anchor="start" x="309" y="-129.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__init__()</text>
+<text text-anchor="start" x="307.5" y="-131" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__init__()</text>
 </a>
 </g>
 <g id="a_node10_38"><a xlink:href="#" xlink:title="mine_ebnf_grammar(self):&#10;Extract EBNF option grammar">
-<text text-anchor="start" x="309" y="-118.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">mine_ebnf_grammar()</text>
+<text text-anchor="start" x="307.5" y="-119.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">mine_ebnf_grammar()</text>
 </a>
 </g>
 <g id="a_node10_39"><a xlink:href="#" xlink:title="mine_grammar(self):&#10;Extract BNF option grammar">
-<text text-anchor="start" x="309" y="-107.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">mine_grammar()</text>
+<text text-anchor="start" x="307.5" y="-108.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">mine_grammar()</text>
 </a>
 </g>
 <g id="a_node10_40"><a xlink:href="#" xlink:title="add_group(self, locals, exclusive)">
-<text text-anchor="start" x="309" y="-95.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_group()</text>
+<text text-anchor="start" x="307.5" y="-96.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_group()</text>
 </a>
 </g>
 <g id="a_node10_41"><a xlink:href="#" xlink:title="add_int_rule(self)">
-<text text-anchor="start" x="309" y="-84.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_int_rule()</text>
+<text text-anchor="start" x="307.5" y="-85" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_int_rule()</text>
 </a>
 </g>
 <g id="a_node10_42"><a xlink:href="#" xlink:title="add_metavar_rule(self, metavar, type_)">
-<text text-anchor="start" x="309" y="-73.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_metavar_rule()</text>
+<text text-anchor="start" x="307.5" y="-73.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_metavar_rule()</text>
 </a>
 </g>
 <g id="a_node10_43"><a xlink:href="#" xlink:title="add_parameter(self, kwargs, metavar)">
-<text text-anchor="start" x="309" y="-62.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_parameter()</text>
+<text text-anchor="start" x="307.5" y="-62.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_parameter()</text>
 </a>
 </g>
 <g id="a_node10_44"><a xlink:href="#" xlink:title="add_str_rule(self)">
-<text text-anchor="start" x="309" y="-51.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_str_rule()</text>
+<text text-anchor="start" x="307.5" y="-51.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_str_rule()</text>
 </a>
 </g>
 <g id="a_node10_45"><a xlink:href="#" xlink:title="add_type_rule(self, type_)">
-<text text-anchor="start" x="309" y="-40.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_type_rule()</text>
+<text text-anchor="start" x="307.5" y="-40" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_type_rule()</text>
 </a>
 </g>
 <g id="a_node10_46"><a xlink:href="#" xlink:title="process_arg(self, arg, in_group, kwargs)">
-<text text-anchor="start" x="309" y="-29.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">process_arg()</text>
+<text text-anchor="start" x="307.5" y="-28.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">process_arg()</text>
 </a>
 </g>
 <g id="a_node10_47"><a xlink:href="#" xlink:title="process_argument(self, locals, in_group)">
-<text text-anchor="start" x="309" y="-18.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">process_argument()</text>
+<text text-anchor="start" x="307.5" y="-17.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">process_argument()</text>
 </a>
 </g>
 <g id="a_node10_48"><a xlink:href="#" xlink:title="traceit(self, frame, event, arg)">
-<text text-anchor="start" x="309" y="-7.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">traceit()</text>
+<text text-anchor="start" x="307.5" y="-6.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">traceit()</text>
 </a>
 </g>
 </a>
@@ -12601,14 +12605,14 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <!-- Legend -->
 <g id="node11" class="node">
 <title>Legend</title>
-<text text-anchor="start" x="461" y="-114.5" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
-<text text-anchor="start" x="461" y="-104.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
-<text text-anchor="start" x="468" y="-104.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
-<text text-anchor="start" x="461" y="-94.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
-<text text-anchor="start" x="468" y="-94.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
-<text text-anchor="start" x="461" y="-84.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
-<text text-anchor="start" x="468" y="-84.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
-<text text-anchor="start" x="461" y="-75.3" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+<text text-anchor="start" x="458.88" y="-116.25" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="458.88" y="-106.25" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="464.88" y="-106.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="458.88" y="-96.25" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="464.88" y="-96.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="458.88" y="-86.25" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="464.88" y="-86.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="458.88" y="-77.2" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
 </g>
 </g>
 </svg>
@@ -12823,7 +12827,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils.setup</a></span>
 </pre></div>
 
 </div>
@@ -13129,9 +13133,9 @@ SystemExit: 2 (expected)
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>add_argument {&#39;self&#39;: ArgumentParser(prog=&#39;ipykernel_launcher.py&#39;, usage=None, description=&#39;Process some integers.&#39;, formatter_class=&lt;class &#39;argparse.HelpFormatter&#39;&gt;, conflict_handler=&#39;error&#39;, add_help=True), &#39;args&#39;: (&#39;-h&#39;, &#39;--help&#39;), &#39;kwargs&#39;: {&#39;action&#39;: &#39;help&#39;, &#39;default&#39;: &#39;==SUPPRESS==&#39;, &#39;help&#39;: &#39;show this help message and exit&#39;}}
 add_argument {&#39;self&#39;: ArgumentParser(prog=&#39;ipykernel_launcher.py&#39;, usage=None, description=&#39;Process some integers.&#39;, formatter_class=&lt;class &#39;argparse.HelpFormatter&#39;&gt;, conflict_handler=&#39;error&#39;, add_help=True), &#39;args&#39;: (&#39;integers&#39;,), &#39;kwargs&#39;: {&#39;metavar&#39;: &#39;N&#39;, &#39;type&#39;: &lt;class &#39;int&#39;&gt;, &#39;nargs&#39;: &#39;+&#39;, &#39;help&#39;: &#39;an integer for the accumulator&#39;}}
-add_argument {&#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x1058b7280&gt;, &#39;args&#39;: (&#39;--sum&#39;,), &#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function sum&gt;, &#39;help&#39;: &#39;sum the integers&#39;}}
-add_argument {&#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x1058b7280&gt;, &#39;args&#39;: (&#39;--min&#39;,), &#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function min&gt;, &#39;help&#39;: &#39;compute the minimum&#39;}}
-add_argument {&#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x1058b7280&gt;, &#39;args&#39;: (&#39;--max&#39;,), &#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function max&gt;, &#39;help&#39;: &#39;compute the maximum&#39;}}
+add_argument {&#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x1040e19f0&gt;, &#39;args&#39;: (&#39;--sum&#39;,), &#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function sum&gt;, &#39;help&#39;: &#39;sum the integers&#39;}}
+add_argument {&#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x1040e19f0&gt;, &#39;args&#39;: (&#39;--min&#39;,), &#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function min&gt;, &#39;help&#39;: &#39;compute the minimum&#39;}}
+add_argument {&#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x1040e19f0&gt;, &#39;args&#39;: (&#39;--max&#39;,), &#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function max&gt;, &#39;help&#39;: &#39;compute the maximum&#39;}}
 6
 </pre>
 </div>
@@ -15124,7 +15128,7 @@ def twice(x=2):
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[&#39; -h&#39;, &#39; --help&#39;, &#39; -v&#39;, &#39; --verbose&#39;, &#39; -V&#39;, &#39; --version&#39;, &#39; --config-file &lt;str&gt;&#39;, &#39; --warn-unused-configs&#39;, &#39; --no-warn-unused-configs&#39;, &#39; --no-namespace-packages&#39;, &#39; --namespace-packages&#39;, &#39; --ignore-missing-imports&#39;, &#39; --follow-imports &lt;str&gt;&#39;, &#39; --python-executable&#39;, &#39; --no-site-packages&#39;, &#39; --no-silence-site-packages&#39;, &#39; --python-version &lt;x.y&gt;&#39;, &#39; -2&#39;, &#39; --py2&#39;, &#39; --platform&#39;, &#39; --always-true&#39;, &#39; --always-false&#39;, &#39; --disallow-any-unimported&#39;, &#39; --disallow-any-expr&#39;, &#39; --disallow-any-decorated&#39;, &#39; --disallow-any-explicit&#39;, &#39; --disallow-any-generics&#39;, &#39; --allow-any-generics&#39;, &#39; --disallow-subclassing-any&#39;, &#39; --allow-subclassing-any&#39;, &#39; --disallow-untyped-calls&#39;, &#39; --allow-untyped-calls&#39;, &#39; --disallow-untyped-defs&#39;, &#39; --allow-untyped-defs&#39;, &#39; --disallow-incomplete-defs&#39;, &#39; --allow-incomplete-defs&#39;, &#39; --check-untyped-defs&#39;, &#39; --no-check-untyped-defs&#39;, &#39; --disallow-untyped-decorators&#39;, &#39; --allow-untyped-decorators&#39;, &#39; --implicit-optional&#39;, &#39; --no-implicit-optional&#39;, &#39; --strict-optional&#39;, &#39; --no-strict-optional&#39;, &#39; --warn-redundant-casts&#39;, &#39; --no-warn-redundant-casts&#39;, &#39; --warn-unused-ignores&#39;, &#39; --no-warn-unused-ignores&#39;, &#39; --no-warn-no-return&#39;, &#39; --warn-no-return&#39;, &#39; --warn-return-any&#39;, &#39; --no-warn-return-any&#39;, &#39; --warn-unreachable&#39;, &#39; --no-warn-unreachable&#39;, &#39; --allow-untyped-globals&#39;, &#39; --disallow-untyped-globals&#39;, &#39; --allow-redefinition&#39;, &#39; --disallow-redefinition&#39;, &#39; --no-implicit-reexport&#39;, &#39; --implicit-reexport&#39;, &#39; --strict-equality&#39;, &#39; --no-strict-equality&#39;, &#39; --strict-concatenate&#39;, &#39; --no-strict-concatenate&#39;, &#39; --strict&#39;, &#39; --disable-error-code&#39;, &#39; --enable-error-code&#39;, &#39; --show-error-context&#39;, &#39; --hide-error-context&#39;, &#39; --show-column-numbers&#39;, &#39; --hide-column-numbers&#39;, &#39; --show-error-end&#39;, &#39; --hide-error-end&#39;, &#39; --hide-error-codes&#39;, &#39; --show-error-codes&#39;, &#39; --pretty&#39;, &#39; --no-pretty&#39;, &#39; --no-color-output&#39;, &#39; --color-output&#39;, &#39; --no-error-summary&#39;, &#39; --error-summary&#39;, &#39; --show-absolute-path&#39;, &#39; --hide-absolute-path&#39;, &#39; --soft-error-limit &lt;int&gt;&#39;, &#39; -i&#39;, &#39; --incremental&#39;, &#39; --no-incremental&#39;, &#39; --cache-dir&#39;, &#39; --sqlite-cache&#39;, &#39; --no-sqlite-cache&#39;, &#39; --cache-fine-grained&#39;, &#39; --skip-version-check&#39;, &#39; --skip-cache-mtime-checks&#39;, &#39; --pdb&#39;, &#39; --show-traceback&#39;, &#39; --tb&#39;, &#39; --raise-exceptions&#39;, &#39; --custom-typing-module &lt;MODULE&gt;&#39;, &#39; --disable-recursive-aliases&#39;, &#39; --enable-recursive-aliases&#39;, &#39; --enable-incomplete-feature&#39;, &#39; --custom-typeshed-dir &lt;DIR&gt;&#39;, &#39; --warn-incomplete-stub&#39;, &#39; --no-warn-incomplete-stub&#39;, &#39; --shadow-file&#39;, &#39; --fast-exit&#39;, &#39; --no-fast-exit&#39;, &#39; --allow-empty-bodies&#39;, &#39; --disallow-empty-bodies&#39;, &#39; --any-exprs-report &lt;DIR&gt;&#39;, &#39; --cobertura-xml-report &lt;DIR&gt;&#39;, &#39; --html-report &lt;DIR&gt;&#39;, &#39; --linecount-report &lt;DIR&gt;&#39;, &#39; --linecoverage-report &lt;DIR&gt;&#39;, &#39; --lineprecision-report &lt;DIR&gt;&#39;, &#39; --txt-report &lt;DIR&gt;&#39;, &#39; --xml-report &lt;DIR&gt;&#39;, &#39; --xslt-html-report &lt;DIR&gt;&#39;, &#39; --xslt-txt-report &lt;DIR&gt;&#39;, &#39; --quickstart-file &lt;str&gt;&#39;, &#39; --junit-xml &lt;str&gt;&#39;, &#39; --find-occurrences &lt;CLASS.MEMBER&gt;&#39;, &#39; --scripts-are-modules&#39;, &#39; --install-types&#39;, &#39; --no-install-types&#39;, &#39; --non-interactive&#39;, &#39; --interactive&#39;, &#39; --stats&#39;, &#39; --inferstats&#39;, &#39; --dump-build-stats&#39;, &#39; --timing-stats &lt;str&gt;&#39;, &#39; --debug-cache&#39;, &#39; --dump-deps&#39;, &#39; --dump-graph&#39;, &#39; --semantic-analysis-only&#39;, &#39; --local-partial-types&#39;, &#39; --logical-deps&#39;, &#39; --bazel&#39;, &#39; --package-root&#39;, &#39; --cache-map( &lt;str&gt;)+&#39;, &#39; --enable-incomplete-features&#39;, &#39; --disable-bytearray-promotion&#39;, &#39; --disable-memoryview-promotion&#39;, &#39; --explicit-package-bases&#39;, &#39; --no-explicit-package-bases&#39;, &#39; --fast-module-lookup&#39;, &#39; --no-fast-module-lookup&#39;, &#39; --exclude&#39;, &#39; -m&#39;, &#39; --module&#39;, &#39; -p&#39;, &#39; --package&#39;, &#39; -c&#39;, &#39; --command&#39;]
+<pre>[&#39; -h&#39;, &#39; --help&#39;, &#39; -v&#39;, &#39; --verbose&#39;, &#39; -V&#39;, &#39; --version&#39;, &#39; --config-file &lt;str&gt;&#39;, &#39; --warn-unused-configs&#39;, &#39; --no-warn-unused-configs&#39;, &#39; --no-namespace-packages&#39;, &#39; --namespace-packages&#39;, &#39; --ignore-missing-imports&#39;, &#39; --follow-imports &lt;str&gt;&#39;, &#39; --python-executable&#39;, &#39; --no-site-packages&#39;, &#39; --no-silence-site-packages&#39;, &#39; --python-version &lt;x.y&gt;&#39;, &#39; --platform&#39;, &#39; --always-true&#39;, &#39; --always-false&#39;, &#39; --disallow-any-unimported&#39;, &#39; --disallow-any-expr&#39;, &#39; --disallow-any-decorated&#39;, &#39; --disallow-any-explicit&#39;, &#39; --disallow-any-generics&#39;, &#39; --allow-any-generics&#39;, &#39; --disallow-subclassing-any&#39;, &#39; --allow-subclassing-any&#39;, &#39; --disallow-untyped-calls&#39;, &#39; --allow-untyped-calls&#39;, &#39; --untyped-calls-exclude&#39;, &#39; --disallow-untyped-defs&#39;, &#39; --allow-untyped-defs&#39;, &#39; --disallow-incomplete-defs&#39;, &#39; --allow-incomplete-defs&#39;, &#39; --check-untyped-defs&#39;, &#39; --no-check-untyped-defs&#39;, &#39; --disallow-untyped-decorators&#39;, &#39; --allow-untyped-decorators&#39;, &#39; --implicit-optional&#39;, &#39; --no-implicit-optional&#39;, &#39; --strict-optional&#39;, &#39; --no-strict-optional&#39;, &#39; --force-uppercase-builtins&#39;, &#39; --no-force-uppercase-builtins&#39;, &#39; --force-union-syntax&#39;, &#39; --no-force-union-syntax&#39;, &#39; --warn-redundant-casts&#39;, &#39; --no-warn-redundant-casts&#39;, &#39; --warn-unused-ignores&#39;, &#39; --no-warn-unused-ignores&#39;, &#39; --no-warn-no-return&#39;, &#39; --warn-no-return&#39;, &#39; --warn-return-any&#39;, &#39; --no-warn-return-any&#39;, &#39; --warn-unreachable&#39;, &#39; --no-warn-unreachable&#39;, &#39; --allow-untyped-globals&#39;, &#39; --disallow-untyped-globals&#39;, &#39; --allow-redefinition&#39;, &#39; --disallow-redefinition&#39;, &#39; --no-implicit-reexport&#39;, &#39; --implicit-reexport&#39;, &#39; --strict-equality&#39;, &#39; --no-strict-equality&#39;, &#39; --extra-checks&#39;, &#39; --no-extra-checks&#39;, &#39; --strict&#39;, &#39; --disable-error-code&#39;, &#39; --enable-error-code&#39;, &#39; --show-error-context&#39;, &#39; --hide-error-context&#39;, &#39; --show-column-numbers&#39;, &#39; --hide-column-numbers&#39;, &#39; --show-error-end&#39;, &#39; --hide-error-end&#39;, &#39; --hide-error-codes&#39;, &#39; --show-error-codes&#39;, &#39; --show-error-code-links&#39;, &#39; --hide-error-code-links&#39;, &#39; --pretty&#39;, &#39; --no-pretty&#39;, &#39; --no-color-output&#39;, &#39; --color-output&#39;, &#39; --no-error-summary&#39;, &#39; --error-summary&#39;, &#39; --show-absolute-path&#39;, &#39; --hide-absolute-path&#39;, &#39; --soft-error-limit &lt;int&gt;&#39;, &#39; -i&#39;, &#39; --incremental&#39;, &#39; --no-incremental&#39;, &#39; --cache-dir&#39;, &#39; --sqlite-cache&#39;, &#39; --no-sqlite-cache&#39;, &#39; --cache-fine-grained&#39;, &#39; --skip-version-check&#39;, &#39; --skip-cache-mtime-checks&#39;, &#39; --pdb&#39;, &#39; --show-traceback&#39;, &#39; --tb&#39;, &#39; --raise-exceptions&#39;, &#39; --custom-typing-module &lt;MODULE&gt;&#39;, &#39; --new-type-inference&#39;, &#39; --disable-recursive-aliases&#39;, &#39; --enable-recursive-aliases&#39;, &#39; --enable-incomplete-feature&#39;, &#39; --custom-typeshed-dir &lt;DIR&gt;&#39;, &#39; --warn-incomplete-stub&#39;, &#39; --no-warn-incomplete-stub&#39;, &#39; --shadow-file&#39;, &#39; --fast-exit&#39;, &#39; --no-fast-exit&#39;, &#39; --allow-empty-bodies&#39;, &#39; --disallow-empty-bodies&#39;, &#39; --export-ref-info&#39;, &#39; --any-exprs-report &lt;DIR&gt;&#39;, &#39; --cobertura-xml-report &lt;DIR&gt;&#39;, &#39; --html-report &lt;DIR&gt;&#39;, &#39; --linecount-report &lt;DIR&gt;&#39;, &#39; --linecoverage-report &lt;DIR&gt;&#39;, &#39; --lineprecision-report &lt;DIR&gt;&#39;, &#39; --txt-report &lt;DIR&gt;&#39;, &#39; --xml-report &lt;DIR&gt;&#39;, &#39; --xslt-html-report &lt;DIR&gt;&#39;, &#39; --xslt-txt-report &lt;DIR&gt;&#39;, &#39; --quickstart-file &lt;str&gt;&#39;, &#39; --junit-xml &lt;str&gt;&#39;, &#39; --find-occurrences &lt;CLASS.MEMBER&gt;&#39;, &#39; --scripts-are-modules&#39;, &#39; --install-types&#39;, &#39; --no-install-types&#39;, &#39; --non-interactive&#39;, &#39; --interactive&#39;, &#39; --stats&#39;, &#39; --inferstats&#39;, &#39; --dump-build-stats&#39;, &#39; --timing-stats &lt;str&gt;&#39;, &#39; --line-checking-stats &lt;str&gt;&#39;, &#39; --debug-cache&#39;, &#39; --dump-deps&#39;, &#39; --dump-graph&#39;, &#39; --semantic-analysis-only&#39;, &#39; --local-partial-types&#39;, &#39; --logical-deps&#39;, &#39; --bazel&#39;, &#39; --package-root&#39;, &#39; --cache-map( &lt;str&gt;)+&#39;, &#39; --debug-serialize&#39;, &#39; --enable-incomplete-features&#39;, &#39; --disable-bytearray-promotion&#39;, &#39; --disable-memoryview-promotion&#39;, &#39; --strict-concatenate&#39;, &#39; --explicit-package-bases&#39;, &#39; --no-explicit-package-bases&#39;, &#39; --fast-module-lookup&#39;, &#39; --no-fast-module-lookup&#39;, &#39; --exclude&#39;, &#39; -m&#39;, &#39; --module&#39;, &#39; -p&#39;, &#39; --package&#39;, &#39; -c&#39;, &#39; --command&#39;]
 </pre>
 </div>
 
@@ -15150,15 +15154,15 @@ def twice(x=2):
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre> --follow-imports l foo.py
- --stats --allow-any-generics --custom-typeshed-dir yB --enable-recursive-aliases --enable-error-code --disable-memoryview-promotion --version --disallow-redefinition --no-warn-redundant-casts --warn-unreachable --no-warn-unused-configs --config-file Fq --hide-absolute-path --show-traceback --no-strict-optional foo.py
- --show-error-end --bazel --py2 --non-interactive foo.py
- --ignore-missing-imports --no-silence-site-packages --no-fast-exit foo.py
- --no-warn-incomplete-stub --error-summary --warn-unused-configs --allow-empty-bodies --debug-cache --scripts-are-modules --xslt-txt-report c --dump-deps --warn-no-return --implicit-reexport --disallow-untyped-decorators --skip-cache-mtime-checks -i -V --no-color-output --no-strict-concatenate --explicit-package-bases --disallow-empty-bodies --allow-untyped-globals --enable-incomplete-feature --no-install-types --python-version f --always-true --disallow-any-generics --show-error-context --allow-incomplete-defs --skip-version-check --help --disallow-any-unimported --fast-exit --dump-build-stats --no-error-summary --fast-module-lookup --show-column-numbers foo.py
- --cache-fine-grained --always-false --allow-untyped-calls --no-pretty --local-partial-types foo.py
- --linecount-report ( --hide-error-codes -p --check-untyped-defs foo.py
- --cobertura-xml-report W --hide-error-end --warn-redundant-casts --strict-concatenate --disallow-untyped-defs --no-warn-unused-ignores --implicit-optional --xslt-html-report 4% --cache-map X C foo.py
- --no-implicit-optional --soft-error-limit 0 --find-occurrences 9 --warn-unused-ignores --quickstart-file ] -h --no-namespace-packages --pdb foo.py
- --module --no-fast-module-lookup --disallow-any-explicit --disable-recursive-aliases --no-warn-no-return --no-incremental --no-site-packages --cache-dir foo.py
+ --junit-xml p&#34; --allow-untyped-decorators --install-types --no-warn-incomplete-stub foo.py
+ --soft-error-limit 2 --show-error-context --disable-recursive-aliases foo.py
+ --no-site-packages --version --warn-unused-configs --allow-redefinition --always-false --show-error-codes --warn-incomplete-stub --strict-optional --bazel --explicit-package-bases foo.py
+ --color-output --quickstart-file + --strict --incremental --show-traceback -h --cache-dir --sqlite-cache --pretty foo.py
+ --disallow-any-explicit --force-uppercase-builtins --allow-untyped-defs --cache-fine-grained --skip-cache-mtime-checks --no-warn-unreachable foo.py
+ --no-silence-site-packages --implicit-optional --xml-report Y --implicit-reexport --shadow-file --logical-deps -c --no-strict-optional --line-checking-stats u3% --local-partial-types --stats --disallow-subclassing-any --no-fast-module-lookup foo.py
+ --hide-error-end --disallow-incomplete-defs --package --linecount-report 0 --no-sqlite-cache --pdb --no-incremental --dump-build-stats --no-color-output --exclude --disallow-untyped-globals -V foo.py
+ --force-union-syntax --disable-memoryview-promotion --allow-incomplete-defs --semantic-analysis-only --no-pretty --python-executable --hide-absolute-path foo.py
+ --fast-module-lookup --disallow-untyped-defs --no-warn-no-return --warn-unused-ignores foo.py
 </pre>
 </div>
 
@@ -15260,16 +15264,16 @@ def twice(x=2):
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre> -o :Y
- --from x --precode S ! --debug --rmagic
- --output --execute --run w
- -h --version --examples +
- --match J --help --strip b
- --nomagic --render --examples -
- --rmagic --nomagic --strip ^
- --timeout -6 --knit --to 5[ --template R --version _
- -o --debug --examples =
- --output } -h --debug --render o
+<pre> 2
+ --strip --version --timeout 47 --knit {
+ --help --render Q@
+ --template 9v --examples
+ --run --execute --rmagic p
+ -h --match &#39; --nomagic --from ,w --debug --execute =
+ --version --execute Pa
+ --output -o 5C --to g --precode } --knit --debug E
+ -h --render d\
+ --output --execute /DG
 </pre>
 </div>
 
@@ -15511,16 +15515,16 @@ def twice(x=2):
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre> -h --debug 5M
- --help --debug --execute --render
- -h --timeout 1 /~
- --nomagic --debug -h --help }
- -h --nomagic --execute --examples
- --knit --version --help --strip
- --strip --examples CD
- -h --examples --examples --debug --help --version *
- --timeout 6 --match i .
- --help --rmagic --strip --version (
+<pre> 2
+ -h --nomagic --version --debug
+ --output G --strip --examples --version t
+ --help --strip --nomagic --examples
+ -h --run --help --render
+ --render --examples --nomagic --version
+ --precode i --match 6 D
+ --strip --render --strip --examples (
+ --nomagic --debug --nomagic --render B
+ --execute --rmagic --run --debug
 </pre>
 </div>
 
@@ -15693,7 +15697,7 @@ $$</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>154
+<pre>164
 </pre>
 </div>
 
@@ -15717,7 +15721,7 @@ $$</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>23562
+<pre>26732
 </pre>
 </div>
 
@@ -16438,7 +16442,7 @@ forwardx11 = no
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConfigurationFuzzer.ipynb" target=_blank)>Last change: 2023-01-07 13:52:17+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConfigurationFuzzer.ipynb" target=_blank)>Last change: 2023-11-11 18:18:05+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -16454,7 +16458,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html">Testing Configurations</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html">https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html</a>.  Retrieved 2023-01-07 13:52:17+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html">Testing Configurations</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html">https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html</a>.  Retrieved 2023-11-11 18:18:05+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2023:ConfigurationFuzzer,
@@ -16464,9 +16468,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2023},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html}},
-    note = {Retrieved 2023-01-07 13:52:17+01:00},
+    note = {Retrieved 2023-11-11 18:18:05+01:00},
     url = {https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html},
-    urldate = {2023-01-07 13:52:17+01:00}
+    urldate = {2023-11-11 18:18:05+01:00}
 }
 </pre>
 </div>

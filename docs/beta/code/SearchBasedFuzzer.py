@@ -3,7 +3,7 @@
 
 # "Search-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
-# Last change: 2023-01-07 15:15:10+01:00
+# Last change: 2023-11-12 13:41:38+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -413,7 +413,7 @@ if __name__ == '__main__':
     fig = plt.figure()
     ax = plt.axes(projection='3d')
 
-    ax.plot_surface(xx, yy, zz, cmap=plt.cm.jet, rstride=1, cstride=1, linewidth=0);
+    ax.plot_surface(xx, yy, zz, cmap=plt.cm.jet, rstride=1, cstride=1, linewidth=0);  # type: ignore
 
 def restarting_hillclimber(fitness_function):
     data = []
@@ -699,6 +699,8 @@ if __name__ == '__main__':
     node = ast.fix_missing_locations(node)
     print_content(ast.unparse(node), '.py')
 
+from typing import Dict, cast
+
 def create_instrumented_function(f):
     source = inspect.getsource(f)
     node = ast.parse(source)
@@ -709,10 +711,8 @@ def create_instrumented_function(f):
 
     # Compile and add the instrumented function to the current module
     current_module = sys.modules[__name__]
-    code = compile(node, filename="<ast>", mode="exec")
+    code = compile(cast(ast.Module, node), filename="<ast>", mode="exec")
     exec(code, current_module.__dict__)
-
-from typing import Dict
 
 if __name__ == '__main__':
     distances_true: Dict[int, int] = {}

@@ -6,8 +6,7 @@
 # Interacting with a notebook (in particular executing cells again and again)
 # will still yield new results every time.
 
-import random
+FIXED_SEED = 2001
 
-def set_fixed_seed(seed: int = 2001) -> None:
-    # print("Setting fixed seed to", seed)
-    random.seed(seed)
+import random
+random.seed(FIXED_SEED)

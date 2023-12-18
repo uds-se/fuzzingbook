@@ -78,7 +78,7 @@ def get_intro(notebook):
 def markdown_to_text(s):
     """Convert Markdown to plain text"""
     html = markdown.markdown(s)
-    return "".join(BeautifulSoup(html, features='lxml').findAll(text=True)).strip()
+    return "".join(BeautifulSoup(html, features='lxml').findAll(string=True)).strip()
 
 def format_title(title):
     """Break title into two lines if too long"""

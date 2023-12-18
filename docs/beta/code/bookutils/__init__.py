@@ -12,7 +12,7 @@ __all__ = [
     "show_ast", "input", "next_inputs",
     "unicode_escape", "terminal_escape", "project"
     "inheritance_conflicts", "extract_class_definition",
-    "quiz", "import_notebooks", "set_fixed_seed"
+    "quiz", "import_notebooks"
 ]
 
 # Setup loader such that workbooks can be imported directly
@@ -24,11 +24,6 @@ except:
 
 if have_ipython:
     from .import_notebooks import NotebookFinder  # type: ignore
-
-# Set fixed seed
-from .set_fixed_seed import set_fixed_seed
-set_fixed_seed()
-
 
 # Check for rich output
 def rich_output() -> bool:
@@ -205,11 +200,10 @@ def HTML(data: Optional[str] = None,
     # Get a webdriver
     global firefox
     if firefox is None:
-        options = Options()
-        options.headless = headless
-        profile = FirefoxProfile()
-        profile.set_preference("layout.css.devPixelsPerPx", repr(zoom))
-        firefox = webdriver.Firefox(firefox_profile=profile, options=options)
+        options = webdriver.FirefoxOptions()
+        options.headless = headless  # type: ignore
+        options.set_preference("layout.css.devPixelsPerPx", repr(zoom))
+        firefox = webdriver.Firefox(options=options)
 
     # Create a URL argument
     if data is not None:

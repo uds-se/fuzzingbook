@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2023-01-07 15:54:01+01:00
+# Last change: 2023-11-12 13:52:42+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -69,20 +69,20 @@ The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow pa
 >>> gui_driver.get(httpd_url)
 >>> actions = gui_fuzzer.fuzz()
 >>> print(actions)
-fill('zip', '1')
+fill('city', 'p')
 check('terms', False)
-fill('name', 'Q')
-fill('email', 'K@i')
-fill('city', 'lGd')
+fill('zip', '834')
+fill('name', 'bP')
+fill('email', 's@iN')
 submit('submit')
 click('order form')
 click('terms and conditions')
 click('order form')
-fill('zip', '6')
-check('terms', True)
-fill('name', 'w')
-fill('email', 'S@q')
-fill('city', 'h')
+fill('city', 'o')
+check('terms', False)
+fill('zip', '7')
+fill('name', 'u')
+fill('email', 'S@K')
 submit('submit')
 
 
@@ -94,7 +94,7 @@ These actions can be fed into the GUI runner, which will execute them on the giv
 >>> Image(gui_driver.get_screenshot_as_png())
 Further invocations of `fuzz()` will further cover the model – for instance, exploring the terms and conditions.
 
-Internally, `GUIFuzzer` and `GUICoverageFuzzer` use a subclass `GUIGrammarMiner` which implements the analysis of the GUI and all its states. Subclassing `GUIGrammarMiner` allows to extend the interpretation of GUIs; the `GUIFuzzer` constructor allows to pass a miner via the `miner` keyword parameter.
+Internally, `GUIFuzzer` and `GUICoverageFuzzer` use a subclass `GUIGrammarMiner` which implements the analysis of the GUI and all its states. Subclassing `GUIGrammarMiner` allows extending the interpretation of GUIs; the `GUIFuzzer` constructor allows passing a miner via the `miner` keyword parameter.
 
 A tool like `GUICoverageFuzzer` will provide "deep" exploration of user interfaces, even filling out forms to explore what is behind them. Keep in mind, though, that `GUICoverageFuzzer` is experimental: It only supports a subset of HTML form and link features, and does not take JavaScript into account.
 
@@ -189,28 +189,66 @@ if __name__ == '__main__':
 
 from selenium import webdriver
 
-BROWSER = 'firefox'
+BROWSER = 'firefox'  # Set to 'chrome' if you prefer Chrome
+
+#### Setting up Firefox
+
+if __name__ == '__main__':
+    print('\n#### Setting up Firefox')
+
+
 
 import shutil
 
 if __name__ == '__main__':
     if BROWSER == 'firefox':
         assert shutil.which('geckodriver') is not None, \
-            "Please install 'geckodriver' executable " \
+            "Please install the 'geckodriver' executable " \
             "from https://github.com/mozilla/geckodriver/releases"
+
+#### Setting up Chrome
+
+if __name__ == '__main__':
+    print('\n#### Setting up Chrome')
+
+
+
+if __name__ == '__main__':
+    if BROWSER == 'chrome':
+        assert shutil.which('chromedriver') is not None, \
+            "Please install the 'chromedriver' executable " \
+            "from https://chromedriver.chromium.org"
+
+#### Running a Headless Browser
+
+if __name__ == '__main__':
+    print('\n#### Running a Headless Browser')
+
+
 
 HEADLESS = True
 
+#### Starting the Web driver
+
+if __name__ == '__main__':
+    print('\n#### Starting the Web driver')
+
+
+
 def start_webdriver(browser=BROWSER, headless=HEADLESS, zoom=1.4):
+    # Set headless option
     if browser == 'firefox':
         options = webdriver.FirefoxOptions()
-    if browser == 'chrome':
+        if headless:
+            # See https://www.browserstack.com/guide/firefox-headless
+            options.add_argument("--headless")
+    elif browser == 'chrome':
         options = webdriver.ChromeOptions()
-
-    if headless and browser == 'chrome':
-        options.add_argument('headless')
+        if headless:
+            # See https://www.selenium.dev/blog/2023/headless-is-going-away/
+            options.add_argument("--headless=new")
     else:
-        options.headless = headless
+        assert False, "Select 'firefox' or 'chrome' as browser"
 
     # Start the browser, and obtain a _web driver_ object such that we can interact with it.
     if browser == 'firefox':
@@ -895,8 +933,8 @@ class GUIRunner(GUIRunner):
     # Delays (in seconds)
     DELAY_AFTER_FILL = 0.1
     DELAY_AFTER_CHECK = 0.1
-    DELAY_AFTER_SUBMIT = 1
-    DELAY_AFTER_CLICK = 1
+    DELAY_AFTER_SUBMIT = 1.5
+    DELAY_AFTER_CLICK = 1.5
 
 class GUIRunner(GUIRunner):
     def do_fill(self, name: str, value: str) -> None:

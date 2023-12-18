@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html
-# Last change: 2023-01-07 15:38:43+01:00
+# Last change: 2023-11-12 13:45:08+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -53,7 +53,6 @@ Rather than mutating strings randomly, the `DictMutator` class allows inserting 
 >>> for i in range(10):
 >>>     print(dict_mutator.mutate(seeds[0]))
 HelloWorld
-tml>HelloWorld
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Greybox Fuzzing with Grammars"

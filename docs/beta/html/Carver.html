@@ -12,6 +12,7 @@ with fuzzingbook adaptations -->
 <html>
 <head>
 <meta charset="utf-8" /><title>Carving Unit Tests - The Fuzzing Book</title>
+<link rel="me" href="https://mastodon.social/@TheFuzzingBook">
 
 <style type="text/css">
     /*!
@@ -11901,7 +11902,7 @@ MathJax.Hub.Config({
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs</a></li>
 </ul><li class="has-sub"><a href="04_Semantical_Fuzzing.html" class="chapters"><span class="part_number">IV</span> Semantic Fuzzing <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
-<li><a href="FuzzingWithConstraints.html">Fuzzing with Constraints <strong class="new_chapter">&bull;</strong></a></li>
+<li><a href="FuzzingWithConstraints.html">Fuzzing with Constraints</a></li>
 <li><a href="GrammarMiner.html">Mining Input Grammars</a></li>
 <li><a href="InformationFlow.html">Tracking Information Flow</a></li>
 <li><a href="ConcolicFuzzer.html">Concolic Fuzzing</a></li>
@@ -11912,6 +11913,7 @@ MathJax.Hub.Config({
 <li><a href="ConfigurationFuzzer.html">Testing Configurations</a></li>
 <li><a href="APIFuzzer.html">Fuzzing APIs</a></li>
 <li><a href="Carver.html" class="this_page">Carving Unit Tests</a></li>
+<li><a href="PythonFuzzer.html">Testing Compilers <strong class="new_chapter">&bull;</strong></a></li>
 <li><a href="WebFuzzer.html">Testing Web Applications</a></li>
 <li><a href="GUIFuzzer.html">Testing Graphical User Interfaces</a></li>
 </ul><li class="has-sub"><a href="06_Managing_Fuzzing.html" class="chapters"><span class="part_number">VI</span> Managing Fuzzing <i class="fa fa-fw fa-caret-right"></i></a>
@@ -11972,12 +11974,14 @@ MathJax.Hub.Config({
      
      <li class="has-sub"><a href="#"><span title="Share"><i class="fa fa-fw fa-comments"></i> </span> <span class="menu_4">Share</span></a>
         <ul>
+<!--
             <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22Carving%20Unit%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fCarver.html" target="popup" 
 onclick="window.open('https://twitter.com/intent/tweet?text=I%20just%20read%20%22Carving%20Unit%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fCarver.html','popup','width=600,height=600'); return false;"
-><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
+><i class="fa fa-fw fa-twitter"></i> Share on X</a>
             <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fCarver.html" target="popup" 
 onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fCarver.html','popup','width=600,height=600'); return false;"
 ><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
+-->
             <li><a href="mailto:?subject=Carving%20Unit%20Tests&body=I%20just%20read%20%22Carving%20Unit%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fCarver.html"><i class="fa fa-fw fa-envelope"></i> Share by Email</a>
             <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
         </ul>
@@ -12026,7 +12030,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils.setup</a></span>
 </pre></div>
 
 </div>
@@ -12072,7 +12076,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <span class="p">[[(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="p">[(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]]</span>
 </pre></div>
 <p>Complex arguments are properly serialized, such that they can be easily restored.</p>
-<h3 id="Synthesizing-Calls">Synthesizing Calls<a class="anchor-link" href="#Synthesizing-Calls">&#182;</a></h3><p>While such recorded arguments already could be turned into arguments and calls, a much nicer alternative is to create a <em>grammar</em> for recorded calls.  This allows to synthesize arbitrary <em>combinations</em> of arguments, and also offers a base for further customization of calls.</p>
+<h3 id="Synthesizing-Calls">Synthesizing Calls<a class="anchor-link" href="#Synthesizing-Calls">&#182;</a></h3><p>While such recorded arguments already could be turned into arguments and calls, a much nicer alternative is to create a <em>grammar</em> for recorded calls.  This allows synthesizing arbitrary <em>combinations</em> of arguments, and also offers a base for further customization of calls.</p>
 <p>The <code>CallGrammarMiner</code> class turns a list of carved executions into a grammar.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">my_sqrt_miner</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">carver</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">my_sqrt_grammar</span> <span class="o">=</span> <span class="n">my_sqrt_miner</span><span class="o">.</span><span class="n">mine_call_grammar</span><span class="p">()</span>
@@ -12186,7 +12190,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Downloaded 470494 bytes in 0.49 seconds
+<pre>Downloaded 474673 bytes in 0.40 seconds
 </pre>
 </div>
 
@@ -12323,7 +12327,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>1.3798750005662441e-06
+<pre>1.404624999850057e-06
 </pre>
 </div>
 
@@ -12355,7 +12359,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.49226266700134147
+<pre>0.3980239579996123
 </pre>
 </div>
 
@@ -12387,7 +12391,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>356744.3911943742
+<pre>283366.7050224089
 </pre>
 </div>
 
@@ -12705,7 +12709,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
  &#39;__exit__&#39;: [[(&#39;tb&#39;, None),
    (&#39;exc_value&#39;, None),
    (&#39;exc_type&#39;, None),
-   (&#39;self&#39;, &lt;__main__.CallCarver at 0x120c4acb0&gt;)]]}
+   (&#39;self&#39;, &lt;__main__.CallCarver at 0x154099420&gt;)]]}
 </pre>
 </div>
 
@@ -12814,7 +12818,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>my_sqrt(x=2)
 my_sqrt(x=4)
-__exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver object at 0x120c4acb0&gt;)
+__exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver object at 0x154099420&gt;)
 </pre>
 </div>
 
@@ -12876,7 +12880,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CallCarver</span><span class="p">()</span> <span class="k">as</span> <span class="n">webbrowser_carver</span><span class="p">:</span>
-    <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;http://www.example.com&quot;</span><span class="p">)</span>
+    <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;https://www.fuzzingbook.org&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12911,7 +12915,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>324
+<pre>359
 </pre>
 </div>
 
@@ -12969,37 +12973,37 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_text output_subarea output_execute_result">
 <pre>[[(&#39;allow_fragments&#39;, True),
   (&#39;scheme&#39;, &#39;&#39;),
-  (&#39;url&#39;, &#39;http://www.example.com&#39;)],
+  (&#39;url&#39;, &#39;https://www.fuzzingbook.org&#39;)],
  [(&#39;allow_fragments&#39;, True),
   (&#39;scheme&#39;, &#39;&#39;),
-  (&#39;url&#39;, &#39;http://www.example.com/&#39;)],
+  (&#39;url&#39;, &#39;https://www.fuzzingbook.org/&#39;)],
  [(&#39;allow_fragments&#39;, True),
   (&#39;scheme&#39;, &#39;&#39;),
-  (&#39;url&#39;, &#39;http://www.example.com/&#39;)],
+  (&#39;url&#39;, &#39;https://www.fuzzingbook.org/&#39;)],
  [(&#39;allow_fragments&#39;, True),
   (&#39;scheme&#39;, &#39;&#39;),
-  (&#39;url&#39;, &#39;http://www.example.com/&#39;)],
+  (&#39;url&#39;, &#39;https://www.fuzzingbook.org/&#39;)],
  [(&#39;allow_fragments&#39;, True),
   (&#39;scheme&#39;, &#39;&#39;),
-  (&#39;url&#39;, &#39;http://www.example.com/&#39;)],
+  (&#39;url&#39;, &#39;https://www.fuzzingbook.org/&#39;)],
  [(&#39;allow_fragments&#39;, True),
   (&#39;scheme&#39;, &#39;&#39;),
-  (&#39;url&#39;, &#39;http://www.example.com/&#39;)],
+  (&#39;url&#39;, &#39;https://www.fuzzingbook.org/&#39;)],
  [(&#39;allow_fragments&#39;, True),
   (&#39;scheme&#39;, &#39;&#39;),
-  (&#39;url&#39;, &#39;http://www.example.com/&#39;)],
+  (&#39;url&#39;, &#39;https://www.fuzzingbook.org/&#39;)],
  [(&#39;allow_fragments&#39;, True),
   (&#39;scheme&#39;, &#39;&#39;),
-  (&#39;url&#39;, &#39;http://www.example.com/&#39;)],
+  (&#39;url&#39;, &#39;https://www.fuzzingbook.org/&#39;)],
  [(&#39;allow_fragments&#39;, True),
   (&#39;scheme&#39;, &#39;&#39;),
-  (&#39;url&#39;, &#39;http://www.example.com/&#39;)],
+  (&#39;url&#39;, &#39;https://www.fuzzingbook.org/&#39;)],
  [(&#39;allow_fragments&#39;, True),
   (&#39;scheme&#39;, &#39;&#39;),
-  (&#39;url&#39;, &#39;http://www.example.com/&#39;)],
+  (&#39;url&#39;, &#39;https://www.fuzzingbook.org/&#39;)],
  [(&#39;allow_fragments&#39;, True),
   (&#39;scheme&#39;, &#39;&#39;),
-  (&#39;url&#39;, &#39;http://www.example.com/&#39;)]]
+  (&#39;url&#39;, &#39;https://www.fuzzingbook.org/&#39;)]]
 </pre>
 </div>
 
@@ -13032,7 +13036,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#34;urlparse(allow_fragments=True, scheme=&#39;&#39;, url=&#39;http://www.example.com&#39;)&#34;
+<pre>&#34;urlparse(allow_fragments=True, scheme=&#39;&#39;, url=&#39;https://www.fuzzingbook.org&#39;)&#34;
 </pre>
 </div>
 
@@ -13064,7 +13068,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>ParseResult(scheme=&#39;http&#39;, netloc=&#39;www.example.com&#39;, path=&#39;&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
+<pre>ParseResult(scheme=&#39;https&#39;, netloc=&#39;www.fuzzingbook.org&#39;, path=&#39;&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
 </pre>
 </div>
 
@@ -13156,7 +13160,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;email.parser.Parser.parse(headersonly=False, fp=&lt;_io.StringIO object at 0x120cf0af0&gt;, self=&lt;email.parser.Parser object at 0x120c489d0&gt;)&#39;
+<pre>&#39;email.parser.Parser.parse(headersonly=False, fp=&lt;_io.StringIO object at 0x10760a8c0&gt;, self=&lt;email.parser.Parser object at 0x15409b370&gt;)&#39;
 </pre>
 </div>
 
@@ -13212,8 +13216,8 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 
 <div class="output_text output_subarea output_execute_result">
 <pre>[[(&#39;headersonly&#39;, False),
-  (&#39;fp&#39;, &lt;_io.StringIO at 0x120cf0af0&gt;),
-  (&#39;self&#39;, &lt;email.parser.Parser at 0x120c489d0&gt;)]]
+  (&#39;fp&#39;, &lt;_io.StringIO at 0x10760a8c0&gt;),
+  (&#39;self&#39;, &lt;email.parser.Parser at 0x15409b370&gt;)]]
 </pre>
 </div>
 
@@ -13237,7 +13241,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;email.parser.Parser at 0x120c489d0&gt;
+<pre>&lt;email.parser.Parser at 0x15409b370&gt;
 </pre>
 </div>
 
@@ -13294,7 +13298,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;email.parser.Parser at 0x105207f10&gt;
+<pre>&lt;email.parser.Parser at 0x15434cac0&gt;
 </pre>
 </div>
 
@@ -13381,7 +13385,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>email.parser.Parser.parse(headersonly=False, fp=pickle.loads(b&#39;\x80\x04\x95}\x01\x00\x00\x00\x00\x00\x00\x8c\x03_io\x94\x8c\x08StringIO\x94\x93\x94)\x81\x94(XT\x01\x00\x00Content-Encoding: gzip\r\nAge: 422115\r\nCache-Control: max-age=604800\r\nContent-Type: text/html; charset=UTF-8\r\nDate: Sat, 07 Jan 2023 14:21:31 GMT\r\nEtag: &#34;3147526947+gzip&#34;\r\nExpires: Sat, 14 Jan 2023 14:21:31 GMT\r\nLast-Modified: Thu, 17 Oct 2019 07:18:26 GMT\r\nServer: ECS (dcb/7EEC)\r\nVary: Accept-Encoding\r\nX-Cache: HIT\r\nContent-Length: 648\r\n\r\n\x94\x8c\x01\n\x94MT\x01Nt\x94b.&#39;), self=pickle.loads(b&#39;\x80\x04\x95w\x00\x00\x00\x00\x00\x00\x00\x8c\x0cemail.parser\x94\x8c\x06Parser\x94\x93\x94)\x81\x94}\x94(\x8c\x06_class\x94\x8c\x0bhttp.client\x94\x8c\x0bHTTPMessage\x94\x93\x94\x8c\x06policy\x94\x8c\x11email._policybase\x94\x8c\x08Compat32\x94\x93\x94)\x81\x94ub.&#39;))
+<pre>email.parser.Parser.parse(headersonly=False, fp=pickle.loads(b&#39;\x80\x04\x95\xc1\x02\x00\x00\x00\x00\x00\x00\x8c\x03_io\x94\x8c\x08StringIO\x94\x93\x94)\x81\x94(X\x98\x02\x00\x00Connection: keep-alive\r\nContent-Length: 51095\r\nServer: GitHub.com\r\nContent-Type: text/html; charset=utf-8\r\nLast-Modified: Sun, 12 Nov 2023 12:29:41 GMT\r\nAccess-Control-Allow-Origin: *\r\nETag: W/&#34;6550c535-45fe9&#34;\r\nexpires: Sun, 12 Nov 2023 12:52:20 GMT\r\nCache-Control: max-age=600\r\nContent-Encoding: gzip\r\nx-proxy-cache: MISS\r\nX-GitHub-Request-Id: CF68:1E7B:62EB309:64AC54A:6550C82B\r\nAccept-Ranges: bytes\r\nDate: Sun, 12 Nov 2023 12:48:19 GMT\r\nVia: 1.1 varnish\r\nAge: 0\r\nX-Served-By: cache-fra-eddf8230084-FRA\r\nX-Cache: HIT\r\nX-Cache-Hits: 1\r\nX-Timer: S1699793299.033343,VS0,VE103\r\nVary: Accept-Encoding\r\nX-Fastly-Request-ID: bc8ee74e442d6838192d803a33b301b5120f1484\r\n\r\n\x94\x8c\x01\n\x94M\x98\x02Nt\x94b.&#39;), self=pickle.loads(b&#39;\x80\x04\x95w\x00\x00\x00\x00\x00\x00\x00\x8c\x0cemail.parser\x94\x8c\x06Parser\x94\x93\x94)\x81\x94}\x94(\x8c\x06_class\x94\x8c\x0bhttp.client\x94\x8c\x0bHTTPMessage\x94\x93\x94\x8c\x06policy\x94\x8c\x11email._policybase\x94\x8c\x08Compat32\x94\x93\x94)\x81\x94ub.&#39;))
 </pre>
 </div>
 
@@ -13427,7 +13431,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;http.client.HTTPMessage at 0x1052078e0&gt;
+<pre>&lt;http.client.HTTPMessage at 0x15434d690&gt;
 </pre>
 </div>
 
@@ -13537,7 +13541,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>263/324 calls (81.17%) successfully created and 55/324 calls (16.98%) successfully ran
+<pre>247/359 calls (68.80%) successfully created and 51/359 calls (14.21%) successfully ran
 </pre>
 </div>
 
@@ -13570,16 +13574,16 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallCarver ob
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>NameError(&#34;name &#39;codecs&#39; is not defined&#34;)
+<pre>NameError(&#34;name &#39;environ&#39; is not defined&#34;)
+AttributeError(&#34;module &#39;enum&#39; has no attribute &#39;__call__&#39;&#34;)
+AttributeError(&#34;module &#39;email.message&#39; has no attribute &#39;set_payload&#39;&#34;)
+SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 21, &#34;urllib3.poolmanager.&lt;lambda&gt;(p=pickle.loads(b&#39;\\x80\\x04\\x95\\xc7\\x03\\x00\\x00\\x00\\x00\\x00\\x00\\x8c\\x16urllib3.connectionpool\\x94\\x8c\\x13HTTPSConnectionPool\\x94\\x93\\x94)\\x81\\x94}\\x94(\\x8c\\x04host\\x94\\x8c\\x13www.fuzzingbook.org\\x94\\x8c\\x0b_proxy_host\\x94\\x8c\\x13www.fuzzingbook.org\\x94\\x8c\\x04port\\x94M\\xbb\\x01\\x8c\\x07headers\\x94}\\x94\\x8c\\x06strict\\x94\\x88\\x8c\\x07timeout\\x94\\x8c\\x14urllib3.util.timeout\\x94\\x8c\\x07Timeout\\x94\\x93\\x94)\\x81\\x94}\\x94(\\x8c\\x08_connect\\x94\\x8c\\x08builtins\\x94\\x8c\\x06object\\x94\\x93\\x94)\\x81\\x94\\x8c\\x05_read\\x94h\\x17\\x8c\\x05total\\x94N\\x8c\\x0e_start_connect\\x94Nub\\x8c\\x07retries\\x94\\x8c\\x12urllib3.util.retry\\x94\\x8c\\x05Retry\\x94\\x93\\x94)\\x81\\x94}\\x94(h\\x19K\\x03\\x8c\\x07connect\\x94N\\x8c\\x04read\\x94N\\x8c\\x06status\\x94N\\x8c\\x05other\\x94N\\x8c\\x08redirect\\x94N\\x8c\\x10status_forcelist\\x94\\x8f\\x94\\x8c\\x0fallowed_methods\\x94(\\x8c\\x03GET\\x94\\x8c\\x05TRACE\\x94\\x8c\\x03PUT\\x94\\x8c\\x04HEAD\\x94\\x8c\\x07OPTIONS\\x94\\x8c\\x06DELETE\\x94\\x91\\x94\\x8c\\x0ebackoff_factor\\x94K\\x00\\x8c\\x11raise_on_redirect\\x94\\x88\\x8c\\x0fraise_on_status\\x94\\x88\\x8c\\x07history\\x94)\\x8c\\x1arespect_retry_after_header\\x94\\x88\\x8c\\x1aremove_headers_on_redirect\\x94(\\x8c\\rauthorization\\x94\\x91\\x94ub\\x8c\\x04pool\\x94N\\x8c\\x05block\\x94\\x89\\x8c\\x05proxy\\x94N\\x8c\\rproxy_headers\\x94}\\x94\\x8c\\x0cproxy_config\\x94N\\x8c\\x0fnum_connections\\x94K\\x01\\x8c\\x0cnum_requests\\x94K\\x01\\x8c\\x07conn_kw\\x94}\\x94\\x8c\\x08key_file\\x94N\\x8c\\tcert_file\\x94N\\x8c\\tcert_reqs\\x94\\x8c\\rCERT_REQUIRED\\x94\\x8c\\x0ckey_password\\x94N\\x8c\\x08ca_certs\\x94\\x8cT/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/certifi/cacert.pem\\x94\\x8c\\x0bca_cert_dir\\x94N\\x8c\\x0bssl_version\\x94N\\x8c\\x0fassert_hostname\\x94N\\x8c\\x12assert_fingerprint\\x94Nub.&#39;))&#34;, 1, 22))
+NameError(&#34;name &#39;encodings&#39; is not defined&#34;)
+TypeError(&#34;cannot pickle &#39;SSLContext&#39; object&#34;)
+NameError(&#34;name &#39;ssl&#39; is not defined&#34;)
 TypeError(&#34;&#39;bytes&#39; object is not callable&#34;)
 NameError(&#34;name &#39;threading&#39; is not defined&#34;)
-NameError(&#34;name &#39;fnmatch&#39; is not defined&#34;)
-SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 21, &#34;requests.structures.&lt;genexpr&gt;(mappedvalue=&#39;*/*&#39;, casedkey=&#39;Accept&#39;, .0=pickle.loads(b&#39;\\x80\\x04\\x95\\x1b\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x8c\\x08builtins\\x94\\x8c\\x04iter\\x94\\x93\\x94]\\x94\\x85\\x94R\\x94.&#39;))&#34;, 1, 22))
-NameError(&#34;name &#39;encodings&#39; is not defined&#34;)
-SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 16, &#34;requests.utils.&lt;genexpr&gt;(f=&#39;.netrc&#39;, .0=pickle.loads(b&#39;\\x80\\x04\\x950\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x8c\\x08builtins\\x94\\x8c\\x04iter\\x94\\x93\\x94\\x8c\\x06.netrc\\x94\\x8c\\x06_netrc\\x94\\x86\\x94\\x85\\x94R\\x94K\\x01b.&#39;))&#34;, 1, 17))
-ResponseNotReady(&#39;Idle&#39;)
-AttributeError(&#34;module &#39;email.message&#39; has no attribute &#39;set_raw&#39;&#34;)
-AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sanitize_header&#39;&#34;)
+AttributeError(&#34;module &#39;email.message&#39; has no attribute &#39;get&#39;&#34;)
 </pre>
 </div>
 
@@ -14335,7 +14339,6 @@ AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sa
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CallCarver</span><span class="p">()</span> <span class="k">as</span> <span class="n">webbrowser_carver</span><span class="p">:</span>
     <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;https://www.fuzzingbook.org&quot;</span><span class="p">)</span>
-    <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;http://www.example.com&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14394,7 +14397,7 @@ AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sa
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>140
+<pre>136
 </pre>
 </div>
 
@@ -14426,7 +14429,7 @@ AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sa
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Here's the rule for the <code>urlsplit()</code> function:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's the rule for the <code>urlparse()</code> function:</p>
 </div>
 </div>
 </div>
@@ -14438,7 +14441,7 @@ AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sa
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;urlsplit&gt;&quot;</span><span class="p">]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;urlparse&gt;&quot;</span><span class="p">]</span>
 </pre></div>
 
 </div>
@@ -14449,7 +14452,7 @@ AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sa
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;urlsplit(&lt;urlsplit-allow_fragments&gt;, &lt;urlsplit-scheme&gt;, &lt;urlsplit-url&gt;)&#39;]
+<pre>[&#39;urlparse(&lt;urlparse-allow_fragments&gt;, &lt;urlparse-scheme&gt;, &lt;urlparse-url&gt;)&#39;]
 </pre>
 </div>
 
@@ -14458,7 +14461,7 @@ AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sa
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Here are the arguments.  Note that although we only passed <code>http://www.fuzzingbook.org</code> as a parameter, we also see the <code>https:</code> variant.  That is because opening the <code>http:</code> URL automatically redirects to the <code>https:</code> URL, which is then also processed by <code>urlsplit()</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here are the arguments.</p>
 </div>
 </div>
 </div>
@@ -14470,7 +14473,7 @@ AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sa
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;urlsplit-url&gt;&quot;</span><span class="p">]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;urlparse-url&gt;&quot;</span><span class="p">]</span>
 </pre></div>
 
 </div>
@@ -14481,42 +14484,7 @@ AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sa
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#34;&#39;https://www.fuzzingbook.org&#39;&#34;,
- &#34;&#39;http://www.example.com&#39;&#34;,
- &#34;&#39;http://www.example.com/&#39;&#34;,
- &#34;&#39;https://www.fuzzingbook.org/&#39;&#34;]
-</pre>
-</div>
-
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>There also is some variation in the <code>scheme</code> argument:</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;urlsplit-scheme&gt;&quot;</span><span class="p">]</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_text output_subarea output_execute_result">
-<pre>[&#34;&#39;&#39;&#34;]
+<pre>[&#34;&#39;https://www.fuzzingbook.org/&#39;&#34;, &#34;&#39;https://www.fuzzingbook.org&#39;&#34;]
 </pre>
 </div>
 
@@ -14537,10 +14505,10 @@ AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sa
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlsplit_fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span>
-    <span class="n">webbrowser_grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;urlsplit&gt;&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlparse_fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span>
+    <span class="n">webbrowser_grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;urlparse&gt;&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">urlsplit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">urlparse_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
 </pre></div>
 
 </div>
@@ -14551,11 +14519,11 @@ AttributeError(&#34;module &#39;email._policybase&#39; has no attribute &#39;_sa
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>urlsplit(True, &#39;&#39;, &#39;http://www.example.com&#39;)
-urlsplit(True, &#39;&#39;, &#39;http://www.example.com/&#39;)
-urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org&#39;)
-urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org/&#39;)
-urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org&#39;)
+<pre>urlparse(True, &#39;&#39;, &#39;https://www.fuzzingbook.org/&#39;)
+urlparse(True, &#39;&#39;, &#39;https://www.fuzzingbook.org&#39;)
+urlparse(True, &#39;&#39;, &#39;https://www.fuzzingbook.org/&#39;)
+urlparse(True, &#39;&#39;, &#39;https://www.fuzzingbook.org/&#39;)
+urlparse(True, &#39;&#39;, &#39;https://www.fuzzingbook.org/&#39;)
 </pre>
 </div>
 
@@ -14617,7 +14585,7 @@ urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org&#39;)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>1.0415998985990882e-05
+<pre>1.0457999451318756e-05
 </pre>
 </div>
 
@@ -14642,7 +14610,7 @@ urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org&#39;)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.23321666699484922
+<pre>0.22982670800047345
 </pre>
 </div>
 
@@ -14665,7 +14633,7 @@ urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org&#39;)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>22390.23518613209
+<pre>21976.16370801131
 </pre>
 </div>
 
@@ -14779,7 +14747,7 @@ urlsplit(True, &#39;&#39;, &#39;https://www.fuzzingbook.org&#39;)
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>my_sqrt(x=2)
 Result: 1.414213562373095
-__exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.ResultCarver object at 0x120dfb730&gt;)
+__exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.ResultCarver object at 0x15434f610&gt;)
 </pre>
 </div>
 
@@ -14816,7 +14784,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.ResultCarver 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-3:-Produce-assertions">Part 3: Produce assertions<a class="anchor-link" href="#Part-3:-Produce-assertions">&#182;</a></h4><p>For the functions called during <code>webbrowser()</code> execution, create a set of <em>assertions</em> that check whether the result returned is still the same.  Test this for <code>urllib.parse.urlparse()</code> and <code>urllib.parse.urlsplit()</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-3:-Produce-assertions">Part 3: Produce assertions<a class="anchor-link" href="#Part-3:-Produce-assertions">&#182;</a></h4><p>For the functions called during <code>webbrowser()</code> execution, create a set of <em>assertions</em> that check whether the result returned is still the same.  Test this for <code>urllib.parse.urlparse()</code>.</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/Carver.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -14844,7 +14812,7 @@ __exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.ResultCarver 
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Carver.ipynb" target=_blank)>Last change: 2023-01-07 13:46:00+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Carver.ipynb" target=_blank)>Last change: 2023-11-11 18:18:05+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -14860,7 +14828,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Carver.html">Carving Unit Tests</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/Carver.html">https://www.fuzzingbook.org/beta/html/Carver.html</a>.  Retrieved 2023-01-07 13:46:00+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Carver.html">Carving Unit Tests</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/Carver.html">https://www.fuzzingbook.org/beta/html/Carver.html</a>.  Retrieved 2023-11-11 18:18:05+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2023:Carver,
@@ -14870,9 +14838,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2023},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Carver.html}},
-    note = {Retrieved 2023-01-07 13:46:00+01:00},
+    note = {Retrieved 2023-11-11 18:18:05+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Carver.html},
-    urldate = {2023-01-07 13:46:00+01:00}
+    urldate = {2023-11-11 18:18:05+01:00}
 }
 </pre>
 </div>
