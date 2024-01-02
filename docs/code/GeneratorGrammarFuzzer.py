@@ -875,7 +875,7 @@ class GeneratorGrammarFuzzer(GeneratorGrammarFuzzer):
                 print("Expandable child #%d %s has order %d" %
                       (k, expandable_child[0], given_order[j]))
 
-            if min_given_order is None or given_order[j] < min_given_order:
+            if min_given_order is None or given_order[j] < given_order[min_given_order]:
                 min_given_order = k
 
         assert min_given_order is not None
