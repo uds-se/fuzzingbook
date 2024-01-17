@@ -56,10 +56,10 @@ You can use this book in four ways:
 
 ## Who this Book is for
 
-This work is designed as a _textbook_ for a course in software testing; as _supplementary material_ in a software testing or software engineering course; and as a _resource for software developers_. We cover random fuzzing, mutation-based fuzzing, grammar-based test generation, symbolic testing, and much more, illustrating all techniques with code examples that you can try out yourself.
+This work is designed as a _textbook_ for a course in software testing or security testing; as _supplementary material_ in a software testing, security testing, or software engineering course; and as a _resource for software developers_. We cover random fuzzing, mutation-based fuzzing, grammar-based test generation, symbolic testing, and much more, illustrating all techniques with code examples that you can try out yourself.
 
 ## News
 
-This book is _work in progress._  All chapters planned are out now, but we keep on refining the material with [minor and major releases.](https://www.fuzzingbook.org/html/ReleaseNotes.html)  To get notified on updates, <a href="https://mastodon.social/invite/3CvrkW9t">follow us on Mastodon</a>.
+This book is _work in progress._  All chapters planned are out now, but we keep on refining text and code with [minor and major releases.](https://www.fuzzingbook.org/html/ReleaseNotes.html)  To get notified on updates, <a href="https://mastodon.social/invite/3CvrkW9t">follow us on Mastodon</a>.
 
 <!--

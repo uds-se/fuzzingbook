@@ -3,7 +3,7 @@
 
 # "Code Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2023-11-12 13:40:08+01:00
+# Last change: 2024-01-17 17:50:31+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -49,26 +49,26 @@ The typical usage of the `Coverage` class is in conjunction with a `with` clause
 >>> with Coverage() as cov:
 >>>     cgi_decode("a+b")
 
-Printing out a coverage object shows the covered functions, with covered lines prefixed as `#`:
+Printing out a coverage object shows the covered functions, with non-covered lines prefixed with `#`:
 
 >>> print(cov)
-   1  def cgi_decode(s: str) -> str:
-   2      """Decode the CGI-encoded string `s`:
-   3         * replace '+' by ' '
-   4         * replace "%xx" by the character with hex number xx.
-   5         Return the decoded string.  Raise `ValueError` for invalid inputs."""
-   6  
-   7      # Mapping of hex digits to their integer values
-#  8      hex_values = {
-#  9          '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
-# 10          '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
-# 11          'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
-# 12          'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
-  13      }
-  14  
-# 15      t = ""
-# 16      i = 0
-# 17      while i >> cov.trace()
+#  1  def cgi_decode(s: str) -> str:
+#  2      """Decode the CGI-encoded string `s`:
+#  3         * replace '+' by ' '
+#  4         * replace "%xx" by the character with hex number xx.
+#  5         Return the decoded string.  Raise `ValueError` for invalid inputs."""
+#  6  
+#  7      # Mapping of hex digits to their integer values
+   8      hex_values = {
+   9          '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
+  10          '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+  11          'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
+  12          'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
+# 13      }
+# 14  
+  15      t = ""
+  16      i = 0
+  17      while i >> cov.trace()
 [('cgi_decode', 8),
  ('cgi_decode', 9),
  ('cgi_decode', 8),
@@ -378,7 +378,7 @@ class Coverage:
         sys.settrace(self.traceit)
         return self
 
-    def __exit__(self, exc_type: Type, exc_value: BaseException, 
+    def __exit__(self, exc_type: Type, exc_value: BaseException,
                  tb: TracebackType) -> Optional[bool]:
         """End of `with` block. Turn off tracing."""
         sys.settrace(self.original_trace_function)
@@ -410,7 +410,7 @@ class Coverage:
 
             source_lines, start_line_number = inspect.getsourcelines(fun)
             for lineno in range(start_line_number, start_line_number + len(source_lines)):
-                if (function_name, lineno) in self.trace():
+                if (function_name, lineno) not in self.trace():
                     t += "# "
                 else:
                     t += "  "

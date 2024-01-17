@@ -1016,19 +1016,9 @@ export default function( revealElement, options ) {
 						}
 					});
 				}
-
-				// Responsively turn on the scroll mode if there is an activation
-				// width configured. Ignore if we're configured to always be in
-				// scroll mode.
-				if( typeof config.scrollActivationWidth === 'number' && config.view !== 'scroll' ) {
-					if( size.presentationWidth > 0 && size.presentationWidth <= config.scrollActivationWidth ) {
-						if( !scrollView.isActive() ) scrollView.activate();
-					}
-					else {
-						if( scrollView.isActive() ) scrollView.deactivate();
-					}
-				}
 			}
+
+			checkResponsiveScrollView();
 
 			dom.viewport.style.setProperty( '--slide-scale', scale );
 			dom.viewport.style.setProperty( '--viewport-width', viewportWidth + 'px' );
@@ -1078,6 +1068,40 @@ export default function( revealElement, options ) {
 			}
 
 		} );
+
+	}
+
+	/**
+	 * Responsively activates the scroll mode when we reach the configured
+	 * activation width.
+	 */
+	function checkResponsiveScrollView() {
+
+		// Only proceed if...
+		// 1. The DOM is ready
+		// 2. Layouts aren't disabled via config
+		// 3. We're not currently printing
+		// 4. There is a scrollActivationWidth set
+		// 5. The deck isn't configured to always use the scroll view
+		if(
+			dom.wrapper &&
+			!config.disableLayout &&
+			!printView.isActive() &&
+			typeof config.scrollActivationWidth === 'number' &&
+			config.view !== 'scroll'
+		) {
+			const size = getComputedSlideSize();
+
+			if( size.presentationWidth > 0 && size.presentationWidth <= config.scrollActivationWidth ) {
+				if( !scrollView.isActive() ) {
+					backgrounds.create();
+					scrollView.activate()
+				};
+			}
+			else {
+				if( scrollView.isActive() ) scrollView.deactivate();
+			}
+		}
 
 	}
 
@@ -2475,6 +2499,9 @@ export default function( revealElement, options ) {
 
 		navigationHistory.hasNavigatedHorizontally = true;
 
+		// Scroll view navigation is handled independently
+		if( scrollView.isActive() ) return scrollView.prev();
+
 		// Reverse for RTL
 		if( config.rtl ) {
 			if( ( overview.isActive() || skipFragments || fragments.next() === false ) && availableRoutes().left ) {
@@ -2492,6 +2519,9 @@ export default function( revealElement, options ) {
 
 		navigationHistory.hasNavigatedHorizontally = true;
 
+		// Scroll view navigation is handled independently
+		if( scrollView.isActive() ) return scrollView.next();
+
 		// Reverse for RTL
 		if( config.rtl ) {
 			if( ( overview.isActive() || skipFragments || fragments.prev() === false ) && availableRoutes().right ) {
@@ -2507,6 +2537,9 @@ export default function( revealElement, options ) {
 
 	function navigateUp({skipFragments=false}={}) {
 
+		// Scroll view navigation is handled independently
+		if( scrollView.isActive() ) return scrollView.prev();
+
 		// Prioritize hiding fragments
 		if( ( overview.isActive() || skipFragments || fragments.prev() === false ) && availableRoutes().up ) {
 			slide( indexh, indexv - 1 );
@@ -2517,6 +2550,9 @@ export default function( revealElement, options ) {
 	function navigateDown({skipFragments=false}={}) {
 
 		navigationHistory.hasNavigatedVertically = true;
+
+		// Scroll view navigation is handled independently
+		if( scrollView.isActive() ) return scrollView.next();
 
 		// Prioritize revealing fragments
 		if( ( overview.isActive() || skipFragments || fragments.next() === false ) && availableRoutes().down ) {
@@ -2532,6 +2568,9 @@ export default function( revealElement, options ) {
 	 * 3) Previous horizontal slide
 	 */
 	function navigatePrev({skipFragments=false}={}) {
+
+		// Scroll view navigation is handled independently
+		if( scrollView.isActive() ) return scrollView.prev();
 
 		// Prioritize revealing fragments
 		if( skipFragments || fragments.prev() === false ) {
@@ -2571,6 +2610,9 @@ export default function( revealElement, options ) {
 
 		navigationHistory.hasNavigatedHorizontally = true;
 		navigationHistory.hasNavigatedVertically = true;
+
+		// Scroll view navigation is handled independently
+		if( scrollView.isActive() ) return scrollView.next();
 
 		// Prioritize revealing fragments
 		if( skipFragments || fragments.next() === false ) {
@@ -2700,7 +2742,6 @@ export default function( revealElement, options ) {
 	function onWindowResize( event ) {
 
 		layout();
-
 	}
 
 	/**
