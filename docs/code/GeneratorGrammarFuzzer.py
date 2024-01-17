@@ -3,7 +3,7 @@
 
 # "Fuzzing with Generators" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2023-11-12 13:43:26+01:00
+# Last change: 2024-01-17 17:53:21+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -71,11 +71,11 @@ A `GeneratorGrammarFuzzer` will extract and interpret these options.  Here is an
 
 >>> picked_us_phone_fuzzer = GeneratorGrammarFuzzer(PICKED_US_PHONE_GRAMMAR)
 >>> [picked_us_phone_fuzzer.fuzz() for i in range(5)]
-['(553)200-6118',
- '(553)889-0205',
- '(555)317-0936',
- '(553)455-2577',
- '(553)263-8511']
+['(554)732-6097',
+ '(555)469-0662',
+ '(553)671-5358',
+ '(555)686-8011',
+ '(554)453-4067']
 
 As you can see, the area codes now all stem from `pick_area_code()`.  Such definitions allow  closely tying program code (such as `pick_area_code()`) to grammars.
 
