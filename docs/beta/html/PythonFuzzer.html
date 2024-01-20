@@ -12019,9 +12019,9 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 Most importantly, Python brings lots of built-in infrastructure we can leverage, especially</p>
 <ul>
 <li><em>parsers</em> that convert Python code into an abstract syntax tree (AST) representation and </li>
-<li><em>unparsers</em> that take an AST and convert it back into Python code.
-This allows us to leverage grammars that operate on ASTs rather than concrete syntax, greatly reducing complexity.</li>
+<li><em>unparsers</em> that take an AST and convert it back into Python code.</li>
 </ul>
+<p>This allows us to leverage grammars that operate on ASTs rather than concrete syntax, greatly reducing complexity.</p>
 </div>
 </div>
 </div>
@@ -12083,22 +12083,16 @@ This allows us to leverage grammars that operate on ASTs rather than concrete sy
 <p>This chapter provides a <code>PythonFuzzer</code> class that allows producing arbitrary Python code elements:</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">PythonFuzzer</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
-<span class="k">def</span> <span class="nf">O</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">()[:]:</span> <span class="c1"># type: </span>
-    <span class="k">continue</span>
-    <span class="k">return</span>
+<span class="k">def</span> <span class="nf">Hw</span><span class="p">():</span> <span class="c1"># type: </span>
+    <span class="k">pass</span>
 </pre></div>
 <p>By default, <code>PythonFuzzer</code> produces a <em>function definition</em> – that is, a list of statements as above.
 You can pass a <code>start_symbol</code> argument to state which Python element you'd like to have:</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">PythonFuzzer</span><span class="p">(</span><span class="s1">&#39;&lt;While&gt;&#39;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
 <span class="k">while</span> 
-<span class="mf">7.6</span><span class="p">:</span>
-    <span class="k">break</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">C</span><span class="p">[:]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="k">pass</span>
-    <span class="k">for</span> <span class="n">O</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">():</span> <span class="c1"># type: </span>
-        <span class="k">continue</span>
+<span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="p">{</span><span class="n">Z</span><span class="p">:</span> <span class="o">*</span><span class="p">(</span><span class="nb">set</span><span class="p">()</span> <span class="o">^</span> <span class="nb">set</span><span class="p">())}:</span>
+    <span class="k">del</span>
 </pre></div>
 <p>Here is a list of all possible start symbols. Their names reflect the nonterminals from the <a href="https://docs.python.org/3/library/ast.html">Python <code>ast</code> module documentation</a>.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">PYTHON_AST_GRAMMAR</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
@@ -12204,7 +12198,7 @@ To produce a Python module without <code>PythonFuzzer</code>, you would take the
 <p><strong>Step 3:</strong>  Have the grammar fuzzer produce a string. This string represents an AST.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ast_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">ast_string</span>
-<span class="s2">&quot;FunctionDef(name=&#39;T&#39;, args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Continue()], decorator_list=[], type_comment=&#39;&#39;)&quot;</span>
+<span class="s1">&#39;FunctionDef(name=</span><span class="se">\&#39;</span><span class="s1">t</span><span class="se">\&#39;</span><span class="s1">, args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Break()], decorator_list=[], returns=Call(func=Name(id=&quot;set&quot;, ctx=Load()), args=[], keywords=[]), type_comment=</span><span class="se">\&#39;\&#39;</span><span class="s1">)&#39;</span>
 </pre></div>
 <p><strong>Step 4:</strong>  Convert the AST into an actual Python AST data structure.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/ast.html" class="import" target="_blank">ast</a></span> <span class="kn">import</span> <span class="o">*</span>
@@ -12213,8 +12207,8 @@ To produce a Python module without <code>PythonFuzzer</code>, you would take the
 <p><strong>Step 5:</strong> Finally, convert the AST structure back into readable Python code:</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ast</span><span class="o">.</span><span class="n">fix_missing_locations</span><span class="p">(</span><span class="n">abstract_syntax_tree</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">abstract_syntax_tree</span><span class="p">))</span>
-<span class="k">def</span> <span class="nf">T</span><span class="p">():</span> <span class="c1"># type: </span>
-    <span class="k">continue</span>
+<span class="k">def</span> <span class="nf">t</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">():</span> <span class="c1"># type: </span>
+    <span class="k">break</span>
 </pre></div>
 <p>The chapter has many more applications, including parsing and mutating Python code, evolutionary fuzzing, and more.</p>
 <p>Here are the details on the <code>PythonFuzzer</code> constructor:</p>
@@ -12267,7 +12261,7 @@ To produce a Python module without <code>PythonFuzzer</code>, you would take the
 <text text-anchor="start" x="18.88" y="-122.95" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">ISLaSolver</text>
 <polyline fill="none" stroke="black" points="10.88,-113.25 92.12,-113.25"/>
 <g id="a_node2_3"><a xlink:href="#" xlink:title="ISLaSolver">
-<g id="a_node2_4"><a xlink:href="isla.solver.ipynb" xlink:title="__init__(self, grammar: Union[Dict[str, List[str]], str], formula: Union[isla.language.Formula, str, NoneType] = None, structural_predicates: Set[isla.language.StructuralPredicate] = frozenset({StructuralPredicate(name=&#39;inside&#39;, arity=2, eval_fun=&lt;function in_tree&gt;), StructuralPredicate(name=&#39;consecutive&#39;, arity=2, eval_fun=&lt;function consecutive&gt;), StructuralPredicate(name=&#39;same_position&#39;, arity=2, eval_fun=&lt;function is_same_position&gt;), StructuralPredicate(name=&#39;nth&#39;, arity=3, eval_fun=&lt;function is_nth&gt;), StructuralPredicate(name=&#39;direct_child&#39;, arity=2, eval_fun=&lt;function is_direct_child&gt;), StructuralPredicate(name=&#39;level&#39;, arity=4, eval_fun=&lt;function level_check&gt;), StructuralPredicate(name=&#39;different_position&#39;, arity=2, eval_fun=&lt;function is_different_position&gt;), StructuralPredicate(name=&#39;before&#39;, arity=2, eval_fun=&lt;function is_before&gt;), StructuralPredicate(name=&#39;after&#39;, arity=2, eval_fun=&lt;function is_after&gt;)}), semantic_predicates: Set[isla.language.SemanticPredicate] = frozenset({SemanticPredicate(count, 3)}), max_number_free_instantiations: int = 10, max_number_smt_instantiations: int = 10, max_number_tree_insertion_results: int = 5, enforce_unique_trees_in_queue: bool = False, debug: bool = False, cost_computer: Optional[ForwardRef(&#39;CostComputer&#39;)] = None, timeout_seconds: Optional[int] = None, global_fuzzer: bool = False, predicates_unique_in_int_arg: Tuple[isla.language.SemanticPredicate, ...] = (SemanticPredicate(count, 3),), fuzzer_factory: Callable[[Dict[str, List[str]]], isla.fuzzer.GrammarFuzzer] = &lt;function SolverDefaults.&lt;lambda&gt;&gt;, tree_insertion_methods: Optional[int] = None, activate_unsat_support: bool = False, grammar_unwinding_threshold: int = 4, initial_tree: isla.helpers.Maybe[isla.derivation_tree.DerivationTree] = Maybe(a=None), enable_optimized_z3_queries: bool = True, start_symbol: Optional[str] = None):&#10;The constructor of :class:`~isla.solver.ISLaSolver` accepts a large number of&#10;parameters. However, all but the first one, :code:`grammar`, are *optional.*&#10;&#10;The simplest way to construct an ISLa solver is by only providing it with a&#10;grammar only; it then works like a grammar fuzzer.&#10;&#10;&gt;&gt;&gt; import random&#10;&gt;&gt;&gt; random.seed(1)&#10;&#10;&gt;&gt;&gt; import string&#10;&gt;&gt;&gt; LANG_GRAMMAR = {&#10;... &#160;&#160;&#160;&#160;&quot;&lt;start&gt;&quot;:&#10;... &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;[&quot;&lt;stmt&gt;&quot;],&#10;... &#160;&#160;&#160;&#160;&quot;&lt;stmt&gt;&quot;:&#10;... &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;[&quot;&lt;assgn&gt; ; &lt;stmt&gt;&quot;, &quot;&lt;assgn&gt;&quot;],&#10;... &#160;&#160;&#160;&#160;&quot;&lt;assgn&gt;&quot;:&#10;... &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;[&quot;&lt;var&gt; := &lt;rhs&gt;&quot;],&#10;... &#160;&#160;&#160;&#160;&quot;&lt;rhs&gt;&quot;:&#10;... &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;[&quot;&lt;var&gt;&quot;, &quot;&lt;digit&gt;&quot;],&#10;... &#160;&#160;&#160;&#160;&quot;&lt;var&gt;&quot;: list(string.ascii_lowercase),&#10;... &#160;&#160;&#160;&#160;&quot;&lt;digit&gt;&quot;: list(string.digits)&#10;... }&#10;&gt;&gt;&gt;&#10;&gt;&gt;&gt; from isla.solver import ISLaSolver&#10;&gt;&gt;&gt; solver = ISLaSolver(LANG_GRAMMAR)&#10;&gt;&gt;&gt;&#10;&gt;&gt;&gt; str(solver.solve())&#10;&#39;d := 9&#39;&#10;&gt;&gt;&gt; str(solver.solve())&#10;&#39;v := n ; s := r&#39;&#10;&#10;:param grammar: The underlying grammar; either, as a &quot;Fuzzing Book&quot; dictionary&#10;or in BNF syntax.&#10;:param formula: The formula to solve; either a string or a readily parsed&#10;formula. If no formula is given, a default `true` constraint is assumed, and&#10;the solver falls back to a grammar fuzzer. The number of produced solutions&#10;will then be bound by `max_number_free_instantiations`.&#10;:param structural_predicates: Structural predicates to use when parsing a&#10;formula.&#10;:param semantic_predicates: Semantic predicates to use when parsing a formula.&#10;:param max_number_free_instantiations: Number of times that nonterminals that&#10;are not bound by any formula should be expanded by a coverage&#45;based fuzzer.&#10;:param max_number_smt_instantiations: Number of solutions of SMT formulas that&#10;should be produced.&#10;:param max_number_tree_insertion_results: The maximum number of results when&#10;solving existential quantifiers by tree insertion.&#10;:param enforce_unique_trees_in_queue: If true, states with the same tree as an&#10;already existing tree in the queue are discarded, irrespectively of the&#10;constraint.&#10;:param debug: If true, debug information about the evolution of states is&#10;collected, notably in the field state_tree. The root of the tree is in the&#10;field state_tree_root. The field costs stores the computed cost values for&#10;all new nodes.&#10;:param cost_computer: The `CostComputer` class for computing the cost relevant&#10;to placing states in ISLa&#39;s queue.&#10;:param timeout_seconds: Number of seconds after which the solver will terminate.&#10;:param global_fuzzer: If set to True, only one coverage&#45;guided grammar fuzzer&#10;object is used to finish off unconstrained open derivation trees throughout&#10;the whole generation time. This may be beneficial for some targets; e.g., we&#10;experienced that CSV works significantly faster. However, the achieved k&#45;path&#10;coverage can be lower with that setting.&#10;:param predicates_unique_in_int_arg: This is needed in certain cases for&#10;instantiating universal integer quantifiers. The supplied predicates should&#10;have exactly one integer argument, and hold for exactly one integer value&#10;once all other parameters are fixed.&#10;:param fuzzer_factory: Constructor of the fuzzer to use for instantiating&#10;&quot;free&quot; nonterminals.&#10;:param tree_insertion_methods: Combination of methods to use for existential&#10;quantifier elimination by tree insertion. Full selection: `DIRECT_EMBEDDING &amp;&#10;SELF_EMBEDDING &amp; CONTEXT_ADDITION`.&#10;:param activate_unsat_support: Set to True if you assume that a formula might&#10;be unsatisfiable. This triggers additional tests for unsatisfiability that&#10;reduce input generation performance, but might ensure termination (with a&#10;negative solver result) for unsatisfiable problems for which the solver could&#10;otherwise diverge.&#10;:param grammar_unwinding_threshold: When querying the SMT solver, ISLa passes a&#10;regular expression for the syntax of the involved nonterminals. If this&#10;syntax is not regular, we unwind the respective part in the reference grammar&#10;up to a depth of `grammar_unwinding_threshold`. If this is too shallow, it can&#10;happen that an equation etc. cannot be solved; if it is too deep, it can&#10;negatively impact performance (and quite tremendously so).&#10;:param initial_tree: An initial input tree for the queue, if the solver shall&#10;not start from the tree `(&lt;start&gt;, None)`.&#10;:param enable_optimized_z3_queries: Enables preprocessing of Z3 queries (mainly&#10;numeric problems concerning things like length). This can improve performance&#10;significantly; however, it might happen that certain problems cannot be solved&#10;anymore. In that case, this option can/should be deactivated.&#10;:param start_symbol: This is an alternative to `initial_tree` for starting with&#10;a start symbol different form `&lt;start&gt;`. If `start_symbol` is provided, a tree&#10;consisting of a single root node with the value of `start_symbol` is chosen as&#10;initial tree.">
+<g id="a_node2_4"><a xlink:href="isla.solver.ipynb" xlink:title="__init__(self, grammar: Union[Dict[str, List[str]], str], formula: Union[isla.language.Formula, str, NoneType] = None, structural_predicates: Set[isla.language.StructuralPredicate] = frozenset({StructuralPredicate(name=&#39;nth&#39;, arity=3, eval_fun=&lt;function is_nth&gt;), StructuralPredicate(name=&#39;different_position&#39;, arity=2, eval_fun=&lt;function is_different_position&gt;), StructuralPredicate(name=&#39;consecutive&#39;, arity=2, eval_fun=&lt;function consecutive&gt;), StructuralPredicate(name=&#39;inside&#39;, arity=2, eval_fun=&lt;function in_tree&gt;), StructuralPredicate(name=&#39;after&#39;, arity=2, eval_fun=&lt;function is_after&gt;), StructuralPredicate(name=&#39;same_position&#39;, arity=2, eval_fun=&lt;function is_same_position&gt;), StructuralPredicate(name=&#39;before&#39;, arity=2, eval_fun=&lt;function is_before&gt;), StructuralPredicate(name=&#39;direct_child&#39;, arity=2, eval_fun=&lt;function is_direct_child&gt;), StructuralPredicate(name=&#39;level&#39;, arity=4, eval_fun=&lt;function level_check&gt;)}), semantic_predicates: Set[isla.language.SemanticPredicate] = frozenset({SemanticPredicate(count, 3)}), max_number_free_instantiations: int = 10, max_number_smt_instantiations: int = 10, max_number_tree_insertion_results: int = 5, enforce_unique_trees_in_queue: bool = False, debug: bool = False, cost_computer: Optional[ForwardRef(&#39;CostComputer&#39;)] = None, timeout_seconds: Optional[int] = None, global_fuzzer: bool = False, predicates_unique_in_int_arg: Tuple[isla.language.SemanticPredicate, ...] = (SemanticPredicate(count, 3),), fuzzer_factory: Callable[[Dict[str, List[str]]], isla.fuzzer.GrammarFuzzer] = &lt;function SolverDefaults.&lt;lambda&gt;&gt;, tree_insertion_methods: Optional[int] = None, activate_unsat_support: bool = False, grammar_unwinding_threshold: int = 4, initial_tree: isla.helpers.Maybe[isla.derivation_tree.DerivationTree] = Maybe(a=None), enable_optimized_z3_queries: bool = True, start_symbol: Optional[str] = None):&#10;The constructor of :class:`~isla.solver.ISLaSolver` accepts a large number of&#10;parameters. However, all but the first one, :code:`grammar`, are *optional.*&#10;&#10;The simplest way to construct an ISLa solver is by only providing it with a&#10;grammar only; it then works like a grammar fuzzer.&#10;&#10;&gt;&gt;&gt; import random&#10;&gt;&gt;&gt; random.seed(1)&#10;&#10;&gt;&gt;&gt; import string&#10;&gt;&gt;&gt; LANG_GRAMMAR = {&#10;... &#160;&#160;&#160;&#160;&quot;&lt;start&gt;&quot;:&#10;... &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;[&quot;&lt;stmt&gt;&quot;],&#10;... &#160;&#160;&#160;&#160;&quot;&lt;stmt&gt;&quot;:&#10;... &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;[&quot;&lt;assgn&gt; ; &lt;stmt&gt;&quot;, &quot;&lt;assgn&gt;&quot;],&#10;... &#160;&#160;&#160;&#160;&quot;&lt;assgn&gt;&quot;:&#10;... &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;[&quot;&lt;var&gt; := &lt;rhs&gt;&quot;],&#10;... &#160;&#160;&#160;&#160;&quot;&lt;rhs&gt;&quot;:&#10;... &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;[&quot;&lt;var&gt;&quot;, &quot;&lt;digit&gt;&quot;],&#10;... &#160;&#160;&#160;&#160;&quot;&lt;var&gt;&quot;: list(string.ascii_lowercase),&#10;... &#160;&#160;&#160;&#160;&quot;&lt;digit&gt;&quot;: list(string.digits)&#10;... }&#10;&gt;&gt;&gt;&#10;&gt;&gt;&gt; from isla.solver import ISLaSolver&#10;&gt;&gt;&gt; solver = ISLaSolver(LANG_GRAMMAR)&#10;&gt;&gt;&gt;&#10;&gt;&gt;&gt; str(solver.solve())&#10;&#39;d := 9&#39;&#10;&gt;&gt;&gt; str(solver.solve())&#10;&#39;v := n ; s := r&#39;&#10;&#10;:param grammar: The underlying grammar; either, as a &quot;Fuzzing Book&quot; dictionary&#10;or in BNF syntax.&#10;:param formula: The formula to solve; either a string or a readily parsed&#10;formula. If no formula is given, a default `true` constraint is assumed, and&#10;the solver falls back to a grammar fuzzer. The number of produced solutions&#10;will then be bound by `max_number_free_instantiations`.&#10;:param structural_predicates: Structural predicates to use when parsing a&#10;formula.&#10;:param semantic_predicates: Semantic predicates to use when parsing a formula.&#10;:param max_number_free_instantiations: Number of times that nonterminals that&#10;are not bound by any formula should be expanded by a coverage&#45;based fuzzer.&#10;:param max_number_smt_instantiations: Number of solutions of SMT formulas that&#10;should be produced.&#10;:param max_number_tree_insertion_results: The maximum number of results when&#10;solving existential quantifiers by tree insertion.&#10;:param enforce_unique_trees_in_queue: If true, states with the same tree as an&#10;already existing tree in the queue are discarded, irrespectively of the&#10;constraint.&#10;:param debug: If true, debug information about the evolution of states is&#10;collected, notably in the field state_tree. The root of the tree is in the&#10;field state_tree_root. The field costs stores the computed cost values for&#10;all new nodes.&#10;:param cost_computer: The `CostComputer` class for computing the cost relevant&#10;to placing states in ISLa&#39;s queue.&#10;:param timeout_seconds: Number of seconds after which the solver will terminate.&#10;:param global_fuzzer: If set to True, only one coverage&#45;guided grammar fuzzer&#10;object is used to finish off unconstrained open derivation trees throughout&#10;the whole generation time. This may be beneficial for some targets; e.g., we&#10;experienced that CSV works significantly faster. However, the achieved k&#45;path&#10;coverage can be lower with that setting.&#10;:param predicates_unique_in_int_arg: This is needed in certain cases for&#10;instantiating universal integer quantifiers. The supplied predicates should&#10;have exactly one integer argument, and hold for exactly one integer value&#10;once all other parameters are fixed.&#10;:param fuzzer_factory: Constructor of the fuzzer to use for instantiating&#10;&quot;free&quot; nonterminals.&#10;:param tree_insertion_methods: Combination of methods to use for existential&#10;quantifier elimination by tree insertion. Full selection: `DIRECT_EMBEDDING &amp;&#10;SELF_EMBEDDING &amp; CONTEXT_ADDITION`.&#10;:param activate_unsat_support: Set to True if you assume that a formula might&#10;be unsatisfiable. This triggers additional tests for unsatisfiability that&#10;reduce input generation performance, but might ensure termination (with a&#10;negative solver result) for unsatisfiable problems for which the solver could&#10;otherwise diverge.&#10;:param grammar_unwinding_threshold: When querying the SMT solver, ISLa passes a&#10;regular expression for the syntax of the involved nonterminals. If this&#10;syntax is not regular, we unwind the respective part in the reference grammar&#10;up to a depth of `grammar_unwinding_threshold`. If this is too shallow, it can&#10;happen that an equation etc. cannot be solved; if it is too deep, it can&#10;negatively impact performance (and quite tremendously so).&#10;:param initial_tree: An initial input tree for the queue, if the solver shall&#10;not start from the tree `(&lt;start&gt;, None)`.&#10;:param enable_optimized_z3_queries: Enables preprocessing of Z3 queries (mainly&#10;numeric problems concerning things like length). This can improve performance&#10;significantly; however, it might happen that certain problems cannot be solved&#10;anymore. In that case, this option can/should be deactivated.&#10;:param start_symbol: This is an alternative to `initial_tree` for starting with&#10;a start symbol different form `&lt;start&gt;`. If `start_symbol` is provided, a tree&#10;consisting of a single root node with the value of `start_symbol` is chosen as&#10;initial tree.">
 <text text-anchor="start" x="21.5" y="-100.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
 </a>
 </g>
@@ -13760,16 +13754,16 @@ For this, let's first find out if the <code>Constant()</code> constructor also t
     <p>
     <div class="quiz_options" title="Pick a choice.">
 
-        <input type="radio" name="7571bd3e-b559-11ee-8b57-6298cf1a5790" id="7571bd3e-b559-11ee-8b57-6298cf1a5790-1" onclick="clear_selection('7571bd3e-b559-11ee-8b57-6298cf1a5790')">
-        <label id="7571bd3e-b559-11ee-8b57-6298cf1a5790-1-label" for="7571bd3e-b559-11ee-8b57-6298cf1a5790-1">a <code>Constant()</code> with a negative value, or</label><br>
+        <input type="radio" name="a7648710-b61f-11ee-bb93-6298cf1a5790" id="a7648710-b61f-11ee-bb93-6298cf1a5790-1" onclick="clear_selection('a7648710-b61f-11ee-bb93-6298cf1a5790')">
+        <label id="a7648710-b61f-11ee-bb93-6298cf1a5790-1-label" for="a7648710-b61f-11ee-bb93-6298cf1a5790-1">a <code>Constant()</code> with a negative value, or</label><br>
 
-        <input type="radio" name="7571bd3e-b559-11ee-8b57-6298cf1a5790" id="7571bd3e-b559-11ee-8b57-6298cf1a5790-2" onclick="clear_selection('7571bd3e-b559-11ee-8b57-6298cf1a5790')">
-        <label id="7571bd3e-b559-11ee-8b57-6298cf1a5790-2-label" for="7571bd3e-b559-11ee-8b57-6298cf1a5790-2">a unary <code>-</code> operator applied to a positive value?</label><br>
+        <input type="radio" name="a7648710-b61f-11ee-bb93-6298cf1a5790" id="a7648710-b61f-11ee-bb93-6298cf1a5790-2" onclick="clear_selection('a7648710-b61f-11ee-bb93-6298cf1a5790')">
+        <label id="a7648710-b61f-11ee-bb93-6298cf1a5790-2-label" for="a7648710-b61f-11ee-bb93-6298cf1a5790-2">a unary <code>-</code> operator applied to a positive value?</label><br>
 
     </div>
     </p>
-    <input id="7571bd3e-b559-11ee-8b57-6298cf1a5790-submit" type="submit" value="Submit" onclick="check_selection('7571bd3e-b559-11ee-8b57-6298cf1a5790', 4, 0, '')">
-    <span class="quiz_hint" id="7571bd3e-b559-11ee-8b57-6298cf1a5790-hint"></span>
+    <input id="a7648710-b61f-11ee-bb93-6298cf1a5790-submit" type="submit" value="Submit" onclick="check_selection('a7648710-b61f-11ee-bb93-6298cf1a5790', 4, 0, '')">
+    <span class="quiz_hint" id="a7648710-b61f-11ee-bb93-6298cf1a5790-hint"></span>
     </div>
 
 </div>
@@ -16318,7 +16312,7 @@ For this, we use the <code>is_valid_grammar()</code> function:</p>
 <pre>&#39;&lt;returns&gt;&#39;: defined, but not used. Consider applying trim_grammar() on the grammar
 &#39;&lt;returns&gt;&#39;: unreachable from &lt;start&gt;. Consider applying trim_grammar() on the grammar
 Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44602/3611578183.py&#34;, line 2, in &lt;cell line: 1&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_4271/3611578183.py&#34;, line 2, in &lt;cell line: 1&gt;
     assert is_valid_grammar(python_ast_grammar_without_decorators)
 AssertionError (expected)
 </pre>
@@ -16545,7 +16539,7 @@ def my_favorite_function(I, /, *, Dq={set(): set(), set(): set()}, **Q) -&gt; ([
 {set()[:]}
 @R(() - set())
 def Fz(yw, l=~(), /, *, **rhnC) -&gt; [Ep4vmVd3RqNGD1s87UXjKgLH9VY].u0Pl6bOkaorfZeucYIyiE2SQ5TAtW_MBFJx: # type: 
-    del 1004
+    del 1006
 </pre>
 </div>
 
@@ -16585,8 +16579,8 @@ def Fz(yw, l=~(), /, *, **rhnC) -&gt; [Ep4vmVd3RqNGD1s87UXjKgLH9VY].u0Pl6bOkaorf
 def Qg(_, *dd, V=set() | A, **H) -&gt; (set() // set() ^ set() @ set() &amp; set()) &gt;&gt; (set() - set()) ** (set() / set()): # type: Q-(U&#39;@&lt;*=j4`tH1R%u&amp;L53ImK~Z/8$NEWr!l].o,_Xgf?#JvM d)PTGk[b07a}C&gt;yVzS^A2qDnB|+;sw:eO{ixYc6h9mpA4:&amp;
     with *
     set().z.DS0(set(), set(), (), l=set()[:]): # type: k
-        continue
-    return
+        return
+    continue
 </pre>
 </div>
 
@@ -16619,7 +16613,7 @@ def Qg(_, *dd, V=set() | A, **H) -&gt; (set() // set() ^ set() @ set() &amp; set
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>def TS(tevLE0_quJANn1FgQ3y8O4YokRsXdT6ti95wbxCKHjUIWlcPDzZpVBGrfM27amhs, /, *): # type: 
+<pre>def j1(UWFJ_yVsHQOzbYEIth6DiGUSfwnM0NXPma8BdLvRgTlp7u423qcx5k9CAZeKjrBoKM, *Ol, **T):
     pass
 </pre>
 </div>
@@ -16825,7 +16819,7 @@ def Qg(_, *dd, V=set() | A, **H) -&gt; (set() // set() ^ set() @ set() &amp; set
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#34;DerivationTree(&#39;&lt;start&gt;&#39;, (DerivationTree(&#39;&lt;mod&gt;&#39;, (DerivationTree(&#39;&lt;Module&gt;&#39;, (DerivationTree(&#39;Module(body=&#39;, (), id=485581), DerivationTree(&#39;&lt;nonempty_stmt_list&gt;&#39;, (DerivationTree(&#39;[&#39;, (), id=485579&#34;
+<pre>&#34;DerivationTree(&#39;&lt;start&gt;&#39;, (DerivationTree(&#39;&lt;mod&gt;&#39;, (DerivationTree(&#39;&lt;Module&gt;&#39;, (DerivationTree(&#39;Module(body=&#39;, (), id=490715), DerivationTree(&#39;&lt;nonempty_stmt_list&gt;&#39;, (DerivationTree(&#39;[&#39;, (), id=490713&#34;
 </pre>
 </div>
 
@@ -19342,8 +19336,8 @@ The input to mutate can be given as a derivation tree, or as a string; its outpu
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>def sum(a, b):
-    the_sum = (95.6) // (a + b)
-    return the_sum
+    the_sum = a + b
+    return iX
 </pre>
 </div>
 
@@ -19400,10 +19394,9 @@ Note if one of the top-level nodes (like <code>&lt;FunctionDef&gt;</code> or <co
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>@the_mum()
-def x(a, b):
-    thu_seUNytMxdleE4pw2 = {a} // b
-    return Raj0X5kWorVMuqIDc3hG4nCRLFbm_6ZBSYgPf781vsOmTJKizHsQ9A
+<pre>def suaGysF9c4Uww(b, b):
+    ([p[:]].ESL, *a[:][{set(): ()}.L_([set()], set()[:] + (not set()), &#39;&#39;):][:]) = h = aheuj_suGm + nHiZXdkWQJw7AjoUBmIb_qxCOfVmRz2pYrK6n9gDMh0cE43PTNve15tl
+    return t
 </pre>
 </div>
 
@@ -19792,7 +19785,7 @@ Notably, mutating <code>2 + 2</code> until we have a distributive law still is m
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>50
+<pre>65
 </pre>
 </div>
 
@@ -19814,17 +19807,8 @@ Notably, mutating <code>2 + 2</code> until we have a distributive law still is m
 
 <div class="output_area">
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>100...200...300...400...500...600...700...800...900...1000...1100...1200...1300...1400...1500...1600...1700...1800...1900...2000...2100...2200...2300...2400...2500...2600...2700...2800...2900...3000...3100...3200...3300...3400...3500...3600...3700...3800...3900...4000...4100...4200...4300...4400...4500...4600...4700...4800...4900...
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
 <div class="output_text output_subarea output_execute_result">
-<pre>4902
+<pre>91
 </pre>
 </div>
 
@@ -20646,60 +20630,212 @@ Other than that, we keep searching until we have a solution.</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Generation 0: found new best candidate (fitness=4.002666666666666):
+<pre>Generation 0: found new best candidate (fitness=4.002673796791444):
 def sum(a, b):
     the_sum = a + b
-    return the_sum
-Generation 1: found new best candidate (fitness=4.002680965147453):
-def s(a, b):
-    tde_sum = a + b
-    return the_sum
-Generation 2: found new best candidate (fitness=4.002695417789758):
-def suhe_sum(a, b):
-    tm = a + b
-    return thF
-Generation 4: found new best candidate (fitness=4.002724795640327):
-def s(a, b):
-    t = a + b
-    return the_sum
-Generation 9: found new best candidate (fitness=4.002762430939226):
-def suhe_sum(Tj):
-    tm = a + b
-    return the_sum
-Generation 11: found new best candidate (fitness=4.002881844380403):
-def s():
-    tde_sum = a + b
-    return the_sum
-Generation 12: found new best candidate (fitness=6.000967117988394):
-def s(a, b):
-    t = a + b
-    return the_sum
-Generation 13: found new best candidate (fitness=6.001138952164009):
-def s():
-    tde_sum = a + b
-    assert (D(set(), set()),).E, (+(*set() * 35))[{}:]
-Generation 14: found new best candidate (fitness=6.001146788990826):
-def s():
-    J = a + b
-    assert (D(set(), set()),).E, (+(*set() * 35))[{}:]
-Generation 16: found new best candidate (fitness=6.00125):
-while {}[set():set():set() * set()]:
-    assert 
-    break
+    return the_su
+Generation 1: found new best candidate (fitness=4.002695417789758):
+def sum(a, b):
+    thK = a + the_sum
+    return b
+Generation 5: found new best candidate (fitness=4.002770083102493):
+def sum(q):
+    the_sum = a + the_sum
+    return b
+Generation 8: found new best candidate (fitness=4.003039513677812):
+def sum(q):
+    the_sum = a + the_sum
+    pass
+Generation 9: found new best candidate (fitness=6.001290322580645):
+def sum(a, b):
+    for JQ in 
+    {} * set(): # type: 
+        the_sum = a + b
+        return the_su
+    u = *q = ~() # type: 
+    continue
+Generation 22: found new best candidate (fitness=6.001426533523538):
+if Q():
+    with :
+        pass
     return
 else:
 
-    def suhe_sum(Tj):
-        tm = a + b
+    def sum(a, b):
+        the_sum = a + b
         return the_sum
-    pass
-Generation 19: found new best candidate (fitness=7.002336448598131):
-def s():
-    tde_sum = (a + b) * (not b)
-    return the_sum
-Done!
+    while set() * set():
+        continue
+        break
+Generation 26: found new best candidate (fitness=6.001432664756447):
+if Q():
+    with :
+        pass
+    return
+else:
+
+    def sum(a, b):
+        the_ = a + b
+        return the_sum
+    while set() * set():
+        continue
+        break
+Generation 28: found new best candidate (fitness=6.001438848920864):
+if Q():
+    with :
+        pass
+    return
+else:
+
+    def sum(a, b):
+        the_ = a + b
+        return the_
+    while set() * set():
+        continue
+        break
+Generation 45: found new best candidate (fitness=6.0014450867052025):
+if Q():
+    with :
+        pass
+    return
+else:
+
+    def sum(a, b):
+        n = a + b
+        return the_
+    while set() * set():
+        continue
+        break
+Generation 47: found new best candidate (fitness=6.001449275362319):
+if Q():
+    with :
+        pass
+    return
+else:
+
+    def sum(a, b):
+        n = a + b
+        return tS
+    while set() * set():
+        continue
+        break
+Generation 56: found new best candidate (fitness=6.001474926253687):
+if Q():
+    with :
+        pass
+    return
+else:
+
+    def sum(o):
+        n = a + b
+        return the_
+    while set() * set():
+        continue
+        break
+Generation 57: found new best candidate (fitness=6.001524390243903):
+if Q():
+    with :
+        pass
+    return
+else:
+
+    def sum(o):
+        n = a + b
+        return the_
+    while set() * 
+    Yy:
+        continue
+        break
+Generation 72: found new best candidate (fitness=7.001300390117035):
+if Q():
+    with :
+        pass
+    return
+else:
+
+    def sum(o5):
+        n = a + b
+        return the_
+    while set() * set() * set():
+        continue
+        break
+Generation 79: found new best candidate (fitness=7.001302083333333):
+if Q():
+    with :
+        pass
+    return
+else:
+
+    def sum(o5):
+        n = M + b
+        return the_
+    while set() * set() * set():
+        continue
+        break
+Generation 89: found new best candidate (fitness=7.0013054830287205):
+if Q():
+    with :
+        pass
+    return
+else:
+
+    def sum(o5):
+        n = M + b
+        return iI
+    while set() * set() * set():
+        continue
+        break
+Generation 98: found new best candidate (fitness=7.001307189542484):
+if Q():
+    with :
+        pass
+    break
+else:
+
+    def sum(o5):
+        n = M + b
+        return iI
+    while set() * set() * set():
+        continue
+        break
 
 Restarting; trial #2
+Generation 0: found new best candidate (fitness=4.002710027100271):
+def sum(a, b):
+    h = a + b
+    return the_sum
+Generation 7: found new best candidate (fitness=4.002739726027397):
+def sum(a, b):
+    h = a + b
+    return the
+Generation 9: found new best candidate (fitness=4.002949852507375):
+def sum(a, b):
+    the_sum = a + b
+    return
+Generation 13: found new best candidate (fitness=4.002994011976048):
+def sum(a, b):
+    tf = a + b
+    return
+Generation 16: found new best candidate (fitness=6.000926784059314):
+def sum(a, b):
+    the_sum = {}
+    return
+Generation 19: found new best candidate (fitness=6.000931966449208):
+def sum(a, b):
+    t = {}
+    return
+Generation 21: found new best candidate (fitness=6.001097694840834):
+def sum(a, b):
+    h = a + ly(b, rC=set()[set():set():set()], T_=set() * set())
+    return the_sum
+Generation 31: found new best candidate (fitness=6.001721170395869):
+def sum(a, b):
+    h = (
+    set() // *()) * (a + b)
+    return t5
+Done!
+
+Restarting; trial #3
 </pre>
 </div>
 
@@ -20731,9 +20867,10 @@ Restarting; trial #2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>def s():
-    tde_sum = (a + b) * (not b)
-    return the_sum
+<pre>def sum(a, b):
+    h = (
+    set() // *()) * (a + b)
+    return t5
 </pre>
 </div>
 
@@ -20935,7 +21072,7 @@ This is a must read for anyone in the field in compiler testing.</p>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/PythonFuzzer.ipynb" target=_blank)>Last change: 2024-01-17 17:47:31+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/PythonFuzzer.ipynb" target=_blank)>Last change: 2024-01-17 22:45:32+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -20951,7 +21088,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/PythonFuzzer.html">Testing Compilers</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/PythonFuzzer.html">https://www.fuzzingbook.org/beta/html/PythonFuzzer.html</a>.  Retrieved 2024-01-17 17:47:31+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/PythonFuzzer.html">Testing Compilers</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/PythonFuzzer.html">https://www.fuzzingbook.org/beta/html/PythonFuzzer.html</a>.  Retrieved 2024-01-17 22:45:32+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2024:PythonFuzzer,
@@ -20961,9 +21098,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2024},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/PythonFuzzer.html}},
-    note = {Retrieved 2024-01-17 17:47:31+01:00},
+    note = {Retrieved 2024-01-17 22:45:32+01:00},
     url = {https://www.fuzzingbook.org/beta/html/PythonFuzzer.html},
-    urldate = {2024-01-17 17:47:31+01:00}
+    urldate = {2024-01-17 22:45:32+01:00}
 }
 </pre>
 </div>

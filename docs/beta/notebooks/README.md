@@ -60,6 +60,6 @@ This work is designed as a _textbook_ for a course in software testing or securi
 
 ## News
 
-This book is _work in progress._  All chapters planned are out now, but we keep on refining text and code with [minor and major releases.](https://www.fuzzingbook.org/html/ReleaseNotes.html)  To get notified on updates, <a href="https://mastodon.social/invite/3CvrkW9t">follow us on Mastodon</a>.
+This book is _work in progress._  All chapters planned are out now, but we keep on refining text and code with [minor and major releases.](https://www.fuzzingbook.org/html/ReleaseNotes.html)  To get notified on updates, <a href="https://mastodon.social/@TheFuzzingBook">follow us on Mastodon</a>.
 
 <!--

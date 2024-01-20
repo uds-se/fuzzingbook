@@ -3,7 +3,7 @@
 
 # "Mining Input Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2024-01-17 17:55:58+01:00
+# Last change: 2024-01-18 17:34:22+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -59,11 +59,11 @@ We extract the input grammar for `url_parse()` using `recover_grammar()`:
 {'': [''],
  '': [':'],
  '': ['https', 'http'],
- '': ['///',
-  '//'],
- '': ['www.cispa.saarland:80',
-  'user:pass@www.google.com:80',
-  'www.fuzzingbook.org'],
+ '': ['//',
+  '///'],
+ '': ['user:pass@www.google.com:80',
+  'www.fuzzingbook.org',
+  'www.cispa.saarland:80'],
  '': ['#',
   '/#'],
  '': ['/?'],
@@ -87,11 +87,11 @@ The grammar can be immediately used for fuzzing, producing arbitrary combination
 >>> from GrammarCoverageFuzzer import GrammarCoverageFuzzer
 >>> fuzzer = GrammarCoverageFuzzer(grammar)
 >>> [fuzzer.fuzz() for i in range(5)]
-['https://user:pass@www.google.com:80/?q=path#ref',
- 'http://www.fuzzingbook.org/',
- 'http://www.cispa.saarland:80/#News',
- 'https://www.cispa.saarland:80/#News',
- 'http://www.fuzzingbook.org/#ref']
+['https://www.cispa.saarland:80/',
+ 'http://user:pass@www.google.com:80/#ref',
+ 'https://www.fuzzingbook.org/?q=path#News',
+ 'https://www.fuzzingbook.org/#ref',
+ 'http://www.cispa.saarland:80/#News']
 
 Being able to automatically extract a grammar and to use this grammar for fuzzing makes for very effective test generation with a minimum of manual work.
 

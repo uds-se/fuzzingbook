@@ -3,7 +3,7 @@
 
 # "Part II: Lexical Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/02_Lexical_Fuzzing.html
-# Last change: 2024-01-18 17:28:06+01:00
+# Last change: 2024-01-18 18:13:59+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
