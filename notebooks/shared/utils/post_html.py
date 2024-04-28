@@ -900,7 +900,7 @@ end_of_exercise = '''
 <p><div class="solution_link"><a href="__CHAPTER_NOTEBOOK_IPYNB__#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 '''
 
-## Survey banner
+# Survey banner
 banner = '''
 <p><div class="banner">Help shaping the future of __BOOKTITLE__ and
 <a target=_new href="https://docs.google.com/forms/d/e/1FAIpQLScyO6j5EsrtS0pse7qVHeDoOj188JgC8SepWFZIO32N6gre8Q/viewform?usp=sf_link">take part in our 2024 reader survey!</a></div></p>
