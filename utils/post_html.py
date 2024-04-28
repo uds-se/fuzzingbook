@@ -819,6 +819,12 @@ end_of_exercise = '''
 <p><div class="solution_link"><a href="__CHAPTER_NOTEBOOK_IPYNB__#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 '''
 
+# Survey banner
+banner = '''
+<p><div class="banner">Help shaping the future of __BOOKTITLE__ and
+<a target=_new href="https://docs.google.com/forms/d/e/1FAIpQLScyO6j5EsrtS0pse7qVHeDoOj188JgC8SepWFZIO32N6gre8Q/viewform?usp=sf_link">take part in our 2024 reader survey!</a></div></p>
+'''
+
 if args.home:
     share_message = (r'I just read "' + booktitle 
         + rf'" ({twitter}) at ' + site_html)
@@ -857,6 +863,7 @@ chapter_contents = chapter_contents \
     .replace("<__STRUCTURED_ALL_CHAPTERS_MENU__>", structured_all_chapters_menu) \
     .replace("<__ALL_SECTIONS_MENU__>", all_sections_menu) \
     .replace("<__END_OF_EXERCISE__>", end_of_exercise) \
+    .replace("<__BANNER__>", banner) \
     .replace("__PROJECT__", project) \
     .replace("__PAGE_TITLE__", page_title) \
     .replace("__BOOKTITLE_BETA__", booktitle_beta) \
