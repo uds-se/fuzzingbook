@@ -167,7 +167,7 @@ export default class Keyboard {
 		let activeElementIsNotes = document.activeElement && document.activeElement.className && /speaker-notes/i.test( document.activeElement.className);
 
 		// Whitelist certain modifiers for slide navigation shortcuts
-		let keyCodeUsesModifier = [32, 37, 38, 39, 40, 78, 80, 191].indexOf( event.keyCode ) !== -1;
+		let keyCodeUsesModifier = [32, 37, 38, 39, 40, 63, 78, 80, 191].indexOf( event.keyCode ) !== -1;
 
 		// Prevent all other events when a modifier is pressed
 		let unusedModifier = 	!( keyCodeUsesModifier && event.shiftKey || event.altKey ) &&
@@ -178,7 +178,7 @@ export default class Keyboard {
 		if( activeElementIsCE || activeElementIsInput || activeElementIsNotes || unusedModifier ) return;
 
 		// While paused only allow resume keyboard events; 'b', 'v', '.'
-		let resumeKeyCodes = [66,86,190,191];
+		let resumeKeyCodes = [66,86,190,191,112];
 		let key;
 
 		// Custom key bindings for togglePause should be able to resume
@@ -271,7 +271,12 @@ export default class Keyboard {
 					this.Reveal.slide( 0 );
 				}
 				else if( !this.Reveal.overview.isActive() && useLinearMode ) {
-					this.Reveal.prev({skipFragments: event.altKey});
+					if( config.rtl ) {
+						this.Reveal.next({skipFragments: event.altKey});
+					}
+					else {
+						this.Reveal.prev({skipFragments: event.altKey});
+					}
 				}
 				else {
 					this.Reveal.left({skipFragments: event.altKey});
@@ -283,7 +288,12 @@ export default class Keyboard {
 					this.Reveal.slide( this.Reveal.getHorizontalSlides().length - 1 );
 				}
 				else if( !this.Reveal.overview.isActive() && useLinearMode ) {
-					this.Reveal.next({skipFragments: event.altKey});
+					if( config.rtl ) {
+						this.Reveal.prev({skipFragments: event.altKey});
+					}
+					else {
+						this.Reveal.next({skipFragments: event.altKey});
+					}
 				}
 				else {
 					this.Reveal.right({skipFragments: event.altKey});
@@ -354,7 +364,11 @@ export default class Keyboard {
 				}
 			}
 			// ?
-			else if( keyCode === 191 && event.shiftKey ) {
+			else if( ( keyCode === 63 || keyCode === 191 ) && event.shiftKey ) {
+				this.Reveal.toggleHelp();
+			}
+			// F1
+			else if( keyCode === 112 ) {
 				this.Reveal.toggleHelp();
 			}
 			else {
