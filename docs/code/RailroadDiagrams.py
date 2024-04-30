@@ -3,7 +3,7 @@
 
 # "Railroad Diagrams" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/RailroadDiagrams.html
-# Last change: 2024-01-18 18:31:28+01:00
+# Last change: 2024-04-27 15:59:44+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors

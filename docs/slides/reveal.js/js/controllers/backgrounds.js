@@ -268,14 +268,15 @@ export default class Backgrounds {
 	 */
 	update( includeAll = false ) {
 
+		let config = this.Reveal.getConfig();
 		let currentSlide = this.Reveal.getCurrentSlide();
 		let indices = this.Reveal.getIndices();
 
 		let currentBackground = null;
 
 		// Reverse past/future classes when in RTL mode
-		let horizontalPast = this.Reveal.getConfig().rtl ? 'future' : 'past',
-			horizontalFuture = this.Reveal.getConfig().rtl ? 'past' : 'future';
+		let horizontalPast = config.rtl ? 'future' : 'past',
+			horizontalFuture = config.rtl ? 'past' : 'future';
 
 		// Update the classes of all backgrounds to match the
 		// states of their slides (past/present/future)
@@ -321,6 +322,42 @@ export default class Backgrounds {
 
 		} );
 
+		// The previous background may refer to a DOM element that has
+		// been removed after a presentation is synced & bgs are recreated
+		if( this.previousBackground && !this.previousBackground.closest( 'body' ) ) {
+			this.previousBackground = null;
+		}
+
+		if( currentBackground && this.previousBackground ) {
+
+			// Don't transition between identical backgrounds. This
+			// prevents unwanted flicker.
+			let previousBackgroundHash = this.previousBackground.getAttribute( 'data-background-hash' );
+			let currentBackgroundHash = currentBackground.getAttribute( 'data-background-hash' );
+
+			if( currentBackgroundHash && currentBackgroundHash === previousBackgroundHash && currentBackground !== this.previousBackground ) {
+				this.element.classList.add( 'no-transition' );
+
+				// If multiple slides have the same background video, carry
+				// the <video> element forward so that it plays continuously
+				// across multiple slides
+				const currentVideo = currentBackground.querySelector( 'video' );
+				const previousVideo = this.previousBackground.querySelector( 'video' );
+
+				if( currentVideo && previousVideo ) {
+
+					const currentVideoParent = currentVideo.parentNode;
+					const previousVideoParent = previousVideo.parentNode;
+
+					// Swap the two videos
+					previousVideoParent.appendChild( currentVideo );
+					currentVideoParent.appendChild( previousVideo );
+
+				}
+			}
+
+		}
+
 		// Stop content inside of previous backgrounds
 		if( this.previousBackground ) {
 
@@ -347,14 +384,6 @@ export default class Backgrounds {
 
 			}
 
-			// Don't transition between identical backgrounds. This
-			// prevents unwanted flicker.
-			let previousBackgroundHash = this.previousBackground ? this.previousBackground.getAttribute( 'data-background-hash' ) : null;
-			let currentBackgroundHash = currentBackground.getAttribute( 'data-background-hash' );
-			if( currentBackgroundHash && currentBackgroundHash === previousBackgroundHash && currentBackground !== this.previousBackground ) {
-				this.element.classList.add( 'no-transition' );
-			}
-
 			this.previousBackground = currentBackground;
 
 		}
@@ -368,7 +397,7 @@ export default class Backgrounds {
 		// Allow the first background to apply without transition
 		setTimeout( () => {
 			this.element.classList.remove( 'no-transition' );
-		}, 1 );
+		}, 10 );
 
 	}
 
