@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2024-04-27 15:49:26+02:00
+# Last change: 2024-06-29 18:19:06+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -90,28 +90,31 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>     scf.add_trace(_, v)
 ' '
 '%'
-'AB'
-''
-'ABC'
 'A'
-'AB+'
+'%'
+''
+'A'
 'AB'
-'ABCD'
+'A+'
+'ABC'
+'AB'
+'AB+'
 
 IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
 
-'ABC+'
-'A'
-'ABC'
-'ABC%'
 'A%'
-'ABC+DE'
 'AB'
+'AB+C'
+'%'
+'AB%'
+'AB+CDE'
 'AB+'
-'A'
-'ABCD'
-'A'
+'A%'
+'A+'
 
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
 IndexError: string index out of range (expected)
 IndexError: string index out of range (expected)
 
@@ -138,26 +141,32 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-insert into W (Ru_2,.Wj186518W8) values ('@','}','h')
-Table ('W') was not found
+select (:) from aX1Nbwy4
+Table ('aX1Nbwy4') was not found
 
-select S>R(j),A from C3 where U4==9249
-Table ('C3') was not found
+delete from W5. where O*ci+D+T-_+H
+Invalid WHERE ('.-B+S+a*s>i+D+T-_+H')
 
-select I/I*U/n1(M),T/E*d(S) from months
-Invalid WHERE ('(I/I*U/n1(M),T/E*d(S))')
+update Ubz set a2=Q1 where N-c+p/V+C/c+N>(L-i/i)
+Table ('Ubz') was not found
 
-select (v==X),t,h,E from vehicles where r8(w)B/P(g)
+update c set l=i,i=q,r=h,F=. where r!=r!=c+E
+Table ('c') was not found
 
-select x/z+.(L)-h from vehicles where -9!=Y>G(A)
+insert into vehicles (L58i91TQf2Z5V1S) values (-1.890)
+Column ('L58i91TQf2Z5V1S') was not found
 
-delete from h4OB60J where K-w/MA) from months where B(e,R)>D
+insert into months (kind,company) values (3742,'8|XE','+Y:',8)
+Column ('kind') was not found
 
+delete from vehicles where (((K)==p!=o))==(((((_>E)))))!=b((pu),D>o)
+Invalid WHERE ('(((K)==p!=o))==(((((_>E)))))!=b((pu),D>o)')
 
-TypeError: 'NotImplementedType' object is not callable (expected)
-TypeError: 'NotImplementedType' object is not callable (expected)
-TypeError: 'NotImplementedType' object is not callable (expected)
-TypeError: 'NotImplementedType' object is not callable (expected)
+select zFocn,(u-e*S-k/U*l>(l)),yq35r16 from m7
+Table ('m7') was not found
+
+update months set company=z8 where ((P==e==8.7))!=I+f/C-J*_-H
+Column ('company') was not found
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"

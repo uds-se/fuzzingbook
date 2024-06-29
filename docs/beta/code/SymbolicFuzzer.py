@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2024-04-27 15:49:42+02:00
+# Last change: 2024-06-29 18:19:17+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -57,10 +57,10 @@ def gcd(a: int, b: int) -> int:
 {'a': 7, 'b': 6}
 {'a': 9, 'b': 10}
 {'a': 4, 'b': 4}
-{'a': 10, 'b': 9}
-{'a': 2, 'b': 10}
-{'a': 14, 'b': 7}
-{'a': 3, 'b': 2}
+{'a': 23, 'b': 11}
+{'a': 8, 'b': 16}
+{'a': 10, 'b': 1}
+{'a': 28, 'b': 9}
 
 
 Note that the variable values returned by `fuzz()` are Z3 _symbolic_ values; to convert them to Python numbers, use their method `as_long()`:
@@ -71,16 +71,16 @@ Note that the variable values returned by `fuzz()` are Z3 _symbolic_ values; to 
 >>>     b = args['b'].as_long()
 >>>     d = gcd(a, b)
 >>>     print(f"gcd({a}, {b}) = {d}")
-gcd(0, 8) = 8
-gcd(-1, 10) = -1
-gcd(13, 2) = 1
-gcd(0, 10) = 10
-gcd(6, 7) = 1
-gcd(14, 2) = 2
-gcd(-1, 11) = -1
-gcd(15, 0) = 15
-gcd(0, -1) = -1
-gcd(-3, -2) = -1
+gcd(0, 12) = 12
+gcd(-1, 0) = -1
+gcd(29, 17) = 1
+gcd(0, 7) = 7
+gcd(-2, -1) = -1
+gcd(40, 8) = 8
+gcd(-1, 18) = -1
+gcd(3, 0) = 3
+gcd(1, -2) = -1
+gcd(-3, -1) = -1
 
 
 The symbolic fuzzer is subject to a number of constraints. First, it requires that the function to be fuzzed has correct type annotations, including all local variables. Second, it solves loops by unrolling them, but only for a fixed amount.

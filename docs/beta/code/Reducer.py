@@ -3,7 +3,7 @@
 
 # "Reducing Failure-Inducing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2024-05-16 13:23:06+02:00
+# Last change: 2024-06-29 18:16:06+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
