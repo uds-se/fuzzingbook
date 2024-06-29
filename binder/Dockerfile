@@ -20,12 +20,12 @@ FROM docker.io/library/buildpack-deps:jammy
 ARG PROJECT=fuzzingbook
 ARG REPO=https://github.com/uds-se/${PROJECT}.git
 
+# Install git and pip
+RUN apt-get update
+RUN apt-get install -y git python3 pip gcc
+
 # Some version info
 RUN echo "This is ${PROJECT} with $(python --version)"
-
-# Install git and pip
-RUN apt update
-RUN apt install -y git pip gcc
 
 # Install jupyter
 RUN pip install --no-cache --upgrade pip && \
@@ -45,21 +45,20 @@ WORKDIR ${HOME}
 
 # Make sure the contents of our repo are in ${HOME}
 COPY . ${HOME}
-RUN chown -R ${NB_UID} ${HOME}
 WORKDIR ${HOME}
 
-# Clone the book repository and chdir into it
 RUN git clone --depth 1 ${REPO}
+RUN chown -R ${NB_UID} ${HOME}
 WORKDIR ${PROJECT}
 
 # Install the required Linux packages
-RUN apt install -y $(grep -v '^#' binder/apt.txt); exit 0
+RUN apt-get install -y $(grep -v '^#' binder/apt.txt); exit 0
 
 # From here on, we are a user
 USER ${NB_USER}
 
 # Add local bin path
-RUN PATH="/home/${NB_USER}/.local/bin:$PATH"
+RUN PATH="/home/${NB_USER}/.local/bin:$PATH"; export PATH
 
 # Set up the conda environment
 # (Skipping for now, as installing conda is hard)
