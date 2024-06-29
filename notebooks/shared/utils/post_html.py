@@ -54,7 +54,11 @@ mastodon = args.mastodon
 
 site_html = f"https://www.{project}.org/"
 github_html = f"https://github.com/uds-se/{project}/"
-notebook_html = f"https://mybinder.org/v2/gh/uds-se/{project}/master?filepath=docs/"
+notebook_html =  f"https://mybinder.org/v2/gh/uds-se/{project}/HEAD?labpath=docs%2F"
+
+# Old path, using Jupyter notebook instead of Jupyter Lab
+# notebook_html = f"https://mybinder.org/v2/gh/uds-se/{project}/master?filepath=docs/"
+
 
 # Menus
 # For icons, see https://fontawesome.com/cheatsheet
