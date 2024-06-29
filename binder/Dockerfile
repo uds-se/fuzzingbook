@@ -25,7 +25,7 @@ RUN apt-get update
 RUN apt-get install -y git python3 pip gcc
 
 # Some version info
-RUN echo "This is ${PROJECT} with $(python --version)"
+RUN echo "This is ${PROJECT} with $(python3 --version)"
 
 # Install jupyter
 RUN pip install --no-cache --upgrade pip && \
