@@ -3,7 +3,7 @@
 
 # "Error Handling" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ExpectError.html
-# Last change: 2024-04-27 15:59:21+02:00
+# Last change: 2024-06-29 18:33:57+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -47,7 +47,7 @@ The `ExpectError` class allows you to catch and report exceptions, yet resume ex
 >>> with ExpectError():
 >>>     x = 1 / 0
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_69748/2664980466.py", line 2, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_25088/2664980466.py", line 2, in 
     x = 1 / 0
 ZeroDivisionError: division by zero (expected)
 
@@ -63,9 +63,9 @@ Start
 3 seconds have passed
 
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_69748/1223755941.py", line 2, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_25088/1223755941.py", line 2, in 
     long_running_test()
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_69748/3930412460.py", line 4, in long_running_test
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_25088/3930412460.py", line 4, in long_running_test
     time.sleep(1)
   File "/Users/zeller/Projects/fuzzingbook/notebooks/Timeout.ipynb", line 43, in timeout_handler
     raise TimeoutError()

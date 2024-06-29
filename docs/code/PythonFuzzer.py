@@ -3,7 +3,7 @@
 
 # "Testing Compilers" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/PythonFuzzer.html
-# Last change: 2024-04-27 15:54:00+02:00
+# Last change: 2024-06-29 18:25:31+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -46,8 +46,9 @@ This chapter provides a `PythonFuzzer` class that allows producing arbitrary Pyt
 
 >>> fuzzer = PythonFuzzer()
 >>> print(fuzzer.fuzz())
-def Hw(): # type: 
-    pass
+def O() -> set()[:]: # type: 
+    continue
+    return
 
 
 By default, `PythonFuzzer` produces a _function definition_ – that is, a list of statements as above.
@@ -56,13 +57,10 @@ You can pass a `start_symbol` argument to state which Python element you'd like 
 >>> fuzzer = PythonFuzzer('')
 >>> print(fuzzer.fuzz())
 while 
-'' or {Z: *(set() ^ set())}:
-    del 
-
-
-Here is a list of all possible start symbols. Their names reflect the nonterminals from the [Python `ast` module documentation](https://docs.python.org/3/library/ast.html).
-
->>> sorted(list(PYTHON_AST_GRAMMAR.keys()))
+7.6:
+    break
+else:
+    C[:] = set() >> sorted(list(PYTHON_AST_GRAMMAR.keys()))
 ['',
  '',
  '',
@@ -169,7 +167,7 @@ To produce a Python module without `PythonFuzzer`, you would take these steps:
 
 >>> ast_string = str(solver.solve())
 >>> ast_string
-'FunctionDef(name=\'t\', args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Break()], decorator_list=[], returns=Call(func=Name(id="set", ctx=Load()), args=[], keywords=[]), type_comment=\'\')'
+"FunctionDef(name='T', args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Continue()], decorator_list=[], type_comment='')"
 
 **Step 4:**  Convert the AST into an actual Python AST data structure.
 
@@ -180,8 +178,8 @@ To produce a Python module without `PythonFuzzer`, you would take these steps:
 
 >>> ast.fix_missing_locations(abstract_syntax_tree)
 >>> print(ast.unparse(abstract_syntax_tree))
-def t() -> set(): # type: 
-    break
+def T(): # type: 
+    continue
 
 
 The chapter has many more applications, including parsing and mutating Python code, evolutionary fuzzing, and more.
