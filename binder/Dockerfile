@@ -34,8 +34,8 @@ RUN pip install --no-cache --upgrade pip && \
 # Add the default user
 ARG NB_USER=jovyan
 ARG NB_UID=1000
-ENV USER ${NB_USER}
-ENV HOME /home/${NB_USER}
+ENV USER=${NB_USER}
+ENV HOME=/home/${NB_USER}
 
 RUN adduser --disabled-password \
     --gecos "Default user" \
@@ -58,7 +58,7 @@ RUN apt-get install -y $(grep -v '^#' binder/apt.txt); exit 0
 USER ${NB_USER}
 
 # Add local bin path
-RUN PATH="/home/${NB_USER}/.local/bin:$PATH"; export PATH
+ENV PATH="/home/${NB_USER}/.local/bin:$PATH"
 
 # Set up the conda environment
 # (Skipping for now, as installing conda is hard)
