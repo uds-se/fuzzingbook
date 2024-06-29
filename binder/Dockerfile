@@ -1,23 +1,35 @@
-# Dockerfile for fuzzingbook (experimental)
+# Dockerfile for fuzzingbook/debuggingbook (experimental)
 
 # The repo2docker script takes a _very_ long time to execute,
 # causing timeouts on mybinder. So, we provide this lightweight
 # Dockerfile instead.
+
+# To test, use
+# docker build -t my-image binder
 
 # For more infp, see
 # https://mybinder.readthedocs.io/en/latest/tutorials/dockerfile.html
 # https://github.com/binder-examples/minimal-dockerfile
 
 # From minimal-dockerfile
-FROM python:3.10-slim
+# FROM python:3.10-slim
+# From docker2repo
+FROM docker.io/library/buildpack-deps:jammy
+
+# Project name
+ARG PROJECT=fuzzingbook
+ARG REPO=https://github.com/uds-se/${PROJECT}.git
+
+# Some version info
+RUN echo "This is ${PROJECT} with $(python --version)"
+
+# Install git and pip
+RUN apt update
+RUN apt install -y git pip gcc
 
 # Install jupyter
 RUN pip install --no-cache --upgrade pip && \
     pip install --no-cache notebook jupyterlab
-
-# Install git
-RUN apt update
-RUN apt install -y git
 
 # Add the default user
 ARG NB_USER=jovyan
@@ -30,22 +42,24 @@ RUN adduser --disabled-password \
     --uid ${NB_UID} \
     ${NB_USER}
 WORKDIR ${HOME}
-USER ${USER}
 
 # Make sure the contents of our repo are in ${HOME}
 COPY . ${HOME}
-USER root
 RUN chown -R ${NB_UID} ${HOME}
-USER ${NB_USER}
+WORKDIR ${HOME}
 
-# Clone the book repository
-RUN git clone --depth 1 https://github.com/uds-se/fuzzingbook.git
-WORKDIR fuzzingbook
+# Clone the book repository and chdir into it
+RUN git clone --depth 1 ${REPO}
+WORKDIR ${PROJECT}
 
 # Install the required Linux packages
-USER root
 RUN apt install -y $(grep -v '^#' binder/apt.txt); exit 0
+
+# From here on, we are a user
 USER ${NB_USER}
+
+# Add local bin path
+RUN PATH="/home/${NB_USER}/.local/bin:$PATH"
 
 # Set up the conda environment
 # (Skipping for now, as installing conda is hard)
@@ -53,6 +67,7 @@ USER ${NB_USER}
 # RUN conda activate myenv
 
 # Install the required Python packages
+RUN pip install -r requirements.txt; exit 0
 RUN pip install -r binder/requirements.txt; exit 0
 
 # Run the postBuild script
