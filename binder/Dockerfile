@@ -26,6 +26,9 @@ FROM docker.io/library/buildpack-deps:jammy
 ARG PROJECT=fuzzingbook
 ARG REPO=https://github.com/uds-se/${PROJECT}.git
 
+# Meta-data
+LABEL description="$(PROJECT).org image from $(REPO)"
+
 # Install git and pip
 RUN apt-get update
 RUN apt-get install -y git python3 pip npm gcc
@@ -36,6 +39,9 @@ RUN echo "This is ${PROJECT} with $(python3 --version)" 1>&2
 # Install jupyter
 RUN pip install --no-cache --upgrade pip && \
     pip install --no-cache notebook jupyterlab
+
+# Install mermaid
+RUN npm i -g mermaid
 
 # Add the default user
 ARG NB_USER=jovyan
@@ -70,7 +76,8 @@ USER ${NB_USER}
 ENV PATH="/home/${NB_USER}/.local/bin:$PATH"
 
 # Set up the conda environment
-# (Skipping for now, as installing conda is hard)
+# (Skipping for now, as installing conda is hard, 
+#  and apparently we can do without)
 # RUN conda env create -f binder/environment.yml
 # RUN conda activate myenv
 
