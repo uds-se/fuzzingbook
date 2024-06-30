@@ -1289,7 +1289,7 @@ docker-push:
 
 docker-release:
 	docker pull $(DOCKER_TAG)
-	docker tag $(DOCKER_TAG):$(GIT_HASH) $(DOCKER_TAG):latest
+	docker tag  $(DOCKER_TAG):latest $(DOCKER_TAG):$(GIT_HASH)
 	docker push $(DOCKER_TAG):latest
 
 # Cleanup unused space	

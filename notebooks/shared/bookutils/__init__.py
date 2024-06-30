@@ -12,7 +12,8 @@ __all__ = [
     "show_ast", "input", "next_inputs",
     "unicode_escape", "terminal_escape", "project"
     "inheritance_conflicts", "extract_class_definition",
-    "quiz", "import_notebooks"
+    "quiz", "import_notebooks", "rich_output",
+    "InteractiveSVG"
 ]
 
 # Setup loader such that workbooks can be imported directly
@@ -70,6 +71,17 @@ def YouTubeVideo(id: str, width: int = 640, height: int = 360) -> Any:
     else:
         # For code: just pass
         pass
+
+# Wrapper for interactive SVG - like SVG, but with links
+# From https://stackoverflow.com/questions/77902970/how-can-i-display-an-interactive-svg-image-that-utilizes-javascript-in-a-jupyter
+
+class InteractiveSVG:
+    def __init__(self, filename: str) -> None:
+        with open(filename, 'r', encoding='utf-8') as svg_fh:
+            self.svg_content = svg_fh.read()
+            
+    def _repr_html_(self) -> str:
+        return self.svg_content
 
 
 # Checking for inheritance conflicts
