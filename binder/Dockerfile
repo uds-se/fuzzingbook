@@ -17,8 +17,6 @@
 # This Dockerfile is meant to be used in the mybinder environment,
 # but it can also serve as a base to deploy docker images.
 
-# From minimal-dockerfile
-# FROM python:3.10-slim
 # From docker2repo
 FROM docker.io/library/buildpack-deps:jammy
 
@@ -42,6 +40,11 @@ RUN pip install --no-cache --upgrade pip && \
 
 # Install mermaid
 RUN npm i -g mermaid
+
+# From postBuild script – apparently, we have to run this as root
+RUN pip install jupyterlab-markup
+RUN pip install jupyterlab-cell-flash
+RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
 
 # Add the default user
 ARG NB_USER=jovyan
@@ -76,7 +79,7 @@ USER ${NB_USER}
 ENV PATH="/home/${NB_USER}/.local/bin:$PATH"
 
 # Set up the conda environment
-# (Skipping for now, as installing conda is hard, 
+# (Skipping for now, as installing conda is hard,
 #  and apparently we can do without)
 # RUN conda env create -f binder/environment.yml
 # RUN conda activate myenv
@@ -85,5 +88,5 @@ ENV PATH="/home/${NB_USER}/.local/bin:$PATH"
 RUN pip install -r requirements.txt; exit 0
 RUN pip install -r binder/requirements.txt; exit 0
 
-# Run the postBuild script (to sign notebooks and more)
+# Run the postBuild script (to set up Jupyter, sign notebooks and more)
 RUN bash binder/postBuild
