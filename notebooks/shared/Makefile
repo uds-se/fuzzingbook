@@ -1260,18 +1260,33 @@ binder/binder.log: .FORCE
 	repo2docker -v '.:.' --Repo2Docker.platform=linux/amd64 . 2>&1 | tee $@
 
 
-## Docker services (experimental)
-docker:
-	docker pull $(PROJECT)/student
-	-docker run -d -p 8888:8888 --name fuzzing-book-instance $(PROJECT)/student
+## Running Jupyter in docker
+.PHONY: docker docker-image docker-push docker-release docker-shell docker-run
+DOCKER_USERNAME = zeller24
+GIT_HASH = $(shell git log --format="%h" -n 1)
+DOCKER_TAG = $(DOCKER_USERNAME)/$(PROJECT)
+DOCKER_PLATFORM = linux/amd64,linux/arm64
+DOCKERFILE = binder/Dockerfile
+JUPYTER_TOKEN=$(PROJECT)
+JUPYTER_PORT=8888
 
-docker-start:
-	docker start fuzzing-book-instance
-	sleep 2
-	@URL=$$(docker exec -it fuzzing-book-instance jupyter notebook list | grep http | awk '{ print $$1 }'); echo $$URL; open $$URL
+docker-image: $(DOCKERFILE) $(SOURCES)
+	docker build --tag $(DOCKER_TAG) --platform $(DOCKER_PLATFORM) binder
 
-docker-stop:
-	docker stop fuzzing-book-instance
+docker-shell: docker-image
+	docker run -it --rm $(DOCKER_TAG) bash
+
+docker-run docker:
+	(sleep 2; open http://127.0.0.1:$(JUPYTER_PORT)/lab?token=$(JUPYTER_TOKEN)) &
+	docker run -it --rm -p $(JUPYTER_PORT):$(JUPYTER_PORT) -e JUPYTER_TOKEN=$(JUPYTER_TOKEN) $(DOCKER_TAG) jupyter lab --ip=0.0.0.0 --port=$(JUPYTER_PORT) --no-browser
+
+docker-push:
+	docker push $(DOCKER_TAG)
+
+docker-release:
+	docker pull $(DOCKER_TAG)
+	docker tag $(DOCKER_TAG):$(GIT_HASH) $(DOCKER_TAG):latest
+	docker push $(DOCKER_TAG):latest
 	
 
 ## Getting rid of stray processes and workspaces
