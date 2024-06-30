@@ -1270,16 +1270,20 @@ DOCKERFILE = binder/Dockerfile
 JUPYTER_TOKEN=$(PROJECT)
 JUPYTER_PORT=8888
 
-docker-image: $(DOCKERFILE) $(SOURCES)
+# Use this first to creata a docker image
+docker-image: $(DOCKERFILE) $(SOURCES) binder/postBuild
 	docker build --tag $(DOCKER_TAG) --platform $(DOCKER_PLATFORM) binder
 
-docker-shell: docker-image
+# Once the image is built, access it via a shell
+docker-shell:
 	docker run -it --rm $(DOCKER_TAG) bash
 
+# Main usage: run jupyter lab in the image
 docker-run docker:
 	(sleep 2; open http://127.0.0.1:$(JUPYTER_PORT)/lab?token=$(JUPYTER_TOKEN)) &
 	docker run -it --rm -p $(JUPYTER_PORT):$(JUPYTER_PORT) -e JUPYTER_TOKEN=$(JUPYTER_TOKEN) $(DOCKER_TAG) jupyter lab --ip=0.0.0.0 --port=$(JUPYTER_PORT) --no-browser
 
+# Publish image on docker hub
 docker-push:
 	docker push $(DOCKER_TAG)
 
@@ -1287,7 +1291,11 @@ docker-release:
 	docker pull $(DOCKER_TAG)
 	docker tag $(DOCKER_TAG):$(GIT_HASH) $(DOCKER_TAG):latest
 	docker push $(DOCKER_TAG):latest
-	
+
+# Cleanup unused space	
+docker-clean:
+	docker system prune --all --force
+
 
 ## Getting rid of stray processes and workspaces
 kill:
