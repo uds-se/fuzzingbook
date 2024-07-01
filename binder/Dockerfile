@@ -29,10 +29,10 @@ LABEL description="${PROJECT}.org image from ${REPO}"
 
 # Install git and pip
 RUN apt-get update
-RUN apt-get install -y git python3 pip npm gcc
+RUN apt-get install -y git python3 python-is-python3 pip npm gcc
 
 # Some version info
-RUN echo "This is ${PROJECT} with $(python3 --version)" 1>&2
+RUN echo "This is ${PROJECT} with $(python --version)" 1>&2
 
 # Install jupyter
 RUN pip install --no-cache --upgrade pip && \
