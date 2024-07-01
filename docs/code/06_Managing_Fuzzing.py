@@ -3,7 +3,7 @@
 
 # "Part VI: Managing Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/06_Managing_Fuzzing.html
-# Last change: 2024-06-29 18:30:49+02:00
+# Last change: 2024-06-30 18:55:49+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors

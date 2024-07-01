@@ -3,7 +3,7 @@
 
 # "Class Diagrams" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ClassDiagram.html
-# Last change: 2024-06-29 18:34:10+02:00
+# Last change: 2024-06-30 18:59:39+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -451,6 +451,10 @@ def display_class_hierarchy(classes: Union[Type, List[Type]], *,
     dot.attr('node', shape='record', fontname=CLASS_FONT)
     dot.attr('graph', rankdir='BT', tooltip=title)
     dot.attr('edge', arrowhead='empty')
+
+    # Hack to force rendering as HTML, allowing hovers and links in Jupyter
+    dot._repr_html_ = dot._repr_image_svg_xml
+
     edges = set()
     overloaded_methods: Set[str] = set()
 

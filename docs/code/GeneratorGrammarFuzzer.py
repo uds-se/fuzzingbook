@@ -3,7 +3,7 @@
 
 # "Fuzzing with Generators" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2024-06-29 18:14:16+02:00
+# Last change: 2024-06-30 22:09:32+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
