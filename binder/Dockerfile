@@ -69,9 +69,6 @@ WORKDIR ${PROJECT}
 # Install the required Linux packages
 RUN apt-get install -y $(grep -v '^#' binder/apt.txt); exit 0
 
-# Expose port 8888, so it can be reached from the outside (for local testing)
-EXPOSE 8888
-
 # From here on, we are a user
 USER ${NB_USER}
 
@@ -90,3 +87,9 @@ RUN pip install -r binder/requirements.txt; exit 0
 
 # Run the postBuild script (to set up Jupyter, sign notebooks and more)
 RUN bash binder/postBuild
+
+# Expose port 8888, so it can be reached from the outside (for local testing)
+EXPOSE 8888
+
+# If nothing else is specified, start a Jupyter server
+CMD ["sh", "-c", "jupyter lab --port=8888 --no-browser --ip=* docs/notebooks"]
