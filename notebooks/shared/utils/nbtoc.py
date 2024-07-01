@@ -57,23 +57,24 @@ def text_to_tooltip(s):
     """Convert plain text to tooltip"""
     return html.escape(s).replace('\n', '&#10;')
 
-def notebook_toc_entry(notebook_name, prefix, path=None, tooltips=True, add_intro=False):
+def notebook_toc_entry(notebook_name, prefix, path=None, tooltips=False, add_intro=False):
     # notebook_path = import_notebooks.find_notebook(notebook_name, path)
     notebook_path = notebook_name
     notebook_title = get_title(notebook_path)
+    notebook_intro = get_intro(notebook_path)
     notebook_basename = os.path.basename(notebook_name)
     notebook_base = os.path.splitext(notebook_basename)[0]
-    notebook_intro = markdown_to_text(get_intro(notebook_path))
-    notebook_tooltip = text_to_tooltip(f'{notebook_title} ({notebook_base})\n\n{notebook_intro}')
+    notebook_intro_text = markdown_to_text(notebook_intro)
+    notebook_tooltip = text_to_tooltip(f'{notebook_title} ({notebook_base})\n\n{notebook_intro_text}')
     if add_intro:
-        toc_body = "<br><small>" + text_to_tooltip(notebook_intro) + "</small>\n"
+        toc_body = notebook_intro
     else:
         toc_body = ""
 
     if tooltips:
-        return f'{prefix} <a href="{notebook_basename}" title="{notebook_tooltip}">{notebook_title}</a>\n{toc_body}'
+        return f'{prefix} <a href="{notebook_basename}" title="{notebook_tooltip}">{notebook_title}</a><br>\n{toc_body}\n'
     else:
-        return f'{prefix} [{notebook_title}]({notebook_basename})'
+        return f'{prefix} [{notebook_title}]({notebook_basename})\n{toc_body}\n'
 
 def notebook_toc(public_chapters, appendices, booktitle):
     if booktitle:
@@ -88,9 +89,9 @@ def notebook_toc(public_chapters, appendices, booktitle):
         if (notebook_title.startswith("Part ") or
             notebook_title.startswith("Appendices")):
             # chapter_toc += "\n### " + notebook_title + "\n\n"
-            chapter_toc += "\n" + notebook_toc_entry(notebook, "###") + "\n"
+            chapter_toc += "\n" + notebook_toc_entry(notebook, "###", add_intro=True) + "\n"
         else:
-            chapter_toc += notebook_toc_entry(notebook, "*", add_intro=True) # repr(counter) + ".")
+            chapter_toc += notebook_toc_entry(notebook, "####", add_intro=True) # repr(counter) + ".")
             counter += 1
 
     # appendix_toc = "### [Appendices](99_Appendices.ipynb)\n\n"
