@@ -57,7 +57,7 @@ def text_to_tooltip(s):
     """Convert plain text to tooltip"""
     return html.escape(s).replace('\n', '&#10;')
 
-def notebook_toc_entry(notebook_name, prefix, path=None, tooltips=True):
+def notebook_toc_entry(notebook_name, prefix, path=None, tooltips=True, add_intro=False):
     # notebook_path = import_notebooks.find_notebook(notebook_name, path)
     notebook_path = notebook_name
     notebook_title = get_title(notebook_path)
@@ -65,9 +65,13 @@ def notebook_toc_entry(notebook_name, prefix, path=None, tooltips=True):
     notebook_base = os.path.splitext(notebook_basename)[0]
     notebook_intro = markdown_to_text(get_intro(notebook_path))
     notebook_tooltip = text_to_tooltip(f'{notebook_title} ({notebook_base})\n\n{notebook_intro}')
+    if add_intro:
+        toc_body = "<br><small>" + text_to_tooltip(notebook_intro) + "</small>\n"
+    else:
+        toc_body = ""
 
     if tooltips:
-        return f'{prefix} <a href="{notebook_basename}" title="{notebook_tooltip}">{notebook_title}</a>\n'
+        return f'{prefix} <a href="{notebook_basename}" title="{notebook_tooltip}">{notebook_title}</a>\n{toc_body}'
     else:
         return f'{prefix} [{notebook_title}]({notebook_basename})'
 
@@ -86,7 +90,7 @@ def notebook_toc(public_chapters, appendices, booktitle):
             # chapter_toc += "\n### " + notebook_title + "\n\n"
             chapter_toc += "\n" + notebook_toc_entry(notebook, "###") + "\n"
         else:
-            chapter_toc += notebook_toc_entry(notebook, "*") # repr(counter) + ".")
+            chapter_toc += notebook_toc_entry(notebook, "*", add_intro=True) # repr(counter) + ".")
             counter += 1
 
     # appendix_toc = "### [Appendices](99_Appendices.ipynb)\n\n"
