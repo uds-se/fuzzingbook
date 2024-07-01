@@ -25,7 +25,7 @@ ARG PROJECT=fuzzingbook
 ARG REPO=https://github.com/uds-se/${PROJECT}.git
 
 # Meta-data
-LABEL description="$(PROJECT).org image from $(REPO)"
+LABEL description="${PROJECT}.org image from ${REPO}"
 
 # Install git and pip
 RUN apt-get update
