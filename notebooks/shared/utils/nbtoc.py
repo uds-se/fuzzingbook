@@ -51,7 +51,7 @@ def get_intro(notebook):
 def markdown_to_text(s):
     """Convert Markdown to plain text"""
     html = markdown.markdown(s)
-    return "".join(BeautifulSoup(html, features='lxml').findAll(text=True)).strip()
+    return "".join(BeautifulSoup(html, features='lxml').findAll(string=True)).strip()
     
 def text_to_tooltip(s):
     """Convert plain text to tooltip"""
@@ -97,8 +97,8 @@ def notebook_toc(public_chapters, appendices, booktitle):
 While the chapters of this book can be read one after the other, there are many possible paths through the book. In this graph, an arrow _A_ → _B_ means that chapter _A_ is a prerequisite for chapter _B_. You can pick arbitrary paths in this graph to get to the topics that interest you most:
 """
 
-    sitemap_code_1 = "# ignore\nfrom IPython.display import SVG"
-    sitemap_code_2 = "# ignore\nSVG(filename='PICS/Sitemap.svg')"
+    sitemap_code_1 = "# ignore\nfrom bookutils import InteractiveSVG"
+    sitemap_code_2 = "# ignore\nInteractiveSVG(filename='PICS/Sitemap.svg')"
 
     toc_notebook = nbformat.v4.new_notebook(
         cells=[

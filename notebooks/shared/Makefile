@@ -583,7 +583,7 @@ $(DOCS_TARGET)html/00_Index.html: \
 
 $(DOCS_TARGET)html/00_Table_of_Contents.html: \
 	$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb \
-	$(SITEMAP_SVG) $(HTML_DEPS)
+	$(SITEMAP_SVG) $(HTML_DEPS) $(NBTOC)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) -r 00_Table_of_Contents.nbpub.log 00_Table_of_Contents_files
 	@cd $(DOCS_TARGET)html && $(RM) -r 00_Table_of_Contents.nbpub.log 00_Table_of_Contents_files
@@ -1150,9 +1150,10 @@ publish-pics-setup:
 
 
 # Table of contents
+NBTOC = $(SHARED)utils/nbtoc.py
 .PHONY: toc
 toc: $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb
-$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: $(SHARED)utils/nbtoc.py \
+$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: $(NBTOC) \
 	$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%) \
 	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
 	$(CHAPTERS_MAKEFILE) \
@@ -1390,9 +1391,9 @@ $(FULL_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVG)
 $(RENDERED_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVG)	
 # $(CODE_TARGET)/Tours.py: $(SITEMAP_SVG)
 
-$(HTML_TARGET)/00_Table_of_Contents.html: $(SITEMAP_SVG)
-$(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG)	
-$(RENDERED_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG)	
+$(HTML_TARGET)/00_Table_of_Contents.html: $(SITEMAP_SVG) $(NBTOC)
+$(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG) $(NBTOC)
+$(RENDERED_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG) $(NBTOC)
 # $(CODE_TARGET)/00_Table_of_Contents.py: $(SITEMAP_SVG)
 
 
