@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2024-06-29 18:12:37+02:00
+# Last change: 2024-06-30 22:07:49+02:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,17 +68,29 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- htpp://w.gfoogne.com/seaRchw?q=fuzzng,
- http://ww.google.com/search?q=furzing,
- xvtp:{/www.foogle.com/seapch=q=uzzing,
- ht:w/ww.goog\l*#m/seaXrceh?bq=rzilgl,
- http:/wwwgoogne.coe/seazch?q=uzzin&,
- h|t4p://.PgoolL.com/sdrh?Qq=Fuzi,
- htzBjQex/c&*ieq=08T,
-  vpe7pJ5/nb/nUc{jICo-m /gacw0qmfQuzz#ng,
- htpp://w.gf/ogn.#m/seaRchw?q=fuzzng,
- J;w?G/&!7jwA,j7/o!fLmX\gh?2-bz@"i,
- ;?p8.gnooxn%ncooms'aRhqW=f"Dzg]
+ http=/uww>gonlco\m'$sterc( fJ|kGziosg*,
+ ht/dwwvcGoooglUe.{om1earqcH?pfw:in(g,
+ htp=uwD>god0co\estqrP(ct! Ckz+o{g,
+ ?htp=
+ uww>g@onlo\m'$gs2;terc( fJ|ozixos*,
+ >ht=
+ uww>g@onlo\m'$g`s;t\erc( fJ\ozxks*,
+ http://www.googl.e.com/searchq=fuzzing,
+ ht-tpS:www.voogl.a.om/s~da3rkhq=fuzzing,
+ tp:/wgg-)lUco/sec?qFuZzizg4L,
+ 0?htp,
+ ukg;gg@on
+ o#\om'Zswer fJo{iH[/os*,
+ ht-tpS:www*voogl.a.om/s~da3khyJ=fuzzing,
+ {`t/dwwvcGoo'lUe>j;m1eaxzqC?rfw:i(Eg,
+ h-lt{:F7.,`o/mt.a.Mom1s[~daa1rkhq=fqZiNg,
+ http=uw>gnlNco\mz#$sterc( fJ|kG_ziosg,
+ ;Fp=
+ we+@onQom$gr2Y;tep`(fHm|jio{*,
+ *tpwDgod0o\so5qrrDta(ct! ;Wz/ow,
+ hRtpTs,
+ wkg:'\`o
+ wo#\mm'Zser3*;m1ea4xzqCRfw:*i(E]
 
 Besides the simple `PowerSchedule`, we can have advanced power schedules.
 
