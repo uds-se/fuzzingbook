@@ -1287,10 +1287,12 @@ docker-run docker:
 docker-push:
 	docker push $(DOCKER_TAG)
 
-docker-release:
+docker-tag:
 	docker pull $(DOCKER_TAG)
 	docker tag  $(DOCKER_TAG):latest $(DOCKER_TAG):$(GIT_HASH)
 	docker push $(DOCKER_TAG):latest
+
+publish-docker: docker-image docker-push docker-tag
 
 # Cleanup unused space	
 docker-clean:
