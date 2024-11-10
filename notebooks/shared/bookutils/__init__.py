@@ -175,7 +175,7 @@ def show_ast(tree: AST) -> Optional[Any]:
     return render(tree, showast.Settings)
 
 # Allow importing the showast module
-def import_showast():
+def import_showast() -> None:
     try:
         import showast
         return
