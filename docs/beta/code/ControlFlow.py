@@ -3,7 +3,7 @@
 
 # "Control Flow Graph" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2024-06-30 18:59:53+02:00
+# Last change: 2024-11-09 18:24:27+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -414,7 +414,7 @@ class PyCFG(PyCFG):
         myparents[0].add_calls(mid)
 
         # these need to be unlinked later if our module actually defines these
-        # functions. Otherwsise we may leave them around.
+        # functions. Otherwise we may leave them around.
         # during a call, the direct child is not the next
         # statement in text.
         for c in p:

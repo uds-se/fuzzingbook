@@ -3,7 +3,7 @@
 
 # "Probabilistic Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2024-06-30 22:09:20+02:00
+# Last change: 2024-11-09 17:39:22+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -143,8 +143,8 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     labels = range(1, 10)
     fig1, ax1 = plt.subplots()
-    ax1.pie(digit_probs, labels=labels, shadow=True, autopct='%1.1f%%',
-            counterclock=False, startangle=90)
+    ax1.pie(digit_probs, labels=labels, shadow=True,  # type: ignore
+            autopct='%1.1f%%', counterclock=False, startangle=90)
     ax1.axis('equal');
 
 ## Specifying Probabilities
@@ -360,7 +360,7 @@ class ProbabilisticGrammarFuzzer(GrammarFuzzer):
 
     def check_grammar(self) -> None:
         super().check_grammar()
-        assert is_valid_probabilistic_grammar(self.grammar)
+        assert is_valid_probabilistic_grammar(self.grammar, self.start_symbol)
 
     def supported_opts(self) -> Set[str]:
         return super().supported_opts() | {'prob'}
