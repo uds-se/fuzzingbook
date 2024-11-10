@@ -130,6 +130,8 @@ export default function( revealElement, options ) {
 
 		if( !revealElement ) throw 'Unable to find presentation root (<div class="reveal">).';
 
+		if( initialized ) throw 'Reveal.js has already been initialized.';
+
 		initialized = true;
 
 		// Cache references to key DOM elements
@@ -189,6 +191,9 @@ export default function( revealElement, options ) {
 	 * to the current URL deeplink if there is one.
 	 */
 	function start() {
+
+		// Don't proceed if this instance has been destroyed
+		if( initialized === false ) return;
 
 		ready = true;
 
@@ -609,9 +614,11 @@ export default function( revealElement, options ) {
 	 */
 	function destroy() {
 
-		// There's nothing to destroy if this instance hasn't been
-		// initialized yet
-		if( initialized === false ) return;
+		initialized = false;
+
+		// There's nothing to destroy if this instance hasn't finished
+		// initializing
+		if( ready === false ) return;
 
 		removeEventListeners();
 		cancelAutoSlide();
@@ -1252,7 +1259,7 @@ export default function( revealElement, options ) {
 
 	/**
 	 * Returns true if we're currently on the last slide in
-	 * the presenation. If the last slide is a stack, we only
+	 * the presentation. If the last slide is a stack, we only
 	 * consider this the last slide if it's at the end of the
 	 * stack.
 	 */

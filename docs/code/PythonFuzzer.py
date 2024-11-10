@@ -3,7 +3,7 @@
 
 # "Testing Compilers" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/PythonFuzzer.html
-# Last change: 2024-06-30 18:54:15+02:00
+# Last change: 2024-11-10 13:15:53+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -46,8 +46,8 @@ This chapter provides a `PythonFuzzer` class that allows producing arbitrary Pyt
 
 >>> fuzzer = PythonFuzzer()
 >>> print(fuzzer.fuzz())
-def Hw(): # type: 
-    pass
+def R():
+    break
 
 
 By default, `PythonFuzzer` produces a _function definition_ – that is, a list of statements as above.
@@ -55,15 +55,27 @@ You can pass a `start_symbol` argument to state which Python element you'd like 
 
 >>> fuzzer = PythonFuzzer('')
 >>> print(fuzzer.fuzz())
-while 
-'' or {Z: *(set() ^ set())}:
-    del 
+while {set()[set():set():set()]}:
+    C = set()
+    D @= set()
+    break
+else:
+    return
 
 
 Here is a list of all possible start symbols. Their names reflect the nonterminals from the [Python `ast` module documentation](https://docs.python.org/3/library/ast.html).
 
 >>> sorted(list(PYTHON_AST_GRAMMAR.keys()))
 ['',
+ '',
+ '',
+ '',
+ '',
+ '',
+ '',
+ '',
+ '',
+ '',
  '',
  '',
  '',
@@ -169,7 +181,7 @@ To produce a Python module without `PythonFuzzer`, you would take these steps:
 
 >>> ast_string = str(solver.solve())
 >>> ast_string
-'FunctionDef(name=\'t\', args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Break()], decorator_list=[], returns=Call(func=Name(id="set", ctx=Load()), args=[], keywords=[]), type_comment=\'\')'
+'FunctionDef(name=\'y\', args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return()], decorator_list=[Call(func=Name(id="set", ctx=Load()), args=[], keywords=[])])'
 
 **Step 4:**  Convert the AST into an actual Python AST data structure.
 
@@ -180,8 +192,9 @@ To produce a Python module without `PythonFuzzer`, you would take these steps:
 
 >>> ast.fix_missing_locations(abstract_syntax_tree)
 >>> print(ast.unparse(abstract_syntax_tree))
-def t() -> set(): # type: 
-    break
+@set()
+def y():
+    return
 
 
 The chapter has many more applications, including parsing and mutating Python code, evolutionary fuzzing, and more.
@@ -667,12 +680,20 @@ PYTHON_AST_IDS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_EXPRS_GRAMMAR, {
     # https://docs.python.org/3/reference/lexical_analysis.html#identifiers
 
     # Function Calls
-   '<Call>': [ 'Call(func=<func>, args=<expr_list>, keywords=<keyword_list>)' ],
-   '<func>': [ '<expr>' ],  # Actually <Expr>, but this is more readable and parses 90%
+    '<Call>': [ 'Call(func=<func><args_param><keywords_param>)' ],
+    '<args_param>': [ ', args=<expr_list>' ],
+    '<keywords_param>': [ ', keywords=<keyword_list>' ],
+    '<func>': [ '<expr>' ],  # Actually <Expr>, but this is more readable and parses 90%
     '<keyword_list>': [ '[<keywords>?]' ],
     '<keywords>': [ '<keyword>', '<keyword>, <keywords>' ],
     '<keyword>': [ 'keyword(arg=<identifier>, value=<expr>)' ]
 })
+
+if sys.version_info >= (3, 13):
+    PYTHON_AST_IDS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_IDS_GRAMMAR, {
+        # As of 3.13, args and keywords parameters are optional
+        '<Call>': [ 'Call(func=<func><args_param>?<keywords_param>?)' ],
+    })
 
 if __name__ == '__main__':
     assert is_valid_grammar(PYTHON_AST_IDS_GRAMMAR)
@@ -699,7 +720,8 @@ if __name__ == '__main__':
     assert call_solver.check('[]')
 
 if __name__ == '__main__':
-    call_str = ast.dump(ast.parse('open()').body[0].value)  # type: ignore
+    call_str = ast.dump(ast.parse('open("foo.txt", "r")').body[0].value)  # type: ignore
+    print(call_str)
     call_solver = ISLaSolver(ast_ids_grammar)
     assert call_solver.check(call_str)
 
@@ -872,7 +894,10 @@ PYTHON_AST_STMTS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_ASSIGNMENTS_GRAMMA
     ],
 
     '<If>': [
-        'If(test=<expr>, body=<nonempty_stmt_list>, orelse=<stmt_list>)'
+        'If(test=<expr>, body=<nonempty_stmt_list><orelse_param>)'
+    ],
+    '<orelse_param>': [
+        ', orelse=<stmt_list>'
     ],
 
     '<With>': [
@@ -901,9 +926,18 @@ PYTHON_AST_STMTS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_ASSIGNMENTS_GRAMMA
     '<Break>': [ 'Break()' ],
     '<Continue>': [ 'Continue()']
 
-    # FIXME: A few more: AsyncFor, AsyncWith, Match, Try, TryStar, With
+    # FIXME: A few more: AsyncFor, AsyncWith, Match, Try, TryStar
     # Import, ImportFrom, Global, Nonlocal...
 })
+
+if sys.version_info >= (3, 13):
+    PYTHON_AST_STMTS_GRAMMAR: Grammar = \
+        extend_grammar(PYTHON_AST_STMTS_GRAMMAR, {
+        # As of 3.13, orelse is optional
+        '<If>': [
+            'If(test=<expr>, body=<nonempty_stmt_list><orelse_param>?)'
+        ],
+    })
 
 if __name__ == '__main__':
     assert is_valid_grammar(PYTHON_AST_STMTS_GRAMMAR)
@@ -925,6 +959,7 @@ with open('foo.txt') as myfile:
 if __name__ == '__main__':
     python_ast_stmts_grammar = convert_ebnf_grammar(PYTHON_AST_STMTS_GRAMMAR)
     with_tree_str = ast.dump(with_tree.body[0])  # get the `With(...)` subtree
+    print(with_tree_str)
     with_solver = ISLaSolver(python_ast_stmts_grammar)
     assert with_solver.check(with_tree_str)
 
@@ -953,11 +988,28 @@ PYTHON_AST_DEFS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_STMTS_GRAMMAR, {
     '<stmt>': PYTHON_AST_STMTS_GRAMMAR['<stmt>'] + [ '<FunctionDef>' ],
 
     '<FunctionDef>': [
-        'FunctionDef(name=<identifier>, args=<arguments>, body=<nonempty_stmt_list>, decorator_list=<expr_list><returns>?<type_comment>?)'
+        'FunctionDef(name=<identifier>, args=<arguments>, body=<nonempty_stmt_list><decorator_list_param><returns>?<type_comment>?)'
     ],
+    '<decorator_list_param>': [
+        ', decorator_list=<expr_list>'
+    ],
+
     '<arguments>': [
-        'arguments(posonlyargs=<arg_list>, args=<arg_list><vararg>?, kwonlyargs=<arg_list>, kw_defaults=<expr_list><kwarg>?, defaults=<expr_list>)'
+        'arguments(<posonlyargs_param>args=<arg_list><vararg>?<kwonlyargs_param><kw_defaults_param><kwarg>?<defaults_param>)'
     ],
+    '<posonlyargs_param>': [
+        'posonlyargs=<arg_list>, '
+    ],
+    '<kwonlyargs_param>': [
+        ', kwonlyargs=<arg_list>'
+    ],
+    '<kw_defaults_param>': [
+        ', kw_defaults=<expr_list>'
+    ],
+    '<defaults_param>': [
+        ', defaults=<expr_list>'
+    ],
+
 
     '<arg_list>': [ '[<args>?]' ],
     '<args>': [ '<arg>', '<arg>, <arg>' ],
@@ -970,12 +1022,10 @@ PYTHON_AST_DEFS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_STMTS_GRAMMAR, {
     # FIXME: Not handled: AsyncFunctionDef, ClassDef
 })
 
-import sys
-
 if sys.version_info >= (3, 12):
     PYTHON_AST_DEFS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_DEFS_GRAMMAR, {
     '<FunctionDef>': [
-        'FunctionDef(name=<identifier>, args=<arguments>, body=<nonempty_stmt_list>, decorator_list=<expr_list><returns>?<type_comment>?<type_params>?)'
+        'FunctionDef(name=<identifier>, args=<arguments>, body=<nonempty_stmt_list><decorator_list_param><returns>?<type_comment>?<type_params>?)'
     ],
     '<type_params>': [
         ', type_params=<type_param_list>',
@@ -991,6 +1041,16 @@ if sys.version_info >= (3, 12):
     '<TypeVarTuple>': [
         'TypeVarTuple(name=<identifier>)'
     ]
+    })
+
+if sys.version_info >= (3, 13):
+    PYTHON_AST_DEFS_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_DEFS_GRAMMAR, {
+    '<FunctionDef>': [
+        'FunctionDef(name=<identifier>, args=<arguments>, body=<nonempty_stmt_list><decorator_list_param>?<returns>?<type_comment>?<type_params>?)'
+    ],
+    '<arguments>': [
+        'arguments(<posonlyargs_param>?args=<arg_list><vararg>?<kwonlyargs_param>?<kw_defaults_param>?<kwarg>?<defaults_param>?)'
+    ],
     })
 
 if __name__ == '__main__':
@@ -1019,12 +1079,20 @@ if __name__ == '__main__':
 PYTHON_AST_MODULE_GRAMMAR: Grammar = extend_grammar(PYTHON_AST_DEFS_GRAMMAR, {
     '<start>': [ '<mod>' ],
     '<mod>': [ '<Module>' ],
-    '<Module>': [ 'Module(body=<nonempty_stmt_list>, type_ignores=<type_ignore_list>)'],
+    '<Module>': [ 'Module(body=<nonempty_stmt_list><type_ignore_param>)'],
 
+    '<type_ignore_param>': [ ', type_ignores=<type_ignore_list>' ],
     '<type_ignore_list>': [ '[<type_ignores>?]' ],
     '<type_ignores>': [ '<type_ignore>', '<type_ignore>, <type_ignore>' ],
     '<type_ignore>': [ 'TypeIgnore(lineno=<integer>, tag=<string>)' ],
 })
+
+if sys.version_info >= (3, 13):
+    PYTHON_AST_MODULE_GRAMMAR: Grammar = \
+        extend_grammar(PYTHON_AST_MODULE_GRAMMAR, {
+        # As of 3.13, the type_ignore parameter is optional
+        '<Module>': [ 'Module(body=<nonempty_stmt_list><type_ignore_param>?)'],
+    })
 
 if __name__ == '__main__':
     assert is_valid_grammar(PYTHON_AST_MODULE_GRAMMAR)
@@ -1208,7 +1276,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     solver = ISLaSolver(python_ast_grammar)
-    solver.check(sum_str)
+    assert solver.check(sum_str)
 
 if __name__ == '__main__':
     sum_tree = solver.parse(sum_str)

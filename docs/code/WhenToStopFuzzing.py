@@ -3,7 +3,7 @@
 
 # "When To Stop Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2024-06-30 18:58:41+02:00
+# Last change: 2024-11-09 18:23:13+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -326,7 +326,7 @@ if __name__ == '__main__':
     plt.subplot(1, 2, 1)
     plt.hist(frequencies, range=[1, 21], bins=numpy.arange(1, 21) - 0.5)  # type: ignore
     plt.xticks(range(1, 21))  # type: ignore
-    plt.xlabel('# of occurances (e.g., 1 represents singleton trigrams)')
+    plt.xlabel('# of occurrences (e.g., 1 represents singleton trigrams)')
     plt.ylabel('Frequency of occurances')
     plt.title('Figure 1. Frequency of Rare Trigrams')
 
