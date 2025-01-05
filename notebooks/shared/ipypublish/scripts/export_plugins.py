@@ -1,10 +1,30 @@
 import glob
-import imp
 import inspect
 import logging
 import os
 import uuid
 import warnings
+
+
+# Replacement for imp.load_source; see https://docs.python.org/3/whatsnew/3.12.html#imp
+import importlib.util
+import importlib.machinery
+
+def load_source(modname, filename):
+    loader = importlib.machinery.SourceFileLoader(modname, filename)
+    spec = importlib.util.spec_from_file_location(modname, filename, loader=loader)
+    module = importlib.util.module_from_spec(spec)
+    # The module is always executed and not cached in sys.modules.
+    # Uncomment the following line to cache the module.
+    # sys.modules[module.__name__] = module
+    loader.exec_module(module)
+    return module
+
+# Alternative if the above code does not work
+# import imp
+# load_source = imp.load_source
+
+
 
 # py 2/3 compatibility
 try:
@@ -22,7 +42,7 @@ try:
         loader.exec_module(mod)
         return mod
 except ImportError as err:
-    load_source = lambda modname, fname: imp.load_source(modname, fname)
+    load_source = lambda modname, fname: load_source(modname, fname)
 
 from ipypublish import export_plugins
 

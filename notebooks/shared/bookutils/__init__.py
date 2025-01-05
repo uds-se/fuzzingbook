@@ -164,37 +164,10 @@ def show_ast(tree: AST) -> Optional[Any]:
         print(ast.dump(tree))
         return None
 
-    # show_ast() no longer works in Python 3.12: the `imp` module is deprecated
-    # import showast
-    # return showast.show_ast(tree)
-
-    # Workaround, avoiding `imp`
-    import_showast()
+    # Note: For Python >=3.12, this needs a patched `showast` module
+    # e.g. git+https://github.com/andreas-zeller/show_ast.git@andreas
     import showast
-    from showast.rendering.graphviz import render
-    return render(tree, showast.Settings)
-
-# Allow importing the showast module
-def import_showast() -> None:
-    try:
-        import showast
-        return
-    except ModuleNotFoundError:
-        pass
-
-    # Create a local (empty) 'imp' module while importing showast
-    # This is an ugly hack until the `showast` module is updated to 3.12
-    import os, sys, shutil
-    os.mkdir('imp')
-    imp_init = os.path.join('imp', '__init__.py')
-    with open(imp_init, 'w') as fd:
-        pass
-    original_sys_path = sys.path
-    sys.path = ['.'] + sys.path
-    import showast
-    sys.path = original_sys_path
-    shutil.rmtree('imp')
-
+    return showast.show_ast(tree)
 
 # Escaping unicode characters into ASCII for user-facing strings
 def unicode_escape(s: str, error: str = 'backslashreplace') -> str:
