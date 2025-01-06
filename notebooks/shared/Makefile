@@ -308,6 +308,9 @@ EXECUTE_NOTEBOOK = $(TIME) $(NBCONVERT) $(NBCONVERT_OPTIONS) $(EXECUTE_OPTIONS) 
 # Render
 RENDER_NOTEBOOK = RENDER_HTML=1 $(NBCONVERT) $(NBCONVERT_OPTIONS) $(EXECUTE_OPTIONS) --to notebook --execute --output-dir=$(RENDERED_NOTEBOOKS)
 
+# Refresh browser after re-creating html
+REFRESH_HTML = \
+osascript -e 'tell application "Safari" to set URL of document of window 1 to URL of document of window 1'
 
 # Zip
 ZIP ?= zip
@@ -329,7 +332,7 @@ and more:	word markdown epub
 
 # Individual targets
 .PHONY: html pdf python code slides word doc docx md markdown epub
-.PHONY: full-notebooks check-notebooks full fulls rendered-notebooks rendered renders book-pdf book-html
+.PHONY: full-notebooks check-notebooks full fulls rendered-notebooks rendered  renders refresh book-pdf book-html
 html:	ipypublish-chapters $(HTMLS)
 pdf:	ipypublish-chapters $(PDFS)
 nbpdf:	ipypublish-chapters $(NBPDFS)
@@ -340,7 +343,8 @@ md markdown: $(MARKDOWNS)
 epub: $(EPUBS)
 full-notebooks check-notebooks full fulls: $(FULLS)
 rendered-notebooks rendered renders: $(RENDERS)
-
+refresh: html
+	$(REFRESH_HTML)
 book-pdf $(PROJECT)-pdf:  ipypublish-book $(BOOK_PDF)
 book-html $(PROJECT)-html: ipypublish-book $(BOOK_HTML)
 
@@ -834,6 +838,17 @@ $(CODE_TARGET).Tracking.py.out: $(CODE_TARGET)Tracking.py
 	@echo Skipping $<...
 	@echo $(PY_SUCCESS_MAGIC) > $@
 
+# These still need to be fixed
+$(CODE_TARGET).Alhazen.py.out: $(CODE_TARGET)Alhazen.py
+	@echo Skipping $<...
+	@echo $(PY_SUCCESS_MAGIC) > $@
+$(CODE_TARGET).Slicer.py.out: $(CODE_TARGET)Slicer.py
+	@echo Skipping $<...
+	@echo $(PY_SUCCESS_MAGIC) > $@
+$(CODE_TARGET).IllustratedCode.py.out: $(CODE_TARGET)IllustratedCode.py
+	@echo Skipping $<...
+	@echo $(PY_SUCCESS_MAGIC) > $@
+
 
 .PHONY: test-code
 test-code: code $(PYS_OUT)
@@ -927,6 +942,12 @@ check-types: test-types
 		echo "Check these files for errors: $$files_with_errors"; \
 		exit 1; \
 	fi
+	
+# These still need to be fixed
+$(MYPY_TARGET).Alhazen.py.out: $(MYPY_TARGET)Alhazen.py
+	@echo Skipping $<...
+	@echo $(PY_SUCCESS_MAGIC) > $@
+
 
 .PHONY: run
 run: check-types check-imports check-standard-imports check-package check-code

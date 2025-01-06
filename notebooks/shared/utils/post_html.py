@@ -443,6 +443,8 @@ def add_links_to_imports(contents, html_file):
             link = 'https://matplotlib.org/stable/api/toolkits/'
         elif module.startswith('matplotlib'):
             link = 'https://matplotlib.org/'
+        elif module.startswith('pandas'):
+            link = 'https://pandas.pydata.org/'
         elif module.startswith('plotly'):
             link = 'https://plotly.com/python/'
         elif module.startswith('scipy'):
