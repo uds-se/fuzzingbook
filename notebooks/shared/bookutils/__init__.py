@@ -164,9 +164,10 @@ def show_ast(tree: AST) -> Optional[Any]:
         print(ast.dump(tree))
         return None
 
-    # Note: For Python >=3.12, this needs the patched `showast2` module
-    # e.g. git+https://github.com/andreas-zeller/show_ast.git@andreas
-    import showast2
+    # For Python >=3.12,
+    # we need the patched `showast2` module instead of `showast`
+    # see git+https://github.com/andreas-zeller/show_ast.git@andreas
+    import showast2  # type: ignore
     return showast2.show_ast(tree)
 
 # Escaping unicode characters into ASCII for user-facing strings
