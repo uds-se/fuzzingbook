@@ -425,7 +425,7 @@ def add_links_to_imports(contents, html_file):
             link = f'https://graphviz.readthedocs.io/'
         elif module in ['git', 'git.exc']:
             link = f'https://gitpython.readthedocs.io/'
-        elif module in ['enforce', 'showast', 'multiprocess']:
+        elif module in ['enforce', 'showast', 'showast2', 'multiprocess']:
             link = f'https://pypi.org/project/{module}/'
         elif module == 'magic':
             link = 'https://pypi.org/project/python-magic/'

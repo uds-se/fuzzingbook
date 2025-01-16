@@ -164,10 +164,10 @@ def show_ast(tree: AST) -> Optional[Any]:
         print(ast.dump(tree))
         return None
 
-    # Note: For Python >=3.12, this needs a patched `showast` module
+    # Note: For Python >=3.12, this needs the patched `showast2` module
     # e.g. git+https://github.com/andreas-zeller/show_ast.git@andreas
-    import showast
-    return showast.show_ast(tree)
+    import showast2
+    return showast2.show_ast(tree)
 
 # Escaping unicode characters into ASCII for user-facing strings
 def unicode_escape(s: str, error: str = 'backslashreplace') -> str:
