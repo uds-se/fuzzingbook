@@ -3,9 +3,9 @@
 
 # "Testing Configurations" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2024-11-09 17:52:05+01:00
+# Last change: 2025-01-16 10:57:34+01:00
 #
-# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2025 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,7 +37,7 @@ This file can be _executed_ as a script, running all experiments:
 or _imported_ as a package, providing classes, functions, and constants:
 
     >>> from fuzzingbook.ConfigurationFuzzer import <identifier>
-    
+
 but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
@@ -193,18 +193,18 @@ The grammar can be immediately used for fuzzing. A `GrammarCoverageFuzzer` will 
 >>> from Grammars import convert_ebnf_grammar
 >>> fuzzer = GrammarCoverageFuzzer(convert_ebnf_grammar(option_ebnf_grammar))
 >>> [fuzzer.fuzz() for i in range(3)]
-[' --list-fixes foo.py',
- ' --version -i --range -5 04 --aggressive --diff -j 817 --help -d --hang-closing -p 26 -a --verbose --exclude |g -v --global-config f --recursive --ignore .= -r --experimental -h --line-range -317 9 --pep8-passes 8 --max-line-length 2 --indent-size 0 --in-place foo.py',
- ' --ignore-local-config --jobs 92 --exit-code --select Q"6 --global-config (h --ignore )` --select M --select t,\\Z --global-config u5 --global-config ! --ignore lUSb --exclude V^ --global-config LBj --global-config X --select _ --exclude n4 --global-config %&/: --select a --global-config k --ignore 1 --ignore G~m?7 --exclude PJX --select I --select w -d foo.py']
+[' --max-line-length -64 foo.py',
+ " -a --version --select u --diff --list-fixes -r --range -50 3 --ignore iq --hang-closing --ignore-local-config --aggressive --in-place --indent-size 9 -d --global-config wQ --help --line-range -8226 7 -j 1 -p 2 -h --experimental -i -v --jobs -81 --exclude c --exit-code --verbose --recursive --exclude j --pep8-passes 587 --global-config 5ty --global-config W]96{ --global-config T --ignore z'C --select %EIL -r -a -v foo.py",
+ ' --exclude VKSl --exclude 3[ --global-config ^0x --ignore 4 --exclude _ --global-config 7 --select mh --global-config e --global-config R --global-config JH\\ --exclude OP --ignore = --global-config @ --select ?N --global-config s --select *}v --ignore - --select Do,GA --exclude bkn --ignore U --exclude | --global-config 2 --exclude 8 --select " --exclude pZ --select / --exclude f(aYdg) --select : --global-config ~ --global-config ! --global-config 1B`$X --exclude ; --select F --select & --ignore r --exclude #+ --exit-code --aggressive --select ?/ -p -6 --version --ignore-local-config -r -v foo.py']
 
 The `OptionFuzzer` class summarizes these steps.  Its constructor takes an `OptionRunner` to automatically extract the grammar; it does the necessary steps to extract the grammar and fuzz with it.
 
 >>> autopep8_runner = OptionRunner("autopep8", "foo.py")
 >>> autopep8_fuzzer = OptionFuzzer(autopep8_runner)
 >>> [autopep8_fuzzer.fuzz() for i in range(3)]
-[' foo.py',
- ' -a --hang-closing --aggressive --help -h --ignore : --verbose --diff --jobs 68 --line-range 4 -159 --indent-size -0 -d -i --range 27 38 --experimental --global-config gt --ignore-local-config --exit-code --in-place -v foo.py',
- ' --select ?H --pep8-passes 7 --max-line-length -154 -r --exclude P --recursive --list-fixes -j 77 --version -p 71 --global-config )c --select 4!m/ --ignore 1d3 --select ~ --ignore b[^ --global-config qn --exclude >V --exclude 2 --select $_iUzQ].0 --select ; --ignore 5M --ignore 9 --select pN`C --ignore 76(J --select Dh --exclude ov" -h foo.py']
+[' --version foo.py',
+ ' --ignore Rj --jobs -6 --line-range -04 7953 --help --aggressive -v --ignore-local-config -h --experimental -r --global-config 3 --indent-size -8 --exclude ;&M"! -a -p 1 --hang-closing -j 263 --verbose --recursive --in-place --list-fixes --select t@fs --range -0 7 -d --pep8-passes 7 --diff -i --exit-code --max-line-length -3 --global-config L --select u| --global-config \' --global-config r --exclude Ik) --ignore D- --ignore 4 --select XS --global-config 7 --ignore ~. --ignore e9 --exclude ph --ignore U --global-config dz --global-config Q$o --exclude 6( --ignore x --select 5J:N --exclude 0 --select TH --exclude * --exclude G --select 8 --global-config bn --global-config C{a1m --exclude F --ignore _ --ignore g --ignore ]q --exclude wy --ignore % --global-config v --ignore + --global-config EK/ --ignore [#}Y --global-config `i --global-config 2 --ignore BE --global-config A --indent-size -22 --recursive --hang-closing --exclude ` --indent-size -61 --diff -a foo.py',
+ ' foo.py']
 
 The final step in testing would now to invoke the program with these arguments.
 

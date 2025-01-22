@@ -3,9 +3,9 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2024-11-09 17:51:30+01:00
+# Last change: 2025-01-22 09:40:59+01:00
 #
-# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2025 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,7 +37,7 @@ This file can be _executed_ as a script, running all experiments:
 or _imported_ as a package, providing classes, functions, and constants:
 
     >>> from fuzzingbook.SymbolicFuzzer import <identifier>
-    
+
 but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/SymbolicFuzzer.html
@@ -47,7 +47,21 @@ This chapter provides an implementation of a symbolic fuzzing engine `SymbolicFu
 As an example, consider the function `gcd()`, computing the greatest common divisor of `a` and `b`:
 
 def gcd(a: int, b: int) -> int:
-    if a >> gcd_fuzzer = SymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
+    if a < b:
+        c: int = a  # type: ignore
+        a = b
+        b = c
+
+    while b != 0:
+        c: int = a  # type: ignore
+        a = b
+        b = c % b
+
+    return a
+
+To explore `gcd()`, the fuzzer can be used as follows, producing values for arguments that cover different paths in `gcd()` (including multiple times of loop iterations):
+
+>>> gcd_fuzzer = SymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
 >>> for i in range(10):
 >>>     args = gcd_fuzzer.fuzz()
 >>>     print(args)
@@ -57,10 +71,10 @@ def gcd(a: int, b: int) -> int:
 {'a': 7, 'b': 6}
 {'a': 9, 'b': 10}
 {'a': 4, 'b': 4}
-{'a': 23, 'b': 11}
-{'a': 8, 'b': 16}
-{'a': 10, 'b': 1}
-{'a': 28, 'b': 9}
+{'a': 10, 'b': 9}
+{'a': 2, 'b': 10}
+{'a': 14, 'b': 7}
+{'a': 3, 'b': 2}
 
 
 Note that the variable values returned by `fuzz()` are Z3 _symbolic_ values; to convert them to Python numbers, use their method `as_long()`:
@@ -71,16 +85,16 @@ Note that the variable values returned by `fuzz()` are Z3 _symbolic_ values; to 
 >>>     b = args['b'].as_long()
 >>>     d = gcd(a, b)
 >>>     print(f"gcd({a}, {b}) = {d}")
-gcd(0, 12) = 12
-gcd(-1, 0) = -1
-gcd(29, 17) = 1
-gcd(0, 7) = 7
-gcd(-2, -1) = -1
-gcd(40, 8) = 8
-gcd(-1, 18) = -1
-gcd(3, 0) = 3
-gcd(1, -2) = -1
-gcd(-3, -1) = -1
+gcd(0, 8) = 8
+gcd(-1, 10) = -1
+gcd(13, 2) = 1
+gcd(0, 10) = 10
+gcd(6, 7) = 1
+gcd(14, 2) = 2
+gcd(-1, 11) = -1
+gcd(15, 0) = 15
+gcd(0, -1) = -1
+gcd(-3, -2) = -1
 
 
 The symbolic fuzzer is subject to a number of constraints. First, it requires that the function to be fuzzed has correct type annotations, including all local variables. Second, it solves loops by unrolling them, but only for a fixed amount.
@@ -113,7 +127,7 @@ if __name__ == '__main__':
 import sys
 
 if __name__ == '__main__':
-    if sys.version_info > (3, 11):
+    if sys.version_info >= (3, 12):
         print("This code requires Python 3.11 or earlier")
         sys.exit(0)
 

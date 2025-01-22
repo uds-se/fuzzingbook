@@ -3,9 +3,9 @@
 
 # "Mutation Analysis" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationAnalysis.html
-# Last change: 2024-11-09 17:38:47+01:00
+# Last change: 2025-01-16 10:40:02+01:00
 #
-# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2025 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,7 +37,7 @@ This file can be _executed_ as a script, running all experiments:
 or _imported_ as a package, providing classes, functions, and constants:
 
     >>> from fuzzingbook.MutationAnalysis import <identifier>
-    
+
 but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/MutationAnalysis.html
@@ -50,7 +50,7 @@ This chapter introduces two methods of running *mutation analysis* on subject pr
 >>>         assert gcd(0, 1) == 1, "Mirror"
 >>> mutant.pm.score()
 ->	gcd_1
- local variable 'c' referenced before assignment
+ cannot access local variable 'c' where it is not associated with a value
 
 ->	gcd_2
  Mirror
@@ -77,11 +77,12 @@ The second class `MuProgramAnalyzer` targets standalone programs with test suite
 >>>     mutant[test_module].runTest('TestGCD')
 >>> mutant.pm.score()
 ======================================================================
-FAIL: test_simple (__main__.TestGCD)
+FAIL: test_simple (__main__.TestGCD.test_simple)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_16886/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_7987/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
+           ^^^^^^^^^^^^^^^^^^
 AssertionError
 
 ----------------------------------------------------------------------
@@ -89,11 +90,12 @@ Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
-FAIL: test_simple (__main__.TestGCD)
+FAIL: test_simple (__main__.TestGCD.test_simple)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_16886/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_7987/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
+           ^^^^^^^^^^^^^^^^^^
 AssertionError
 
 ----------------------------------------------------------------------
@@ -101,11 +103,12 @@ Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
-FAIL: test_simple (__main__.TestGCD)
+FAIL: test_simple (__main__.TestGCD.test_simple)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_16886/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_7987/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
+           ^^^^^^^^^^^^^^^^^^
 AssertionError
 
 ----------------------------------------------------------------------
@@ -113,11 +116,12 @@ Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
-FAIL: test_simple (__main__.TestGCD)
+FAIL: test_simple (__main__.TestGCD.test_simple)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_16886/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_7987/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
+           ^^^^^^^^^^^^^^^^^^
 AssertionError
 
 ----------------------------------------------------------------------
@@ -125,11 +129,12 @@ Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
-FAIL: test_simple (__main__.TestGCD)
+FAIL: test_simple (__main__.TestGCD.test_simple)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_16886/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_7987/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
+           ^^^^^^^^^^^^^^^^^^
 AssertionError
 
 ----------------------------------------------------------------------
@@ -137,11 +142,12 @@ Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
-FAIL: test_simple (__main__.TestGCD)
+FAIL: test_simple (__main__.TestGCD.test_simple)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_16886/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_7987/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
+           ^^^^^^^^^^^^^^^^^^
 AssertionError
 
 ----------------------------------------------------------------------
@@ -149,11 +155,12 @@ Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
-FAIL: test_simple (__main__.TestGCD)
+FAIL: test_simple (__main__.TestGCD.test_simple)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_16886/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_7987/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
+           ^^^^^^^^^^^^^^^^^^
 AssertionError
 
 ----------------------------------------------------------------------

@@ -3,9 +3,9 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2024-11-09 17:51:13+01:00
+# Last change: 2025-01-16 10:56:54+01:00
 #
-# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2025 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,7 +37,7 @@ This file can be _executed_ as a script, running all experiments:
 or _imported_ as a package, providing classes, functions, and constants:
 
     >>> from fuzzingbook.ConcolicFuzzer import <identifier>
-    
+
 but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/ConcolicFuzzer.html
@@ -89,30 +89,36 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>             _[cgi_decode](v)
 >>>     scf.add_trace(_, v)
 ' '
-'+'
 '%'
-'+A'
+''
 'AB'
-'++'
-'++A'
-
-IndexError: string index out of range (expected)
-
-'+++'
-'A'
-'+A'
-'+++A'
-'+AB'
-'++'
+'A+'
 '%'
-'++AB'
-'++A+'
-'+A'
-'++'
+'A'
+'AB'
 '+'
-'+%'
 
 IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
+
+'%'
+'A%'
+'%'
+'A+'
+'A'
+'AB'
+'A'
+'A+B'
+'ABC'
+
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
+
+'AB%'
+'A%'
+
 IndexError: string index out of range (expected)
 
 
@@ -138,26 +144,36 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-select 245 from :2 where r(_)-N+e>n
-Table (':2') was not found
+insert into H (DZxQ) values (60366,'QR',-21.2981,6,38.7)
+Table ('H') was not found
 
-delete from vehicles where Q/x/j/q(p)/H*h-B==cz
-Invalid WHERE ('Q/x/j/q(p)/H*h-B==cz')
+select 340.0 from i8g4
+Table ('i8g4') was not found
 
-insert into months (:b) values (22.72)
-Column (':b') was not found
+delete from months where -16.98==Q000
+Invalid WHERE ('-16.98==Q000')
 
-select i*q!=(4) from months where L*S/l/u/b+b==W
+update uKt set D=d,:=m,c=R,R=C where A==Q==M
+Table ('uKt') was not found
 
-delete from months where W/V!=A(f)+tW*x>L
-Invalid WHERE ('(b==D)-_/W+z/s/e>W*x>L')
+insert into months (q491) values ('Ib^|}',2,'8/','k')
+Column ('q491') was not found
 
-select E((f),C) from vehicles where I+g-y-v+G>y-P*l
+select w from lU where 445==M(v/n*J!=a)>W-e/k-r(n)*G
+Table ('lU') was not found
 
-select _ from vehicles
-Invalid WHERE ('(_)')
+select (r),k-Q*f>Z,((s)),i>N,f!=t from FK9
+Table ('FK9') was not found
 
-delete from vehicles where _*A-w-R
+update m5 set name=U,name=W where (d*D>k)==(d)
+Table ('m5') was not found
+
+select H2==h!=R,j-e+F*t,(L),p,W from p_
+Table ('p_') was not found
+
+delete from vehicles where _(w)+q/D/x>(e+H>u*b)
+Invalid WHERE ('_(w)+q/D/x>(e+H>u*b)')
+
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
 at https://www.fuzzingbook.org/html/ConcolicFuzzer.html

@@ -3,9 +3,9 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2024-11-09 18:20:49+01:00
+# Last change: 2025-01-16 11:13:35+01:00
 #
-# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2025 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,7 +37,7 @@ This file can be _executed_ as a script, running all experiments:
 or _imported_ as a package, providing classes, functions, and constants:
 
     >>> from fuzzingbook.GUIFuzzer import <identifier>
-    
+
 but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/GUIFuzzer.html
@@ -47,6 +47,8 @@ This chapter demonstrates how to programmatically interact with user interfaces,
 The function `start_webdriver()` starts a headless Web browser in the background and returns a _GUI driver_ as handle for further communication.
 
 >>> gui_driver = start_webdriver()
+The geckodriver version (0.34.0) detected in PATH at /Users/zeller/bin/geckodriver might not be compatible with the detected firefox version (135.03); currently, geckodriver 0.35.0 is recommended for firefox 135.*, so it is advised to delete the driver in PATH and retry
+
 
 We let the browser open the URL of the server we want to investigate (in this case, the vulnerable server from [the chapter on Web fuzzing](WebFuzzer.ipynb)) and obtain a screenshot.
 
@@ -69,24 +71,17 @@ The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow pa
 >>> gui_driver.get(httpd_url)
 >>> actions = gui_fuzzer.fuzz()
 >>> print(actions)
+fill('city', 'U')
+fill('email', 'r@z')
+fill('name', 'H')
 check('terms', True)
-fill('city', 'J')
-fill('email', 'U@si')
-fill('name', 'K')
-fill('zip', '16')
+fill('zip', '3')
 submit('submit')
 click('order form')
-check('terms', False)
-fill('city', 'c')
-fill('email', 'n@H')
-fill('name', 'b')
-fill('zip', '9')
-submit('submit')
-click('order form')
-check('terms', False)
-fill('city', 'y')
-fill('email', 'M@C')
-fill('name', 'o')
+fill('city', 'q')
+fill('email', 'v@p')
+fill('name', 's')
+check('terms', True)
 fill('zip', '4')
 submit('submit')
 
