@@ -3,9 +3,9 @@
 
 # "Efficient Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2024-11-09 17:13:34+01:00
+# Last change: 2025-01-16 10:40:43+01:00
 #
-# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2025 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,7 +37,7 @@ This file can be _executed_ as a script, running all experiments:
 or _imported_ as a package, providing classes, functions, and constants:
 
     >>> from fuzzingbook.GrammarFuzzer import <identifier>
-    
+
 but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/GrammarFuzzer.html
@@ -49,13 +49,13 @@ This chapter introduces `GrammarFuzzer`, an efficient grammar fuzzer that takes 
 >>> from Grammars import US_PHONE_GRAMMAR
 >>> phone_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR)
 >>> phone_fuzzer.fuzz()
-'(236)844-1154'
+'(771)306-0659'
 
 The `GrammarFuzzer` constructor takes a number of keyword arguments to control its behavior.  `start_symbol`, for instance, allows setting the symbol that expansion starts with (instead of ``):
 
 >>> area_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR, start_symbol='')
 >>> area_fuzzer.fuzz()
-'996'
+'409'
 
 Here's how to parameterize the `GrammarFuzzer` constructor:
 
@@ -76,20 +76,20 @@ In the internal representation of a derivation tree, a _node_ is a pair (`symbol
  [('',
    [('(', []),
     ('',
-     [('', [('2', [])]),
-      ('', [('3', [])]),
-      ('', [('6', [])])]),
+     [('', [('7', [])]),
+      ('', [('7', [])]),
+      ('', [('1', [])])]),
     (')', []),
     ('',
-     [('', [('8', [])]),
-      ('', [('4', [])]),
-      ('', [('4', [])])]),
+     [('', [('3', [])]),
+      ('', [('0', [])]),
+      ('', [('6', [])])]),
     ('-', []),
     ('',
-     [('', [('1', [])]),
-      ('', [('1', [])]),
+     [('', [('0', [])]),
+      ('', [('6', [])]),
       ('', [('5', [])]),
-      ('', [('4', [])])])])])
+      ('', [('9', [])])])])])
 
 The chapter contains various helpers to work with derivation trees, including visualization tools – notably, `display_tree()`, above.
 

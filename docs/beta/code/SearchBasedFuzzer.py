@@ -3,9 +3,9 @@
 
 # "Search-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
-# Last change: 2024-11-09 17:12:39+01:00
+# Last change: 2025-01-16 10:39:55+01:00
 #
-# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2025 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,7 +37,7 @@ This file can be _executed_ as a script, running all experiments:
 or _imported_ as a package, providing classes, functions, and constants:
 
     >>> from fuzzingbook.SearchBasedFuzzer import <identifier>
-    
+
 but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
@@ -75,6 +75,11 @@ Different aspects and challenges require different variations of this algorithm,
 The search can be guided by different optimization goals captured in fitness functions. A fitness function to measure how close we are to reaching locations in the source code uses source code instrumentation. To produce an instrumented version of `cgi_decode`, use:
 
 >>> cgi_decode_instrumented = create_instrumented_function(cgi_decode)
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_7394/942233608.py:15: DeprecationWarning: ast.Num is deprecated and will be removed in Python 3.14; use ast.Constant instead
+  args=[ast.Num(self.branch_num),
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_7394/942233608.py:16: DeprecationWarning: ast.Str is deprecated and will be removed in Python 3.14; use ast.Constant instead
+  ast.Str(node.ops[0].__class__.__name__),
+
 
 Fitness values are obtained by executing `cgi_decode_instrumented`, which is done by the `get_fitness_cgi` function:
 

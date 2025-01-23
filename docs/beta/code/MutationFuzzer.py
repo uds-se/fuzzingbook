@@ -3,9 +3,9 @@
 
 # "Mutation-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2024-11-09 17:37:38+01:00
+# Last change: 2025-01-16 10:38:21+01:00
 #
-# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2025 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,7 +37,7 @@ This file can be _executed_ as a script, running all experiments:
 or _imported_ as a package, providing classes, functions, and constants:
 
     >>> from fuzzingbook.MutationFuzzer import <identifier>
-    
+
 but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/MutationFuzzer.html
@@ -48,15 +48,15 @@ This chapter introduces a `MutationFuzzer` class that takes a list of _seed inpu
 >>> mutation_fuzzer = MutationFuzzer(seed=[seed_input])
 >>> [mutation_fuzzer.fuzz() for i in range(10)]
 ['http://www.google.com/search?q=fuzzing',
- 'http://wwBw.google.com/searh?q=fuzzing',
- 'http8//wswgoRogle.am/secch?qU=fuzzing',
- 'ittp://www.googLe.com/serch?q=fuzzingZ',
- 'httP://wgw.google.com/seasch?Q=fuxzanmgY',
- 'http://www.google.cxcom/search?q=fuzzing',
- 'hFttp://ww.-g\x7fog+le.com/s%arch?q=f-uzz#ing',
- 'http://www\x0egoogle.com/seaNrch?q=fuZzing',
- 'http//www.Ygooge.comsarch?q=fuz~Ijg',
- 'http8//ww.goog5le.com/sezarc?q=fuzzing']
+ ']hTtp://ww,google\x1ecom/searc?q=fuzzig',
+ 'hppY://www.google.cm/seacH?q=fduzzing',
+ 'http:&//www.goole.com/sear#h?q=fuzz(ingw',
+ 'http://vww.googlje.om/{earch?q5fuzzing',
+ 'http://www.google.com/seach?q=uzzing',
+ 'hv,tp*//www.ggogle.com/seagrch/q=fuzzing',
+ "h(tpy:/wGw.goo'l%.com/searc?q=fuz~ing",
+ 'hp://www.gooelecom/)search?q=fuz?zing?',
+ "httpv//www.goo6gl.#om'search?q=Puzzin"]
 
 The `MutationCoverageFuzzer` maintains a _population_ of inputs, which are then evolved in order to maximize coverage.
 
@@ -64,11 +64,7 @@ The `MutationCoverageFuzzer` maintains a _population_ of inputs, which are then 
 >>> mutation_fuzzer.runs(http_runner, trials=10000)
 >>> mutation_fuzzer.population[:5]
 ['http://www.google.com/search?q=fuzzing',
- 'http://wwv.oogle>co/search7Eq=fuzing',
- 'http://wwv\x0eOogleb>co/seakh7Eq\x1d;fuzing',
- 'http://wwv\x0eoglebkooqeakh7Eq\x1d;fuzing',
- 'http://wwv\x0eoglekol=oekh7Eq\x1d\x1bf~ing']
-
+ 'http://www.google.com
 For more details, source, and documentation, see
 "The Fuzzing Book - Mutation-Based Fuzzing"
 at https://www.fuzzingbook.org/html/MutationFuzzer.html

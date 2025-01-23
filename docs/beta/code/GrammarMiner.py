@@ -3,9 +3,9 @@
 
 # "Mining Input Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2024-11-09 17:50:34+01:00
+# Last change: 2025-01-16 10:56:19+01:00
 #
-# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2025 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,7 +37,7 @@ This file can be _executed_ as a script, running all experiments:
 or _imported_ as a package, providing classes, functions, and constants:
 
     >>> from fuzzingbook.GrammarMiner import <identifier>
-    
+
 but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/GrammarMiner.html
@@ -57,13 +57,13 @@ We extract the input grammar for `url_parse()` using `recover_grammar()`:
 >>> grammar = recover_grammar(url_parse, URLS, files=['urllib/parse.py'])
 >>> grammar
 {'': [''],
- '': [':'],
- '': ['https', 'http'],
- '': ['//',
-  '///'],
+ '': [':<_splitnetloc@413:url>'],
+ '': ['http', 'https'],
+ '<_splitnetloc@413:url>': ['///',
+  '//'],
  '': ['www.cispa.saarland:80',
-  'user:pass@www.google.com:80',
-  'www.fuzzingbook.org'],
+  'www.fuzzingbook.org',
+  'user:pass@www.google.com:80'],
  '': ['#',
   '/#'],
  '': ['/?'],
@@ -74,24 +74,24 @@ The names of nonterminals are a bit technical; but the grammar nicely represents
 
 >>> syntax_diagram(grammar)
 start
-urlsplit@437:url
-urlparse@394:scheme
-_splitnetloc@411:url
-urlparse@394:netloc
-urlsplit@481:url
-urlsplit@486:url
-urlparse@394:query
-urlparse@394:fragment
+urlsplit@452:url
+urlparse@396:scheme
+_splitnetloc@413:url
+urlparse@396:netloc
+urlsplit@494:url
+urlsplit@502:url
+urlparse@396:query
+urlparse@396:fragment
 The grammar can be immediately used for fuzzing, producing arbitrary combinations of input elements, which are all syntactically valid.
 
 >>> from GrammarCoverageFuzzer import GrammarCoverageFuzzer
 >>> fuzzer = GrammarCoverageFuzzer(grammar)
 >>> [fuzzer.fuzz() for i in range(5)]
-['https://www.cispa.saarland:80/',
- 'http://www.fuzzingbook.org/#ref',
- 'https://user:pass@www.google.com:80/?q=path#News',
- 'http://user:pass@www.google.com:80/#ref',
- 'https://www.fuzzingbook.org/#News']
+['https://www.cispa.saarland:80/#ref',
+ 'http://www.fuzzingbook.org/',
+ 'http://user:pass@www.google.com:80/?q=path#News',
+ 'https://www.fuzzingbook.org/?q=path#ref',
+ 'http://www.cispa.saarland:80/#News']
 
 Being able to automatically extract a grammar and to use this grammar for fuzzing makes for very effective test generation with a minimum of manual work.
 

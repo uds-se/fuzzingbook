@@ -3,9 +3,9 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2024-11-09 17:38:39+01:00
+# Last change: 2025-01-16 10:39:44+01:00
 #
-# Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2021-2025 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,7 +37,7 @@ This file can be _executed_ as a script, running all experiments:
 or _imported_ as a package, providing classes, functions, and constants:
 
     >>> from fuzzingbook.GreyboxFuzzer import <identifier>
-    
+
 but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/GreyboxFuzzer.html
@@ -68,27 +68,34 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- http;//www.google.com/serch?q=fuzzing,
- http://www.gongl{e.com/searchq=fuzing,
- http:/i?gww.gongl{e.mcom/serchq=fuzi~g,
- http://w#wwo.gongl{e.com/searchq=fuzing,
- http://w#wwo.ongl{e.com_/%searchbq=urn,
- http:/w#ww.ongl;e.com_/%sRarbhbqn,
- htt&p:/i,;gw.gongl{e)mcom/ercHq=fuzi~g,
- p:/[gmXn+gl.jc/s-/surc(2q=zog,
- htCpE/wwLV.nngD7Pl;
- e.Gwoi]/sRarrb,[t|rln,
- ht$p!//w>uw.go2/n{Cre.k/BeqrAci
- QS=fwzic,
- hty8/www.*ongPl{acomeach&q?fwuzing,
- http/w#wJwonlG{e.cm/sqearcchq=fuzg,
- htp:/\ww7.gong{e.com/searchq=feu~ing,
- htdp://w#wo.gogl{e.com/searchq
- fuzing,
- ttp8/w"ww4.kongl;,eco_%s]qrbh"zrn,
- L]td02/eWgo.wgg{gno~-c%arbhb5-i,
- htPtzp:/{i?gx.gonl:{e.mcotm/rKerhHM0q=fuvzi~g,
- `ttp://www.ngd{e(*/mserbh,qfuzing]
+ http://ww.gomgle.com/searciq=fuzzing,
+ |h>Att&p8?wwnOgle.cooarhl~Cp`uzza',
+ http2Ot/*gv-VRgogec:om/rearc h=fu~i
+ g,
+ http"Ot/*gv-VRgogecom/rearc h=u~i
+ f,
+ http"Ot/g$vVRgogEecom/#reabc h=u~a
+ f,
+ httT`2Ot//:7ev^VRgoec:uom/re!6dctKc= hS;=fu-yH
+ /,
+ http'www&go/le.comm/sea:rh*?q=Ftzzifg,
+ h4tpw://w.gomMle.m/weazciq=fuezzi.',
+ h~Att&p8?ws_nOge.#ooarhBlw~Cp`uzza',
+ ht8P:/wwvgkowcom/eacrh?q=f uzzing,
+ httT`Ot//:7evVR"goec:uom/re!dctKc=hS;=fu-yH
+ I,
+ htp://ww.go/gl%.otm/wearch?q=f5zzing,
+ httU`Ot//:7evVR"goec:uo2Jm/re#dctKc=hS;=fu-yH
+ I,
+ ht4p://ww.gomgle.co.serciq=fuzzing,
+ httpp"OtSo*gv'VRgkg;eom/earcR >
+ =u|in
+ f,
+ htP:/wwvgMolwcomeachq=f uzzine,
+ htt://[/wwgwC6.]gogleg/lE.bo/_sEarcq9Afqwz"king,
+ httT`Ot//:7evVR"goec:uom/re!dctKc=hS;=fu-yH
+ I,
+ tPK:,wIfvglwvc#omeaBc`9qOin]
 
 Besides the simple `PowerSchedule`, we can have advanced power schedules.
 
