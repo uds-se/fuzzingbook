@@ -1,0 +1,1 @@
+This folder holds images (and their sources) used within the book.

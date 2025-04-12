@@ -1,0 +1,881 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>The Fuzzing Book &#8212; The Fuzzing Book</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=42e1b1a5" />
+    <link rel="stylesheet" type="text/css" href="_static/mastodon-timeline.css?v=f82c2b23" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tours through the Book" href="Tours.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content"><p>This is a beta version of fuzzingbook.org, currently in development. See the <a href="https://fuzzingbook.org/"  style="color:white!important;">classic site</a> for resources.</p></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/fuzzingbook.png" class="logo__image only-light" alt="The Fuzzing Book - Home"/>
+    <script>document.write(`<img src="_static/fuzzingbook.png" class="logo__image only-dark" alt="The Fuzzing Book - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1 current active">
+                <a class="reference internal" href="#">
+                    The Fuzzing Book
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Tours.html">Tours through the Book</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Intro_Testing.html">Introduction to Software Testing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Lexical Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Coverage.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MutationFuzzer.html">Mutation-Based Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GreyboxFuzzer.html">Greybox Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SearchBasedFuzzer.html">Search-Based Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MutationAnalysis.html">Mutation Analysis</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Syntactical Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Grammars.html">Fuzzing with Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarFuzzer.html">Efficient Grammar Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarCoverageFuzzer.html">Grammar Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Parser.html">Parsing Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeneratorGrammarFuzzer.html">Fuzzing with Generators</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="GreyboxGrammarFuzzer.html">Greybox Fuzzing with Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reducer.html">Reducing Failure-Inducing Inputs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Semantical Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="FuzzingWithConstraints.html">Fuzzing with Constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarMiner.html">Mining Input Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InformationFlow.html">Tracking Information Flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConcolicFuzzer.html">Concolic Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SymbolicFuzzer.html">Symbolic Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DynamicInvariants.html">Mining Function Specifications</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Domain-Specific Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ConfigurationFuzzer.html">Testing Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="APIFuzzer.html">Fuzzing APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Carver.html">Carving Unit Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PythonFuzzer.html">Testing Compilers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WebFuzzer.html">Testing Web Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GUIFuzzer.html">Testing Graphical User Interfaces</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Managing Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="FuzzingInTheLarge.html">Fuzzing in the Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WhenToStopFuzzing.html">When To Stop Fuzzing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Appendices</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="AcademicPrototyping.html">Academic Prototyping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PrototypingWithPython.html">Prototyping with Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExpectError.html">Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Timer.html">Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Timeout.html">Timeout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClassDiagram.html">Class Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RailroadDiagrams.html">Railroad Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ControlFlow.html">Control Flow Graph</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">About This Book</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ReleaseNotes.html">Fuzzingbook Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Importing.html">Using Fuzzingbook Code in your own Programs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Guide_for_Authors.html">Guide for Authors</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?urlpath=tree/docs/notebooks/index.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/uds-se/fuzzingbook" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/uds-se/fuzzingbook/issues/new?title=Issue%20on%20page%20%2Findex.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/index.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>The Fuzzing Book</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-textbook-for-paper-screen-and-keyboard">A Textbook for Paper, Screen, and Keyboard</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#who-this-book-is-for">Who this Book is for</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#news">News</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-the-authors">About the Authors</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#frequently-asked-questions">Frequently Asked Questions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#why-does-it-take-so-long-to-start-an-interactive-notebook">Why does it take so long to start an interactive notebook?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#the-interactive-notebook-does-not-work">The interactive notebook does not work!</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#do-i-have-alternatives-to-the-interactive-notebook">Do I have alternatives to the interactive notebook?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-run-the-code-on-my-windows-machine">Can I run the code on my Windows machine?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cant-you-run-your-own-dedicated-cloud-service">Can’t you run your own dedicated cloud service?</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#content">Content</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-use-your-code-in-my-own-programs">Can I use your code in my own programs?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#which-content-has-come-up">Which content has come up?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#how-do-i-cite-your-work">How do I cite your work?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#can-you-cite-my-paper-and-possibly-write-a-chapter-about-it">Can you cite my paper?  And possibly write a chapter about it?</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#teaching-and-coursework">Teaching and Coursework</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-use-your-material-in-my-course">Can I use your material in my course?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-extend-or-adapt-your-material">Can I extend or adapt your material?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-run-a-course-based-on-the-book">How can I run a course based on the book?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#are-there-specific-subsets-i-can-focus-on">Are there specific subsets I can focus on?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-extend-or-adapt-your-slides">How can I extend or adapt your slides?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#do-you-provide-pdfs-of-your-material">Do you provide PDFs of your material?</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#other-issues">Other Issues</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#i-have-a-question-comment-or-a-suggestion-what-do-i-do">I have a question, comment, or a suggestion.  What do I do?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#i-have-reported-an-issue-two-weeks-ago-when-will-it-be-addressed">I have reported an issue two weeks ago.  When will it be addressed?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-solve-problems-myself">How can I solve problems myself?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-contribute">How can I contribute?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="the-fuzzing-book">
+<h1>The Fuzzing Book<a class="headerlink" href="#the-fuzzing-book" title="Link to this heading">#</a></h1>
+<p><strong>Welcome to “The Fuzzing Book”!</strong>
+Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by <em>automating</em> software testing, specifically by <em>generating tests automatically</em>.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book – even with executable code.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bookutils</span> <span class="kn">import</span> <span class="n">YouTubeVideo</span>
+<span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;w4u5gCgPlmg&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+        <iframe
+            width="640"
+            height="360"
+            src="https://www.youtube-nocookie.com/embed/w4u5gCgPlmg"
+            frameborder="0"
+            allowfullscreen
+            
+        ></iframe>
+        </div></div>
+</div>
+<section id="a-textbook-for-paper-screen-and-keyboard">
+<h2>A Textbook for Paper, Screen, and Keyboard<a class="headerlink" href="#a-textbook-for-paper-screen-and-keyboard" title="Link to this heading">#</a></h2>
+<p>You can use this book in four ways:</p>
+<ul class="simple">
+<li><p>You can <strong>read chapters in your browser</strong>.  Check out the list of chapters in the menu above, or start right away with the <a class="reference internal" href="Intro_Testing.html"><span class="std std-doc">introduction to testing</span></a> or the <a class="reference internal" href="Fuzzer.html"><span class="std std-doc">introduction to fuzzing</span></a>.  All code is available for download.</p></li>
+<li><p>You can <strong>interact with chapters as Jupyter Notebooks</strong> (beta).  This allows you to edit and extend the code, experimenting <em>live in your browser.</em>  Simply select “Resources → Edit as Notebook” at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/HEAD?labpath=docs/notebooks/Fuzzer.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a></p></li>
+<li><p>You can <strong>use the code in your own projects</strong>.  You can download the code as Python programs; simply select “Resources → Download Code” for one chapter or “Resources → All Code” for all chapters.  These code files can be executed, yielding (hopefully) the same results as the notebooks.  Even easier: <a class="reference internal" href="Importing.html"><span class="std std-doc">Install the fuzzingbook Python package</span></a>.</p></li>
+<li><p>You can <strong>present chapters as slides</strong>.  This allows for presenting the material in lectures.  Just select “Resources → View slides” at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Fuzzer.slides.html" target=_blank>Try viewing the slides for the introduction to fuzzing.</a></p></li>
+</ul>
+</section>
+<section id="who-this-book-is-for">
+<h2>Who this Book is for<a class="headerlink" href="#who-this-book-is-for" title="Link to this heading">#</a></h2>
+<p>This work is designed as a <em>textbook</em> for a course in software testing or security testing; as <em>supplementary material</em> in a software testing, security testing, or software engineering course; and as a <em>resource for software developers</em>. We cover random fuzzing, mutation-based fuzzing, grammar-based test generation, symbolic testing, and much more, illustrating all techniques with code examples that you can try out yourself.</p>
+</section>
+<section id="news">
+<h2>News<a class="headerlink" href="#news" title="Link to this heading">#</a></h2>
+<p>This book is <em>work in progress.</em>  All chapters planned are out now, but we keep on refining text and code with <a class="reference internal" href="ReleaseNotes.html"><span class="std std-doc">minor and major releases.</span></a>  To get notified on updates, <a href="https://mastodon.social/@TheFuzzingBook">follow us on Mastodon</a>.</p>
+<!--
+<iframe allowfullscreen sandbox="allow-top-navigation allow-scripts allow-popups allow-popups-to-escape-sandbox" width="400" height="400" frameBorder="0" src="https://mastofeed.com/apiv2/feed?userurl=https%3A%2F%2Fmastodon.social%2Fusers%2FTheFuzzingBook&theme=auto&size=80&header=false&replies=false&boosts=false"></iframe>
+--><link rel="stylesheet" href="/html/mastodon-timeline.css" />
+<script src="/html/mastodon-timeline.js"></script>
+<div class="mt-timeline">
+  <div id="mt-body" class="mt-body" role="feed">
+    <div class="loading-spinner"></div>
+  </div>
+</div></section>
+<section id="about-the-authors">
+<h2>About the Authors<a class="headerlink" href="#about-the-authors" title="Link to this heading">#</a></h2>
+<p>This book is written by <em>Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler</em>.  All of us are long-standing experts in software testing and test generation; and we have written or contributed to some of the most important test generators and fuzzers on the planet.  As an example, if you are reading this in a Firefox, Chrome, or Edge Web browser, you can do so safely partly because of us, as <em>the very techniques listed in this book have found more than 2,600 bugs in their JavaScript interpreters so far.</em>  We are happy to share our expertise and making it accessible to the public.</p>
+</section>
+<section id="frequently-asked-questions">
+<h2>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Link to this heading">#</a></h2>
+<section id="troubleshooting">
+<h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">#</a></h3>
+<section id="why-does-it-take-so-long-to-start-an-interactive-notebook">
+<h4>Why does it take so long to start an interactive notebook?<a class="headerlink" href="#why-does-it-take-so-long-to-start-an-interactive-notebook" title="Link to this heading">#</a></h4>
+<p>The interactive notebook uses the <a class="reference external" href="https://mybinder.org">mybinder.org</a> service, which runs notebooks on their own servers.  Starting Jupyter through <a class="reference external" href="http://mybinder.org">mybinder.org</a> normally takes about 30 seconds, depending on your Internet connection. If, however, you are the first to invoke binder after a book update, binder recreates its environment, which will take a few minutes.  Reload the page occasionally.</p>
+</section>
+<section id="the-interactive-notebook-does-not-work">
+<h4>The interactive notebook does not work!<a class="headerlink" href="#the-interactive-notebook-does-not-work" title="Link to this heading">#</a></h4>
+<p><a class="reference external" href="http://mybinder.org">mybinder.org</a> imposes a <a class="reference external" href="https://mybinder.readthedocs.io/en/latest/user-guidelines.html">limit of 100 concurrent users for a repository</a>.  Also, as listed on the <a class="reference external" href="https://mybinder.readthedocs.io/en/latest/reliability.html">mybinder.org status and reliability page</a>,</p>
+<blockquote>
+<div><p>As <a class="reference external" href="http://mybinder.org">mybinder.org</a> is a research pilot project, the main goal for the project is to understand usage patterns and workloads for future project evolution. While we strive for site reliability and availability, we want our users to understand the intent of this service is research and we offer no guarantees of its performance in mission critical uses.</p>
+</div></blockquote>
+<p>There are alternatives to <a class="reference external" href="http://mybinder.org">mybinder.org</a>; see below.</p>
+</section>
+<section id="do-i-have-alternatives-to-the-interactive-notebook">
+<h4>Do I have alternatives to the interactive notebook?<a class="headerlink" href="#do-i-have-alternatives-to-the-interactive-notebook" title="Link to this heading">#</a></h4>
+<p>If <a class="reference external" href="http://mybinder.org">mybinder.org</a> does not work or match your needs, you have a number of alternatives:</p>
+<ol class="arabic simple">
+<li><p><strong>Download the Python code</strong> (using the menu at the top) and edit and run it in your favorite environment.  This is easy to do and does not require lots of resources.</p></li>
+<li><p><strong>Download the Jupyter Notebooks</strong> (using the menu at the top) and open them in Jupyter.  Here’s <a class="reference external" href="https://www.dataquest.io/blog/jupyter-notebook-tutorial/">how to install jupyter notebook on your machine</a>.</p></li>
+</ol>
+<p>For details, see our article on <a class="reference internal" href="Importing.html"><span class="std std-doc">Using Debuggingbook Code in your own Programs</span></a>.</p>
+<p>As another alternative, you can also <strong>use our Docker images</strong> (experimental). <a class="reference external" href="https://docs.docker.com/get-docker/">Install Docker</a> and then run</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    $ docker pull zeller24/fuzzingbook
+    $ docker run -it --rm -p 8888:8888 zeller24/fuzzingbook
+</pre></div>
+</div>
+<p>and then in your Web browser, open the URL (<code class="docutils literal notranslate"><span class="pre">http://127.0.0.1/...</span></code> or <code class="docutils literal notranslate"><span class="pre">http://localhost/...</span></code>) given in the console output.
+This should give you the same environment as in <a class="reference external" href="http://mybinder.org">mybinder.org</a>.</p>
+<p>If you want to create your own Docker images, use our <a class="reference external" href="https://github.com/uds-se/fuzzingbook/blob/master/binder/Dockerfile">Dockerfile</a> as a starting point.</p>
+</section>
+<section id="can-i-run-the-code-on-my-windows-machine">
+<h4>Can I run the code on my Windows machine?<a class="headerlink" href="#can-i-run-the-code-on-my-windows-machine" title="Link to this heading">#</a></h4>
+<p>We try to keep the code as general as possible, but occasionally, when we interact with the operating system, we assume a Unix-like environment (because that is what Binder provides).  To run these examples on your own Windows machine, you can install a Linux Subsystem or a Linux Virtual Machine.</p>
+</section>
+<section id="cant-you-run-your-own-dedicated-cloud-service">
+<h4>Can’t you run your own dedicated cloud service?<a class="headerlink" href="#cant-you-run-your-own-dedicated-cloud-service" title="Link to this heading">#</a></h4>
+<p>Technically, yes; but this would cost money and effort, which we’d rather spend on the book at this point.  If you’d like to host a <a class="reference external" href="http://jupyter.org/hub">JupyterHub</a> or <a class="reference external" href="https://github.com/jupyterhub/binderhub">BinderHub</a> instance for the public, please <em>do so</em> and let us know.</p>
+</section>
+</section>
+<section id="content">
+<h3>Content<a class="headerlink" href="#content" title="Link to this heading">#</a></h3>
+<section id="can-i-use-your-code-in-my-own-programs">
+<h4>Can I use your code in my own programs?<a class="headerlink" href="#can-i-use-your-code-in-my-own-programs" title="Link to this heading">#</a></h4>
+<p>Yes!  See the <a class="reference internal" href="Importing.html"><span class="std std-doc">installation instructions</span></a> for details.</p>
+</section>
+<section id="which-content-has-come-up">
+<h4>Which content has come up?<a class="headerlink" href="#which-content-has-come-up" title="Link to this heading">#</a></h4>
+<p>See the <a class="reference internal" href="ReleaseNotes.html"><span class="std std-doc">release notes</span></a> for details.</p>
+</section>
+<section id="how-do-i-cite-your-work">
+<h4>How do I cite your work?<a class="headerlink" href="#how-do-i-cite-your-work" title="Link to this heading">#</a></h4>
+<p>Thanks for referring to our work!  Once the book is complete, you will be able to cite it in the traditional way.  In the meantime, just click on the “cite” button at the bottom of the Web page for each chapter to get a citation entry.</p>
+</section>
+<section id="can-you-cite-my-paper-and-possibly-write-a-chapter-about-it">
+<h4>Can you cite my paper?  And possibly write a chapter about it?<a class="headerlink" href="#can-you-cite-my-paper-and-possibly-write-a-chapter-about-it" title="Link to this heading">#</a></h4>
+<p>We’re always happy to get suggestions!  If we missed an important reference, we will of course add it.  If you’d like specific material to be covered, the best way is to <em>write a notebook</em> yourself; see our <a class="reference internal" href="Guide_for_Authors.html"><span class="std std-doc">Guide for Authors</span></a> for instructions on coding and writing.  We can then refer to it or even host it.</p>
+</section>
+</section>
+<section id="teaching-and-coursework">
+<h3>Teaching and Coursework<a class="headerlink" href="#teaching-and-coursework" title="Link to this heading">#</a></h3>
+<section id="can-i-use-your-material-in-my-course">
+<h4>Can I use your material in my course?<a class="headerlink" href="#can-i-use-your-material-in-my-course" title="Link to this heading">#</a></h4>
+<p>Of course!  Just respect the <a class="reference external" href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md">license</a> (including attribution and share alike).  If you want to use the material for commercial purposes, contact us.</p>
+</section>
+<section id="can-i-extend-or-adapt-your-material">
+<h4>Can I extend or adapt your material?<a class="headerlink" href="#can-i-extend-or-adapt-your-material" title="Link to this heading">#</a></h4>
+<p>Yes!  Again, please see the <a class="reference external" href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md">license</a> for details.</p>
+</section>
+<section id="how-can-i-run-a-course-based-on-the-book">
+<h4>How can I run a course based on the book?<a class="headerlink" href="#how-can-i-run-a-course-based-on-the-book" title="Link to this heading">#</a></h4>
+<p>We have successfully used the material in various courses.</p>
+<ul class="simple">
+<li><p>Initially, we used the slides and code and did <em>live coding</em> in lectures to illustrate how a technique works.</p></li>
+<li><p>Now, the goal of the book is to be completely self-contained; that is, it should work without additional support.  Hence, we now give out completed chapters to students in a <em>flipped classroom</em> setting, with the students working on the notebooks at their leisure.  We would meet in the classroom to discuss experiences with past notebooks and discuss future notebooks.</p></li>
+<li><p>We have the students work on exercises from the book or work on larger (fuzzing) projects.  We also have students who use the book as a base for their research; indeed, it is very easy to prototype in Python for Python.</p></li>
+</ul>
+<p>When running a course, <a class="reference internal" href="#Troubleshooting"><span class="xref myst">do not rely on mybinder.org</span></a> – it will not provide sufficient resources for a larger group of students.  Instead, <a class="reference internal" href="#Do-I-have-alternatives-to-the-interactive-notebook?"><span class="xref myst">install and run your own hub.</span></a></p>
+</section>
+<section id="are-there-specific-subsets-i-can-focus-on">
+<h4>Are there specific subsets I can focus on?<a class="headerlink" href="#are-there-specific-subsets-i-can-focus-on" title="Link to this heading">#</a></h4>
+<p>We have compiled a number of <a class="reference internal" href="Tours.html"><span class="std std-doc">tours through the book</span></a> for various audiences.  Our <a class="reference internal" href="#00_Table_of_Contents.ipynb"><span class="xref myst">Sitemap</span></a> lists the dependencies between the individual chapters.</p>
+</section>
+<section id="how-can-i-extend-or-adapt-your-slides">
+<h4>How can I extend or adapt your slides?<a class="headerlink" href="#how-can-i-extend-or-adapt-your-slides" title="Link to this heading">#</a></h4>
+<p>Download the Jupyter Notebooks (using the menu at the top) and adapt the notebooks at your leisure (see above), including “Slide Type” settings.  Then,</p>
+<ol class="arabic simple">
+<li><p>Download slides from Jupyter Notebook; or</p></li>
+<li><p>Use the RISE extension (<a class="reference external" href="http://www.blog.pythonlibrary.org/2018/09/25/creating-presentations-with-jupyter-notebook/">instructions</a>) to present your slides right out of Jupyter notebook.</p></li>
+</ol>
+</section>
+<section id="do-you-provide-pdfs-of-your-material">
+<h4>Do you provide PDFs of your material?<a class="headerlink" href="#do-you-provide-pdfs-of-your-material" title="Link to this heading">#</a></h4>
+<p>At this point, we do not provide support for PDF versions.  We will be producing PDF and print versions after the book is complete.</p>
+</section>
+</section>
+<section id="other-issues">
+<h3>Other Issues<a class="headerlink" href="#other-issues" title="Link to this heading">#</a></h3>
+<section id="i-have-a-question-comment-or-a-suggestion-what-do-i-do">
+<h4>I have a question, comment, or a suggestion.  What do I do?<a class="headerlink" href="#i-have-a-question-comment-or-a-suggestion-what-do-i-do" title="Link to this heading">#</a></h4>
+<p>You can post to <a class="reference external" href="https://mastodon.social/&#64;TheFuzzingBook">&#64;TheFuzzingBook&#64;mastodon.social on Mastodon</a>, allowing the community of readers to chime in.
+For bugs that you’d like to get fixed, report an issue on the <a class="reference external" href="https://github.com/uds-se/fuzzingbook/issues">development page</a>.</p>
+</section>
+<section id="i-have-reported-an-issue-two-weeks-ago-when-will-it-be-addressed">
+<h4>I have reported an issue two weeks ago.  When will it be addressed?<a class="headerlink" href="#i-have-reported-an-issue-two-weeks-ago-when-will-it-be-addressed" title="Link to this heading">#</a></h4>
+<p>We prioritize issues as follows:</p>
+<ol class="arabic simple">
+<li><p>Bugs in code published on <a class="reference external" href="http://fuzzingbook.org">fuzzingbook.org</a></p></li>
+<li><p>Bugs in text published on <a class="reference external" href="http://fuzzingbook.org">fuzzingbook.org</a></p></li>
+<li><p>Writing missing chapters</p></li>
+<li><p>Issues in yet unpublished code or text</p></li>
+<li><p>Issues related to development or construction</p></li>
+<li><p>Things marked as “beta”</p></li>
+<li><p>Everything else</p></li>
+</ol>
+</section>
+<section id="how-can-i-solve-problems-myself">
+<h4>How can I solve problems myself?<a class="headerlink" href="#how-can-i-solve-problems-myself" title="Link to this heading">#</a></h4>
+<p>We’re glad you ask that.  The <a class="reference external" href="https://github.com/uds-se/fuzzingbook/">development page</a> has all sources and some supplementary material.  Pull requests that fix issues are very welcome.</p>
+</section>
+<section id="how-can-i-contribute">
+<h4>How can I contribute?<a class="headerlink" href="#how-can-i-contribute" title="Link to this heading">#</a></h4>
+<p>Again, we’re glad you’re here!  We are happy to accept</p>
+<ul class="simple">
+<li><p><strong>Code fixes and improvements.</strong>  Please place any code under the MIT license such that we can easily include it.</p></li>
+<li><p><strong>Additional text, chapters, and notebooks</strong> on specialized topics.  We plan to set up a special folder for third-party contributions.</p></li>
+</ul>
+<p>See our <a class="reference internal" href="Guide_for_Authors.html"><span class="std std-doc">Guide for Authors</span></a> for instructions on coding and writing.</p>
+</section>
+</section>
+</section>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="right-next"
+       href="Tours.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Tours through the Book</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-textbook-for-paper-screen-and-keyboard">A Textbook for Paper, Screen, and Keyboard</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#who-this-book-is-for">Who this Book is for</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#news">News</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-the-authors">About the Authors</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#frequently-asked-questions">Frequently Asked Questions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#why-does-it-take-so-long-to-start-an-interactive-notebook">Why does it take so long to start an interactive notebook?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#the-interactive-notebook-does-not-work">The interactive notebook does not work!</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#do-i-have-alternatives-to-the-interactive-notebook">Do I have alternatives to the interactive notebook?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-run-the-code-on-my-windows-machine">Can I run the code on my Windows machine?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cant-you-run-your-own-dedicated-cloud-service">Can’t you run your own dedicated cloud service?</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#content">Content</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-use-your-code-in-my-own-programs">Can I use your code in my own programs?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#which-content-has-come-up">Which content has come up?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#how-do-i-cite-your-work">How do I cite your work?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#can-you-cite-my-paper-and-possibly-write-a-chapter-about-it">Can you cite my paper?  And possibly write a chapter about it?</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#teaching-and-coursework">Teaching and Coursework</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-use-your-material-in-my-course">Can I use your material in my course?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-extend-or-adapt-your-material">Can I extend or adapt your material?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-run-a-course-based-on-the-book">How can I run a course based on the book?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#are-there-specific-subsets-i-can-focus-on">Are there specific subsets I can focus on?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-extend-or-adapt-your-slides">How can I extend or adapt your slides?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#do-you-provide-pdfs-of-your-material">Do you provide PDFs of your material?</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#other-issues">Other Issues</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#i-have-a-question-comment-or-a-suggestion-what-do-i-do">I have a question, comment, or a suggestion.  What do I do?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#i-have-reported-an-issue-two-weeks-ago-when-will-it-be-addressed">I have reported an issue two weeks ago.  When will it be addressed?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-solve-problems-myself">How can I solve problems myself?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#how-can-i-contribute">How can I contribute?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2021-2025 CISPA Helmholtz Center for Information Security (www.cispa.de); © Copyright 2018-2020 Saarland University, authors, and contributors. All Rights Reserved.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

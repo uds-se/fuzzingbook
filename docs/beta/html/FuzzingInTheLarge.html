@@ -1,0 +1,2362 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Fuzzing in the Large &#8212; The Fuzzing Book</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=42e1b1a5" />
+    <link rel="stylesheet" type="text/css" href="_static/mastodon-timeline.css?v=f82c2b23" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'FuzzingInTheLarge';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="When To Stop Fuzzing" href="WhenToStopFuzzing.html" />
+    <link rel="prev" title="Testing Graphical User Interfaces" href="GUIFuzzer.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content"><p>This is a beta version of fuzzingbook.org, currently in development. See the <a href="https://fuzzingbook.org/"  style="color:white!important;">classic site</a> for resources.</p></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/fuzzingbook.png" class="logo__image only-light" alt="The Fuzzing Book - Home"/>
+    <script>document.write(`<img src="_static/fuzzingbook.png" class="logo__image only-dark" alt="The Fuzzing Book - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="index.html">
+                    The Fuzzing Book
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Tours.html">Tours through the Book</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Intro_Testing.html">Introduction to Software Testing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Lexical Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Coverage.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MutationFuzzer.html">Mutation-Based Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GreyboxFuzzer.html">Greybox Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SearchBasedFuzzer.html">Search-Based Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MutationAnalysis.html">Mutation Analysis</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Syntactical Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Grammars.html">Fuzzing with Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarFuzzer.html">Efficient Grammar Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarCoverageFuzzer.html">Grammar Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Parser.html">Parsing Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeneratorGrammarFuzzer.html">Fuzzing with Generators</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="GreyboxGrammarFuzzer.html">Greybox Fuzzing with Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reducer.html">Reducing Failure-Inducing Inputs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Semantical Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="FuzzingWithConstraints.html">Fuzzing with Constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarMiner.html">Mining Input Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InformationFlow.html">Tracking Information Flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConcolicFuzzer.html">Concolic Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SymbolicFuzzer.html">Symbolic Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DynamicInvariants.html">Mining Function Specifications</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Domain-Specific Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ConfigurationFuzzer.html">Testing Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="APIFuzzer.html">Fuzzing APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Carver.html">Carving Unit Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PythonFuzzer.html">Testing Compilers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WebFuzzer.html">Testing Web Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GUIFuzzer.html">Testing Graphical User Interfaces</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Managing Fuzzing</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Fuzzing in the Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WhenToStopFuzzing.html">When To Stop Fuzzing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Appendices</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="AcademicPrototyping.html">Academic Prototyping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PrototypingWithPython.html">Prototyping with Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExpectError.html">Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Timer.html">Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Timeout.html">Timeout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClassDiagram.html">Class Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RailroadDiagrams.html">Railroad Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ControlFlow.html">Control Flow Graph</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">About This Book</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ReleaseNotes.html">Fuzzingbook Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Importing.html">Using Fuzzingbook Code in your own Programs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Guide_for_Authors.html">Guide for Authors</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?urlpath=tree/docs/notebooks/FuzzingInTheLarge.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/uds-se/fuzzingbook" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/uds-se/fuzzingbook/issues/new?title=Issue%20on%20page%20%2FFuzzingInTheLarge.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/FuzzingInTheLarge.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Fuzzing in the Large</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synopsis">Synopsis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#collecting-crashes-from-multiple-fuzzers">Collecting Crashes from Multiple Fuzzers</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-a-crash-server">Running a Crash Server</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#excursion-setting-up-the-server">Excursion: Setting up the Server</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#end-of-excursion">End of Excursion</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#excursion-starting-the-server">Excursion: Starting the Server</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">End of Excursion</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#logging-in">Logging In</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#collecting-crashes">Collecting Crashes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#program-configurations">Program Configurations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crash-info">Crash Info</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#collector">Collector</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-crashes">Inspecting Crashes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crash-buckets">Crash Buckets</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crash-signatures">Crash Signatures</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#coarse-grained-signatures">Coarse-Grained Signatures</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#excursion-escapelines-implementatipn">Excursion: <code class="docutils literal notranslate"><span class="pre">escapelines()</span></code> implementatipn</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">End of Excursion</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#collecting-code-coverage">Collecting Code Coverage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Synopsis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#lessons-learned">Lessons Learned</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next Steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercises">Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-1-automatic-crash-reporting">Exercise 1: Automatic Crash Reporting</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="fuzzing-in-the-large">
+<h1>Fuzzing in the Large<a class="headerlink" href="#fuzzing-in-the-large" title="Link to this heading">#</a></h1>
+<p>In the past chapters, we have always looked at fuzzing taking place on one machine for a few seconds only.  In the real world, however, fuzzers are run on dozens or even thousands of machines; for hours, days and weeks; for one program or dozens of programs.  In such contexts, one needs an <em>infrastructure</em> to <em>collect</em> failure data from the individual fuzzer runs, and to <em>aggregate</em> such data in a central repository.  In this chapter, we will examine such an infrastructure, the <em>FuzzManager</em> framework from Mozilla.</p>
+<p><strong>Prerequisites</strong></p>
+<ul class="simple">
+<li><p>This chapter requires basic knowledge on testing, e.g. from the <a class="reference internal" href="Intro_Testing.html"><span class="std std-doc">Introduction to testing</span></a>.</p></li>
+<li><p>This chapter requires basic knowledge on how fuzzers fork, e.g. from the <a class="reference internal" href="Fuzzer.html"><span class="std std-doc">Introduction to fuzzing</span></a>.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bookutils.setup</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">Fuzzer</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="synopsis">
+<h2>Synopsis<a class="headerlink" href="#synopsis" title="Link to this heading">#</a></h2>
+<!-- Automatically generated. Do not edit. -->
+<p>To <a class="reference internal" href="Importing.html"><span class="std std-doc">use the code provided in this chapter</span></a>, write</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fuzzingbook.FuzzingInTheLarge</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>and then make use of the following features.</p>
+<p>The Python <code class="docutils literal notranslate"><span class="pre">FuzzManager</span></code> package allows for programmatic submission of failures from a large number of (fuzzed) programs.  One can query crashes and their details, collect them into buckets to ensure they will be treated the same, and also retrieve coverage information for debugging both programs and their tests.</p>
+</section>
+<section id="collecting-crashes-from-multiple-fuzzers">
+<h2>Collecting Crashes from Multiple Fuzzers<a class="headerlink" href="#collecting-crashes-from-multiple-fuzzers" title="Link to this heading">#</a></h2>
+<p>So far, all our fuzzing scenarios have been <em>one</em> fuzzer on <em>one</em> machine testing <em>one</em> program.  Failures would be shown immediately, and diagnosed quickly by the same person who started the fuzzer.  Alas, testing in the real world is different.  Fuzzing is still fully automated; but now, we are talking about <em>multiple</em> fuzzers running on <em>multiple</em> machines testing <em>multiple</em> programs (and versions thereof), producing <em>multiple</em> failures that have to be handled by <em>multiple</em> people.  This raises the question of how to manage all these activities and their interplay.</p>
+<p>A common means to coordinate several fuzzers is to have a central <em>repository</em> that collects all crashes as well as their crash information.  Whenever a fuzzer detects a failure, it connects via the network to a <em>crash server</em>, which then stores the crash information in a database.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="kn">from</span> <span class="nn">graphviz</span> <span class="kn">import</span> <span class="n">Digraph</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">Digraph</span><span class="p">()</span>
+<span class="n">server</span> <span class="o">=</span> <span class="s1">&#39;Crash Server&#39;</span>
+<span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="s1">&#39;Crash Database&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s1">&#39;cylinder&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="s1">&#39;Fuzzer &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">server</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="s1">&#39;Crash Database&#39;</span><span class="p">)</span>
+<span class="n">g</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/04f6d8affb7d1c9c8376f11c282012c8eee2bc1b6e2e1d68837189ae6118335e.svg" src="_images/04f6d8affb7d1c9c8376f11c282012c8eee2bc1b6e2e1d68837189ae6118335e.svg" />
+</div>
+</div>
+<p>The resulting crash database can be <em>queried</em> to find out which failures have occurred – typically, using a Web interface.  It can also be <em>integrated</em> with other process activities.  Most importantly, entries in the crash database can be linked to the <em>bug database</em>, and vice versa, such that bugs (= crashes) can be assigned to individual developers.</p>
+<p>In such an infrastructure, collecting crashes is not limited to fuzzers.  Crashes and failures occurring in the wild can also be automatically reported to the crash server.  In industry, it is not uncommon to have crash databases collecting thousands of crashes from production runs – especially if the software in question is used by millions of people every day.</p>
+<p>What information is stored in such a database?</p>
+<ul class="simple">
+<li><p>Most important is the <em>identifier</em> of the product – that is, the product name, version information as well as the platform and the operating system.  Without this information, there is no way developers can tell whether the bug is still around in the latest version, or whether it already has been fixed.</p></li>
+<li><p>For debugging, the most helpful information for developers are the <em>steps to reproduce</em> – in a fuzzing scenario, this would be the <em>input</em> to the program in question.  (In a production scenario, the user’s input is not collected for obvious privacy reasons.)</p></li>
+<li><p>Second most helpful for debugging is a <em>stack trace</em> such that developers can inspect which internal functionality was active in the moment of the failure.  A <em>coverage</em> map also comes in handy, since developers can query which functions were executed and which were not.</p></li>
+<li><p>If general failures are collected, developers also need to know what the expected behavior was; for crashes, this is simple, as users do not expect their software to crash.</p></li>
+</ul>
+<p>All of this information can be collected automatically if the fuzzer (or the program in question) is set up accordingly.</p>
+<p>In this chapter, we will explore a platform that automates all these steps.  The <em>FuzzManager</em> platform  allows to</p>
+<ol class="arabic simple">
+<li><p><em>collect</em> failure data from failing runs,</p></li>
+<li><p><em>enter</em> this data into a centralized server, and</p></li>
+<li><p><em>query</em> the server via a Web interface.</p></li>
+</ol>
+<p>In this chapter, we will show how to conduct basic steps with FuzzManager, including crash submission and triage as well as coverage measurement tasks.</p>
+</section>
+<section id="running-a-crash-server">
+<h2>Running a Crash Server<a class="headerlink" href="#running-a-crash-server" title="Link to this heading">#</a></h2>
+<p><a class="reference external" href="https://github.com/MozillaSecurity/FuzzManager">FuzzManager</a> is a tool chain for managing large-scale fuzzing processes.  It is <em>modular</em> in the sense that you can make use of those parts you need; it is <em>versatile</em> in the sense that it does not impose a particular process.  It consists of a <em>server</em> whose task is to collect crash data, as well as of various <em>collector utilities</em> that collect crash data to send it to the server.</p>
+<section id="excursion-setting-up-the-server">
+<h3>Excursion: Setting up the Server<a class="headerlink" href="#excursion-setting-up-the-server" title="Link to this heading">#</a></h3>
+<p>To run the examples in this notebook, we need to run a <em>crash server</em> – that is, the <em>FuzzManager</em> server.  You can either</p>
+<ol class="arabic simple">
+<li><p>Run your own server.  To do so, you need to follow the installation steps listed under “Server Setup” on the <a class="reference external" href="https://github.com/MozillaSecurity/FuzzManager">FuzzManager</a> page.  The <code class="docutils literal notranslate"><span class="pre">FuzzManager</span></code> folder should be created in the same folder as this notebook.</p></li>
+<li><p>Have the notebook start (and stop) a server.  The following commands following commands do this automatically.  They are meant for the purposes of this notebook only, though; if you want to experiment with your own server, run it manually, as described above.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="k">if</span> <span class="s1">&#39;CI&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+    <span class="c1"># Can&#39;t run this in our continuous environment,</span>
+    <span class="c1"># since it can&#39;t run a headless Web browser</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We start with getting the fresh server code from the repository.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;FuzzManager&#39;</span><span class="p">):</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="s1">&#39;FuzzManager&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The base repository is <code class="docutils literal notranslate"><span class="pre">https://github.com/MozillaSecurity/FuzzManager</span></code>, but we use the <code class="docutils literal notranslate"><span class="pre">uds-se</span></code> repository as this repository has the <code class="docutils literal notranslate"><span class="pre">0.4.1</span></code> stable release of FuzzManager.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/uds-se/FuzzManager
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cloning into &#39;FuzzManager&#39;...
+remote: Enumerating objects: 11755, done.
+remote: Counting objects: 100% (11755/11755), done.
+remote: Compressing objects: 100% (3726/3726), done.
+remote: Total 11755 (delta 7943), reused 11674 (delta 7862), pack-reused 0 (from 0)
+Receiving objects: 100% (11755/11755), 5.33 MiB | 9.57 MiB/s, done.
+Resolving deltas: 100% (7943/7943), done.
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="o">!{</span>sys.executable<span class="o">}</span><span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>FuzzManager/server/requirements.txt<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Yellow">WARNING: Ignoring version 4.2.2 of celery since it has invalid metadata:</span>
+<span class=" -Color -Color-Yellow">Requested celery&lt;4.3,&gt;=4.1.1 from https://files.pythonhosted.org/packages/24/e9/9741a5a8b83253e27293e77bd4319c84306019dfbfa4cc43fa250243c12f/celery-4.2.2-py2.py3-none-any.whl (from -r FuzzManager/server/requirements.txt (line 9)) has invalid metadata: Expected matching RIGHT_PARENTHESIS for LEFT_PARENTHESIS, after version specifier</span>
+<span class=" -Color -Color-Yellow">    pytz (&gt;dev)</span>
+<span class=" -Color -Color-Yellow">         ~^</span>
+<span class=" -Color -Color-Yellow">Please use pip&lt;24.1 if you need to use this version.</span>
+<span class=" -Color -Color-Yellow">WARNING: Ignoring version 4.2.1 of celery since it has invalid metadata:</span>
+<span class=" -Color -Color-Yellow">Requested celery&lt;4.3,&gt;=4.1.1 from https://files.pythonhosted.org/packages/e8/58/2a0b1067ab2c12131b5c089dfc579467c76402475c5231095e36a43b749c/celery-4.2.1-py2.py3-none-any.whl (from -r FuzzManager/server/requirements.txt (line 9)) has invalid metadata: Expected matching RIGHT_PARENTHESIS for LEFT_PARENTHESIS, after version specifier</span>
+<span class=" -Color -Color-Yellow">    pytz (&gt;dev)</span>
+<span class=" -Color -Color-Yellow">         ~^</span>
+<span class=" -Color -Color-Yellow">Please use pip&lt;24.1 if you need to use this version.</span>
+<span class=" -Color -Color-Yellow">WARNING: Ignoring version 4.2.0 of celery since it has invalid metadata:</span>
+<span class=" -Color -Color-Yellow">Requested celery&lt;4.3,&gt;=4.1.1 from https://files.pythonhosted.org/packages/ea/75/d7d1eaeb6c90c7442f7b96242a6d4ebcf1cf075f9c51957d061fb8264d24/celery-4.2.0-py2.py3-none-any.whl (from -r FuzzManager/server/requirements.txt (line 9)) has invalid metadata: Expected matching RIGHT_PARENTHESIS for LEFT_PARENTHESIS, after version specifier</span>
+<span class=" -Color -Color-Yellow">    pytz (&gt;dev)</span>
+<span class=" -Color -Color-Yellow">         ~^</span>
+<span class=" -Color -Color-Yellow">Please use pip&lt;24.1 if you need to use this version.</span>
+<span class=" -Color -Color-Yellow">WARNING: Ignoring version 4.1.1 of celery since it has invalid metadata:</span>
+<span class=" -Color -Color-Yellow">Requested celery&lt;4.3,&gt;=4.1.1 from https://files.pythonhosted.org/packages/99/fa/4049b26bfe71992ecf979acd39b87e55b493608613054089d975418015b7/celery-4.1.1-py2.py3-none-any.whl (from -r FuzzManager/server/requirements.txt (line 9)) has invalid metadata: Expected matching RIGHT_PARENTHESIS for LEFT_PARENTHESIS, after version specifier</span>
+<span class=" -Color -Color-Yellow">    pytz (&gt;dev)</span>
+<span class=" -Color -Color-Yellow">         ~^</span>
+<span class=" -Color -Color-Yellow">Please use pip&lt;24.1 if you need to use this version.</span>
+<span class=" -Color -Color-Red">ERROR: Ignored the following yanked versions: 5.0.6, 5.2.5</span>
+<span class=" -Color -Color-Red">ERROR: Could not find a version that satisfies the requirement celery&lt;4.3,&gt;=4.1.1 (from versions: 0.1.2, 0.1.4, 0.1.6, 0.1.7, 0.1.8, 0.1.10, 0.1.11, 0.1.12, 0.1.13, 0.1.14, 0.1.15, 0.2.0, 0.3.0, 0.3.7, 0.3.20, 0.4.0, 0.4.1, 0.6.0, 0.8.0, 0.8.1, 0.8.2, 0.8.3, 0.8.4, 1.0.0, 1.0.1, 1.0.2, 1.0.3, 1.0.4, 1.0.5, 1.0.6, 2.0.0, 2.0.1, 2.0.2, 2.0.3, 2.1.0, 2.1.1, 2.1.2, 2.1.3, 2.1.4, 2.2.0, 2.2.1, 2.2.2, 2.2.3, 2.2.4, 2.2.5, 2.2.6, 2.2.7, 2.2.8, 2.2.9, 2.2.10, 2.3.0, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5, 2.4.0, 2.4.1, 2.4.2, 2.4.3, 2.4.4, 2.4.5, 2.4.6, 2.4.7, 2.5.0, 2.5.1, 2.5.2, 2.5.3, 2.5.5, 3.0.0, 3.0.1, 3.0.2, 3.0.3, 3.0.4, 3.0.5, 3.0.6, 3.0.7, 3.0.8, 3.0.9, 3.0.10, 3.0.11, 3.0.12, 3.0.13, 3.0.14, 3.0.15, 3.0.16, 3.0.17, 3.0.18, 3.0.19, 3.0.20, 3.0.21, 3.0.22, 3.0.23, 3.0.24, 3.0.25, 3.1.0, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.1.7, 3.1.8, 3.1.9, 3.1.10, 3.1.11, 3.1.12, 3.1.13, 3.1.14, 3.1.15, 3.1.16, 3.1.17, 3.1.18, 3.1.19, 3.1.20, 3.1.21, 3.1.22, 3.1.23, 3.1.24, 3.1.25, 3.1.26.post1, 3.1.26.post2, 4.0.0rc3, 4.0.0rc4, 4.0.0rc5, 4.0.0rc6, 4.0.0rc7, 4.0.0, 4.0.1, 4.0.2, 4.1.0, 4.1.1, 4.2.0rc1, 4.2.0rc2, 4.2.0rc3, 4.2.0rc4, 4.2.0, 4.2.1, 4.2.2, 4.3.0rc1, 4.3.0rc2, 4.3.0rc3, 4.3.0, 4.3.1, 4.4.0rc1, 4.4.0rc2, 4.4.0rc3, 4.4.0rc4, 4.4.0rc5, 4.4.0, 4.4.1, 4.4.2, 4.4.3, 4.4.4, 4.4.5, 4.4.6, 4.4.7, 5.0.0a1, 5.0.0a2, 5.0.0b1, 5.0.0rc1, 5.0.0rc2, 5.0.0rc3, 5.0.0, 5.0.1, 5.0.2, 5.0.3, 5.0.4, 5.0.5, 5.1.0b1, 5.1.0b2, 5.1.0rc1, 5.1.0, 5.1.1, 5.1.2, 5.2.0b1, 5.2.0b2, 5.2.0b3, 5.2.0rc1, 5.2.0rc2, 5.2.0, 5.2.1, 5.2.2, 5.2.3, 5.2.4, 5.2.6, 5.2.7, 5.3.0a1, 5.3.0b1, 5.3.0b2, 5.3.0rc1, 5.3.0rc2, 5.3.0, 5.3.1, 5.3.4, 5.3.5, 5.3.6, 5.4.0rc1, 5.4.0rc2, 5.4.0, 5.5.0b1, 5.5.0b2, 5.5.0b3, 5.5.0b4, 5.5.0rc1)</span>
+<span class=" -Color -Color-Red">ERROR: No matching distribution found for celery&lt;4.3,&gt;=4.1.1</span>
+
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="c1"># To make FuzzManager 0.4.1 work on Python 3.10, we need to upgrade the `celery` package</span>
+<span class="o">!{</span>sys.executable<span class="o">}</span><span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>celery<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span><span class="nb">cd</span><span class="w"> </span>FuzzManager<span class="p">;</span><span class="w"> </span><span class="o">{</span>sys.executable<span class="o">}</span><span class="w"> </span>server/manage.py<span class="w"> </span>migrate<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+</pre></div>
+</div>
+</div>
+</div>
+<p>We create a user named <code class="docutils literal notranslate"><span class="pre">demo</span></code> with a password <code class="docutils literal notranslate"><span class="pre">demo</span></code>, using <a class="reference external" href="https://stackoverflow.com/questions/6244382/how-to-automate-createsuperuser-on-django">this handy trick</a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!(</span><span class="nb">cd</span><span class="w"> </span>FuzzManager<span class="p">;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser(&#39;demo&#39;, &#39;demo@fuzzingbook.org&#39;, &#39;demo&#39;)&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="o">{</span>sys.executable<span class="o">}</span><span class="w"> </span>server/manage.py<span class="w"> </span>shell<span class="o">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We create a token for this user.  This token will later be used by automatic commands for authentication.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;FuzzManager&#39;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> 
+                         <span class="s1">&#39;server/manage.py&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;get_auth_token&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;demo&#39;</span><span class="p">],</span> 
+                        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">)</span>
+
+<span class="n">err</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">token</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+<span class="n">token</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="n">token</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;5371d2409244c4a7ad22874ffab40c9c4d2b4883&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;Invalid token &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The token is stored in <code class="docutils literal notranslate"><span class="pre">~/.fuzzmanagerconf</span></code> in our home folder. This is the full configuration:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">home</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">)</span>
+<span class="n">conf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="s2">&quot;.fuzzmanagerconf&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">fuzzmanagerconf</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">[Main]</span>
+<span class="s2">sigdir = /home/example/fuzzingbook</span>
+<span class="s2">serverhost = 127.0.0.1</span>
+<span class="s2">serverport = 8000</span>
+<span class="s2">serverproto = http</span>
+<span class="s2">serverauthtoken = </span><span class="si">%s</span>
+<span class="s2">tool = fuzzingbook</span>
+<span class="s2">&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">token</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fuzzmanagerconf</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="kn">from</span> <span class="nn">pygments.lexers.configs</span> <span class="kn">import</span> <span class="n">IniLexer</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="kn">from</span> <span class="nn">bookutils</span> <span class="kn">import</span> <span class="n">print_file</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">print_file</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">lexer</span><span class="o">=</span><span class="n">IniLexer</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Blue">[Main]</span>
+<span class=" -Color -Color-Cyan">sigdir</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">/home/example/fuzzingbook</span>
+<span class=" -Color -Color-Cyan">serverhost</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">127.0.0.1</span>
+<span class=" -Color -Color-Cyan">serverport</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">8000</span>
+<span class=" -Color -Color-Cyan">serverproto</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">http</span>
+<span class=" -Color -Color-Cyan">serverauthtoken</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">5371d2409244c4a7ad22874ffab40c9c4d2b4883</span>
+<span class=" -Color -Color-Cyan">tool</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">fuzzingbook</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="end-of-excursion">
+<h3>End of Excursion<a class="headerlink" href="#end-of-excursion" title="Link to this heading">#</a></h3>
+</section>
+<section id="excursion-starting-the-server">
+<h3>Excursion: Starting the Server<a class="headerlink" href="#excursion-starting-the-server" title="Link to this heading">#</a></h3>
+<p>Once the server is set up, we can start it.  On the command line, we use</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>FuzzManager<span class="p">;</span><span class="w"> </span>python<span class="w"> </span>server/manage.py<span class="w"> </span>runserver
+</pre></div>
+</div>
+<p>In our notebook, we can do this programmatically, using the <code class="docutils literal notranslate"><span class="pre">Process</span></code> framework introduced for <a class="reference internal" href="WebFuzzer.html"><span class="std std-doc">fuzzing Web servers</span></a>.  We let the FuzzManager server run in its own process, which we start in the background.</p>
+<p>For multiprocessing, we use the <code class="docutils literal notranslate"><span class="pre">multiprocess</span></code> module - a variant of the standard Python <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> module that also works in notebooks. If you are running this code outside a notebook, you can also use <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> instead.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">multiprocess</span> <span class="kn">import</span> <span class="n">Process</span>  <span class="c1"># type: ignore</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">subprocess</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run_fuzzmanager</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">run_fuzzmanager_forever</span><span class="p">():</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;FuzzManager&#39;</span><span class="p">)</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="s1">&#39;server/manage.py&#39;</span><span class="p">,</span>
+                                 <span class="s1">&#39;runserver&#39;</span><span class="p">],</span>
+                                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span>
+                                <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">fuzzmanager_process</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">run_fuzzmanager_forever</span><span class="p">)</span>
+    <span class="n">fuzzmanager_process</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fuzzmanager_process</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>While the server is running, you will be able to see its output below.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fuzzmanager_process</span> <span class="o">=</span> <span class="n">run_fuzzmanager</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># wait a bit after interactions</span>
+<span class="n">DELAY_AFTER_START</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">DELAY_AFTER_CLICK</span> <span class="o">=</span> <span class="mf">1.5</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">DELAY_AFTER_START</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="id1">
+<h3>End of Excursion<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+</section>
+<section id="logging-in">
+<h3>Logging In<a class="headerlink" href="#logging-in" title="Link to this heading">#</a></h3>
+<p>Now that the server is up and running, <em>FuzzManager</em> can be reached on the local host using this URL.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fuzzmanager_url</span> <span class="o">=</span> <span class="s2">&quot;http://127.0.0.1:8000&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To log in, use the username <code class="docutils literal notranslate"><span class="pre">demo</span></code> and the password <code class="docutils literal notranslate"><span class="pre">demo</span></code>.  In this notebook, we do this programmatically, using the <em>Selenium</em> interface  introduced in the <a class="reference internal" href="GUIFuzzer.html"><span class="std std-doc">chapter on GUI fuzzing</span></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span><span class="p">,</span> <span class="n">Image</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bookutils</span> <span class="kn">import</span> <span class="n">HTML</span><span class="p">,</span> <span class="n">rich_output</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">GUIFuzzer</span> <span class="kn">import</span> <span class="n">start_webdriver</span>  <span class="c1"># minor dependency</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>For an interactive session, set <code class="docutils literal notranslate"><span class="pre">headless</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>; then you can interact with <code class="docutils literal notranslate"><span class="pre">FuzzManager</span></code> at the same time you are interacting with this notebook.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gui_driver</span> <span class="o">=</span> <span class="n">start_webdriver</span><span class="p">(</span><span class="n">headless</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">zoom</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gui_driver</span><span class="o">.</span><span class="n">set_window_size</span><span class="p">(</span><span class="mi">1400</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fuzzmanager_url</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>This is the starting screen of <code class="docutils literal notranslate"><span class="pre">FuzzManager</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">Image</span><span class="p">(</span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/3e001c31cdf3c5e2c7f526a0f5d3069c6222bceace6706e600598fb374a02be2.png" src="_images/3e001c31cdf3c5e2c7f526a0f5d3069c6222bceace6706e600598fb374a02be2.png" />
+</div>
+</div>
+<p>We now log in by sending <code class="docutils literal notranslate"><span class="pre">demo</span></code> both as username and password, and then click on the <code class="docutils literal notranslate"><span class="pre">Login</span></code> button.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.by</span> <span class="kn">import</span> <span class="n">By</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">username</span> <span class="o">=</span> <span class="n">gui_driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="n">username</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="s2">&quot;demo&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">password</span> <span class="o">=</span> <span class="n">gui_driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">)</span>
+<span class="n">password</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="s2">&quot;demo&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">login</span> <span class="o">=</span> <span class="n">gui_driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">TAG_NAME</span><span class="p">,</span> <span class="s2">&quot;button&quot;</span><span class="p">)</span>
+<span class="n">login</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">DELAY_AFTER_CLICK</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>After login, we find an empty database.  This is where crashes will appear, once we have collected them.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">Image</span><span class="p">(</span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/e9d3d0935c64438dcead03797a0724d6d68d91ab0f819332fe2ecc36d9817521.png" src="_images/e9d3d0935c64438dcead03797a0724d6d68d91ab0f819332fe2ecc36d9817521.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="collecting-crashes">
+<h2>Collecting Crashes<a class="headerlink" href="#collecting-crashes" title="Link to this heading">#</a></h2>
+<p>To fill our database, we need some crashes.  Let us take a look at <code class="docutils literal notranslate"><span class="pre">simply-buggy</span></code>, an example repository containing trivial C++ programs for illustration purposes.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/uds-se/simply-buggy
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cloning into &#39;simply-buggy&#39;...
+remote: Enumerating objects: 22, done.
+remote: Total 22 (delta 0), reused 0 (delta 0), pack-reused 22 (from 1)
+Receiving objects: 100% (22/22), 4.90 KiB | 4.90 MiB/s, done.
+Resolving deltas: 100% (9/9), done.
+</pre></div>
+</div>
+</div>
+</div>
+<p>The make command compiles our target program, including our first target, the <em>simple-crash</em> example. Alongside the program, there is also a configuration file generated.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!(</span><span class="nb">cd</span><span class="w"> </span>simply-buggy<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>clang++ -fsanitize=address -g -o maze maze.cpp
+clang++ -fsanitize=address -g -o out-of-bounds out-of-bounds.cpp
+clang++ -fsanitize=address -g -o simple-crash simple-crash.cpp
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s take a look at the <code class="docutils literal notranslate"><span class="pre">simple-crash</span></code> source code in <code class="docutils literal notranslate"><span class="pre">simple-crash.cpp</span></code>.  As you can see, the source code is fairly simple: A forced crash by writing to a (near)-NULL pointer.  This should immediately crash on most machines.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="kn">from</span> <span class="nn">bookutils</span> <span class="kn">import</span> <span class="n">print_file</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">print_file</span><span class="p">(</span><span class="s2">&quot;simply-buggy/simple-crash.cpp&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-White">/*</span>
+<span class=" -Color -Color-White"> * simple-crash - A simple NULL crash.</span>
+<span class=" -Color -Color-White"> *</span>
+<span class=" -Color -Color-White"> * WARNING: This program neither makes sense nor should you code like it is</span>
+<span class=" -Color -Color-White"> *          done in this program. It is purely for demo purposes and uses</span>
+<span class=" -Color -Color-White"> *          bad and meaningless coding habits on purpose.</span>
+<span class=" -Color -Color-White"> */</span>
+
+<span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Green">crash</span>()<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Cyan">int</span>*<span class=" -Color -Color-White"> </span>p<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span>(<span class=" -Color -Color-Cyan">int</span>*)<span class=" -Color -Color-Blue">0x1</span>;
+<span class=" -Color -Color-White">  </span>*p<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">0xDEADBEEF</span>;
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span>*p;
+}
+
+<span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Green">main</span>(<span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span>argc,<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Cyan">char</span>**<span class=" -Color -Color-White"> </span>argv)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span>crash();
+}
+</pre></div>
+</div>
+</div>
+</div>
+<p>The configuration file <code class="docutils literal notranslate"><span class="pre">simple-crash.fuzzmanagerconf</span></code> generated for the the binary also contains some straightforward information, like the version of the program and other metadata that is required or at least useful later on when submitting crashes.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">print_file</span><span class="p">(</span><span class="s2">&quot;simply-buggy/simple-crash.fuzzmanagerconf&quot;</span><span class="p">,</span> <span class="n">lexer</span><span class="o">=</span><span class="n">IniLexer</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Blue">[Main]</span>
+<span class=" -Color -Color-Cyan">platform</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">x86-64</span>
+<span class=" -Color -Color-Cyan">product</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">simple-crash-simple-crash</span>
+<span class=" -Color -Color-Cyan">product_version</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">83038f74e812529d0fc172a718946fbec385403e</span>
+<span class=" -Color -Color-Cyan">os</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">linux</span>
+
+<span class=" -Color -Color-Blue">[Metadata]</span>
+<span class=" -Color -Color-Cyan">pathPrefix</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">/Users/zeller/Projects/fuzzingbook/notebooks/simply-buggy/</span>
+<span class=" -Color -Color-Cyan">buildFlags</span><span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">-fsanitize=address -g</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us run the program!  We immediately get a crash trace as expected:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>simply-buggy/simple-crash
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>simple-crash(47892,0x1fd223840) malloc: nano zone abandoned due to inability to reserve vm space.
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+<span class=" -Color -Color-Bold -Color-Bold-Red">==47892==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000001 (pc 0x0001005c3e0c bp 0x00016f83ea10 sp 0x00016f83e9d0 T0)</span>
+==47892==The signal is caused by a WRITE memory access.
+==47892==Hint: address points to the zero page.
+    #0 0x1005c3e0c in crash() simple-crash.cpp:11
+    #1 0x1005c3e94 in main simple-crash.cpp:16
+    #2 0x197d8c270  (&lt;unknown module&gt;)
+
+==47892==Register values:
+ x[0] = 0x0000000000000001   x[1] = 0x000000016f83ec98   x[2] = 0x000000016f83eca8   x[3] = 0x000000016f83ef08  
+ x[4] = 0x0000000000000001   x[5] = 0x0000000000000000   x[6] = 0x0000000000000000   x[7] = 0x00000000000004a0  
+ x[8] = 0x0000007000020000   x[9] = 0x00000000deadbeef  x[10] = 0x0000000000000001  x[11] = 0x000000016f83e9d0  
+x[12] = 0x0000000000001170  x[13] = 0x0000000100008000  x[14] = 0x0000000000004000  x[15] = 0x00000001a5bcef55  
+x[16] = 0x0000000198141344  x[17] = 0x0000000205482578  x[18] = 0x0000000000000000  x[19] = 0x00000001fcf8c050  
+x[20] = 0x00000001fcf8c0a0  x[21] = 0x00000001fcf8c050  x[22] = 0x000000016f83eb28  x[23] = 0x000000016f83eb28  
+x[24] = 0x0000000197d86000  x[25] = 0x0000000000000000  x[26] = 0x0000000000000000  x[27] = 0x0000000000000000  
+x[28] = 0x0000000000000000     fp = 0x000000016f83ea10     lr = 0x00000001005c3e98     sp = 0x000000016f83e9d0  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV simple-crash.cpp:11 in crash()
+==47892==ABORTING
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now, what we would actually like to do is to run this binary from Python instead, detect that it crashed, collect the trace and submit it to the server. Let’s start with a simple script that would just run the program we give it and detect the presence of the ASan trace:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">subprocess</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;simply-buggy/simple-crash&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+<span class="n">stderr</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+<span class="n">crashed</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stderr</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">&quot;ERROR: AddressSanitizer&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+        <span class="n">crashed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">break</span>
+
+<span class="k">if</span> <span class="n">crashed</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Yay, we crashed!&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Move along, nothing to see...&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Yay, we crashed!
+</pre></div>
+</div>
+</div>
+</div>
+<p>With this script, we can now run the binary and indeed detect that it crashed. But how do we send this information to the crash server now? Let’s add a few features from the <em>FuzzManager</em> toolbox.</p>
+<section id="program-configurations">
+<h3>Program Configurations<a class="headerlink" href="#program-configurations" title="Link to this heading">#</a></h3>
+<p>A <code class="docutils literal notranslate"><span class="pre">ProgramConfiguration</span></code> is largely a container class storing various properties of the program, e.g. product name, the platform, version and runtime options.  By default, it reads the information from the <code class="docutils literal notranslate"><span class="pre">.fuzzmanagerconf</span></code> file created for the program under test.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;FuzzManager&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">FTB.ProgramConfiguration</span> <span class="kn">import</span> <span class="n">ProgramConfiguration</span>  <span class="c1"># type: ignore</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">configuration</span> <span class="o">=</span> <span class="n">ProgramConfiguration</span><span class="o">.</span><span class="n">fromBinary</span><span class="p">(</span><span class="s1">&#39;simply-buggy/simple-crash&#39;</span><span class="p">)</span>
+<span class="p">(</span><span class="n">configuration</span><span class="o">.</span><span class="n">product</span><span class="p">,</span> <span class="n">configuration</span><span class="o">.</span><span class="n">platform</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&#39;simple-crash-simple-crash&#39;, &#39;x86-64&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="crash-info">
+<h3>Crash Info<a class="headerlink" href="#crash-info" title="Link to this heading">#</a></h3>
+<p>A <code class="docutils literal notranslate"><span class="pre">CrashInfo</span></code> object stores all the necessary data about a crash, including</p>
+<ul class="simple">
+<li><p>the stdout output of your program</p></li>
+<li><p>the stderr output of your program</p></li>
+<li><p>crash information as produced by GDB or AddressSanitizer</p></li>
+<li><p>a <code class="docutils literal notranslate"><span class="pre">ProgramConfiguration</span></code> instance</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">FTB.Signatures.CrashInfo</span> <span class="kn">import</span> <span class="n">CrashInfo</span>  <span class="c1"># type: ignore</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s collect the information for the run of <code class="docutils literal notranslate"><span class="pre">simply-crash</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;simply-buggy/simple-crash&quot;</span><span class="p">]</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stderr</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+<span class="n">stderr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;AddressSanitizer:DEADLYSIGNAL&#39;,
+ &#39;=================================================================&#39;,
+ &#39;==47914==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000001 (pc 0x000102897e0c bp 0x00016d56aab0 sp 0x00016d56aa70 T0)&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stdout</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+<span class="n">stdout</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[]
+</pre></div>
+</div>
+</div>
+</div>
+<p>This reads and parses our ASan trace into a more generic format, returning us a generic <code class="docutils literal notranslate"><span class="pre">CrashInfo</span></code> object that we can inspect and/or submit to the server:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">crashInfo</span> <span class="o">=</span> <span class="n">CrashInfo</span><span class="o">.</span><span class="n">fromRawCrashData</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="p">,</span> <span class="n">configuration</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">crashInfo</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Crash trace:
+
+# 00    crash
+# 01    main
+# 02    &lt;unknow
+
+Crash address: 0x1
+
+Last 5 lines on stderr:
+x[24] = 0x0000000197d86000  x[25] = 0x0000000000000000  x[26] = 0x0000000000000000  x[27] = 0x0000000000000000  
+x[28] = 0x0000000000000000     fp = 0x000000016d56aab0     lr = 0x0000000102897e98     sp = 0x000000016d56aa70  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV simple-crash.cpp:11 in crash()
+==47914==ABORTING
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="collector">
+<h3>Collector<a class="headerlink" href="#collector" title="Link to this heading">#</a></h3>
+<p>The last step is to send the crash info to our crash manager.  A <code class="docutils literal notranslate"><span class="pre">Collector</span></code> is a feature to communicate with a CrashManager server. Collector provides an easy client interface that allows your clients to submit crashes as well as download and match existing signatures to avoid reporting frequent issues repeatedly.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Collector.Collector</span> <span class="kn">import</span> <span class="n">Collector</span>  <span class="c1"># type: ignore</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We instantiate the collector instance; this will be our entry point for talking to the server.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">collector</span> <span class="o">=</span> <span class="n">Collector</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To submit the crash info, we use the collector’s <code class="docutils literal notranslate"><span class="pre">submit()</span></code> method:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">collector</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">crashInfo</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;rawStdout&#39;: &#39;&#39;,
+ &#39;rawStderr&#39;: &#39;AddressSanitizer:DEADLYSIGNAL\n=================================================================\n==47914==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000001 (pc 0x000102897e0c bp 0x00016d56aab0 sp 0x00016d56aa70 T0)\n==47914==The signal is caused by a WRITE memory access.\n==47914==Hint: address points to the zero page.\n    #0 0x102897e0c in crash() simple-crash.cpp:11\n    #1 0x102897e94 in main simple-crash.cpp:16\n    #2 0x197d8c270  (&lt;unknown module&gt;)\n\n==47914==Register values:\n x[0] = 0x0000000000000001   x[1] = 0x000000016d56ad30   x[2] = 0x000000016d56ad40   x[3] = 0x000000016d56af90  \n x[4] = 0x0000000000000001   x[5] = 0x0000000000000000   x[6] = 0x0000000000000000   x[7] = 0x00000000000004a0  \n x[8] = 0x0000007000020000   x[9] = 0x00000000deadbeef  x[10] = 0x0000000000000001  x[11] = 0x000000016d56aa70  \nx[12] = 0x0000000000001170  x[13] = 0x0000000100008000  x[14] = 0x0000000000004000  x[15] = 0x00000001a5bcef55  \nx[16] = 0x0000000198141344  x[17] = 0x0000000205482578  x[18] = 0x0000000000000000  x[19] = 0x00000001fcf8c050  \nx[20] = 0x00000001fcf8c0a0  x[21] = 0x00000001fcf8c050  x[22] = 0x000000016d56abc8  x[23] = 0x000000016d56abc8  \nx[24] = 0x0000000197d86000  x[25] = 0x0000000000000000  x[26] = 0x0000000000000000  x[27] = 0x0000000000000000  \nx[28] = 0x0000000000000000     fp = 0x000000016d56aab0     lr = 0x0000000102897e98     sp = 0x000000016d56aa70  \nAddressSanitizer can not provide additional info.\nSUMMARY: AddressSanitizer: SEGV simple-crash.cpp:11 in crash()\n==47914==ABORTING&#39;,
+ &#39;rawCrashData&#39;: &#39;&#39;,
+ &#39;metadata&#39;: &#39;{&quot;pathPrefix&quot;: &quot;/Users/zeller/Projects/fuzzingbook/notebooks/simply-buggy/&quot;, &quot;buildFlags&quot;: &quot;-fsanitize=address -g&quot;}&#39;,
+ &#39;testcase_size&#39;: 0,
+ &#39;testcase_quality&#39;: 0,
+ &#39;testcase_isbinary&#39;: False,
+ &#39;platform&#39;: &#39;x86-64&#39;,
+ &#39;product&#39;: &#39;simple-crash-simple-crash&#39;,
+ &#39;product_version&#39;: &#39;83038f74e812529d0fc172a718946fbec385403e&#39;,
+ &#39;os&#39;: &#39;linux&#39;,
+ &#39;client&#39;: &#39;Braeburn.fritz.box&#39;,
+ &#39;tool&#39;: &#39;fuzzingbook&#39;,
+ &#39;env&#39;: &#39;&#39;,
+ &#39;args&#39;: &#39;&#39;,
+ &#39;bucket&#39;: None,
+ &#39;id&#39;: 1,
+ &#39;shortSignature&#39;: &#39;[@ crash]&#39;,
+ &#39;crashAddress&#39;: &#39;0x1&#39;}
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="inspecting-crashes">
+<h3>Inspecting Crashes<a class="headerlink" href="#inspecting-crashes" title="Link to this heading">#</a></h3>
+<p>We now submitted something to our local FuzzManager demo instance.  If you run the crash server on your local machine, you can go to <a class="reference external" href="http://127.0.0.1:8000/crashmanager/crashes/">http://127.0.0.1:8000/crashmanager/crashes/</a> you should see the crash info just submitted.  You can inquire the product, version, operating system, and further crash details.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">gui_driver</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">Image</span><span class="p">(</span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/c9b1c639ba685759909a8788869e85c4ee683f8657c304f848a69ffd15351f9c.png" src="_images/c9b1c639ba685759909a8788869e85c4ee683f8657c304f848a69ffd15351f9c.png" />
+</div>
+</div>
+<p>If you click on the crash ID, you can further inspect the submitted data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">crash</span> <span class="o">=</span> <span class="n">gui_driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">XPATH</span><span class="p">,</span> <span class="s1">&#39;//td/a[contains(@href,&quot;/crashmanager/crashes/&quot;)]&#39;</span><span class="p">)</span>
+<span class="n">crash</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">DELAY_AFTER_CLICK</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">Image</span><span class="p">(</span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/3c1f9bc9646d24343e4585ebc53bcc04c786812a1d397dd5add5deca286820b8.png" src="_images/3c1f9bc9646d24343e4585ebc53bcc04c786812a1d397dd5add5deca286820b8.png" />
+</div>
+</div>
+<p>Since <code class="docutils literal notranslate"><span class="pre">Collector</span></code>s can be called from any program (provided they are configured to talk to the correct server), you can now collect crashes from anywhere – fuzzers on remote machines, crashes occurring during beta testing, or even crashes during production.</p>
+</section>
+</section>
+<section id="crash-buckets">
+<h2>Crash Buckets<a class="headerlink" href="#crash-buckets" title="Link to this heading">#</a></h2>
+<p>One challenge with collecting crashes is that the <em>same crashes occur multiple times.</em>  If a product is in the hands of millions of users, chances are that thousands of them will encounter the same bug, and thus the same crash.  Therefore, the database will have thousands of entries that are all caused by the same one bug.  Therefore, it is necessary to identify those failures that are <em>similar</em> and to group them together in a set called a <em>crash bucket</em> or <em>bucket</em> for short.</p>
+<p>In <em>FuzzManager</em>, a bucket is defined through a <em>crash signature</em>, a list of predicates matching a set of bugs.  Such a predicate can refer to a number of features, the most important being</p>
+<ul class="simple">
+<li><p>the current <em>program counter</em>, reporting the instruction executed at the moment of the crash;</p></li>
+<li><p>elements from the <em>stack trace</em>, showing which functions were active at the moment of the crash.</p></li>
+</ul>
+<p>We can create such a signature right away when viewing a single crash:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">Image</span><span class="p">(</span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/3c1f9bc9646d24343e4585ebc53bcc04c786812a1d397dd5add5deca286820b8.png" src="_images/3c1f9bc9646d24343e4585ebc53bcc04c786812a1d397dd5add5deca286820b8.png" />
+</div>
+</div>
+<p>Clicking the red <code class="docutils literal notranslate"><span class="pre">Create</span></code> button creates a bucket for this crash.  A <em>crash signature</em> will be proposed to you for matching this and future crashes of the same type:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">create</span> <span class="o">=</span> <span class="n">gui_driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">XPATH</span><span class="p">,</span> <span class="s1">&#39;//a[contains(@href,&quot;/signatures/new/&quot;)]&#39;</span><span class="p">)</span>
+<span class="n">create</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">DELAY_AFTER_CLICK</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">gui_driver</span><span class="o">.</span><span class="n">set_window_size</span><span class="p">(</span><span class="mi">1400</span><span class="p">,</span> <span class="mi">1200</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">Image</span><span class="p">(</span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/fb89ab5510338c9cde10fca44703d446c2e3f9f502bbbd3d30193c3e67249248.png" src="_images/fb89ab5510338c9cde10fca44703d446c2e3f9f502bbbd3d30193c3e67249248.png" />
+</div>
+</div>
+<p>Accept it by clicking <em>Save</em>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">save</span> <span class="o">=</span> <span class="n">gui_driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="s2">&quot;submit_save&quot;</span><span class="p">)</span>
+<span class="n">save</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">DELAY_AFTER_CLICK</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>You will be redirected to the newly created bucket, which shows you the size (how many crashes it holds), its bug report status (buckets can be linked to bugs in an external bug tracker like Bugzilla) and many other useful information.</p>
+<section id="crash-signatures">
+<h3>Crash Signatures<a class="headerlink" href="#crash-signatures" title="Link to this heading">#</a></h3>
+<p>If you click on the <em>Signatures</em> entry in the top menu, you should also see your newly created entry.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">gui_driver</span><span class="o">.</span><span class="n">set_window_size</span><span class="p">(</span><span class="mi">1400</span><span class="p">,</span> <span class="mi">800</span><span class="p">)</span>
+<span class="n">Image</span><span class="p">(</span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/fb11121371a72f6fa79ce7829858f3f16aa5835b3198bdcf62f5e47e23dbcd60.png" src="_images/fb11121371a72f6fa79ce7829858f3f16aa5835b3198bdcf62f5e47e23dbcd60.png" />
+</div>
+</div>
+<p>You see that this signature refers to a crash occurring in the function <code class="docutils literal notranslate"><span class="pre">crash()</span></code> (duh!) when called from <code class="docutils literal notranslate"><span class="pre">main()</span></code> when called from <code class="docutils literal notranslate"><span class="pre">start()</span></code> (an internal OS function).  We also see the current crash address.</p>
+<p>Buckets and their signatures are a central concept in FuzzManager. If you receive a lot of crash reports from various sources, bucketing allows you to easily group crashes and filter duplicates.</p>
+</section>
+<section id="coarse-grained-signatures">
+<h3>Coarse-Grained Signatures<a class="headerlink" href="#coarse-grained-signatures" title="Link to this heading">#</a></h3>
+<p>The flexible signature system starts out with an initially proposed fine-grained signature, but it can be adjusted as needed to capture <em>variations</em> of the same bug and make tracking easier.</p>
+<p>In the next example, we will look at a more complex example that reads data from a file and creates multiple crash signatures - a file <code class="docutils literal notranslate"><span class="pre">out-of-bounds.cpp</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">print_file</span><span class="p">(</span><span class="s2">&quot;simply-buggy/out-of-bounds.cpp&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-White">/*</span>
+<span class=" -Color -Color-White"> * out-of-bounds - A simple multi-signature out-of-bounds demo.</span>
+<span class=" -Color -Color-White"> *</span>
+<span class=" -Color -Color-White"> * WARNING: This program neither makes sense nor should you code like it is</span>
+<span class=" -Color -Color-White"> *          done in this program. It is purely for demo purposes and uses</span>
+<span class=" -Color -Color-White"> *          bad and meaningless coding habits on purpose.</span>
+<span class=" -Color -Color-White"> */</span>
+<span class=" -Color -Color-Cyan">#include</span><span class=" -Color -Color-White"> &lt;cstring&gt;</span>
+<span class=" -Color -Color-Cyan">#include</span><span class=" -Color -Color-White"> &lt;fstream&gt;</span>
+<span class=" -Color -Color-Cyan">#include</span><span class=" -Color -Color-White"> &lt;iostream&gt;</span>
+
+<span class=" -Color -Color-Cyan">void</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Green">printFirst</span>(<span class=" -Color -Color-Cyan">char</span>*<span class=" -Color -Color-White"> </span>data,<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Cyan">size_t</span><span class=" -Color -Color-White"> </span>count)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">  </span>std::string<span class=" -Color -Color-White"> </span>first(data,<span class=" -Color -Color-White"> </span>count);
+<span class=" -Color -Color-White">  </span>std::cout<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>first<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+}
+
+<span class=" -Color -Color-Cyan">void</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Green">printLast</span>(<span class=" -Color -Color-Cyan">char</span>*<span class=" -Color -Color-White"> </span>data,<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Cyan">size_t</span><span class=" -Color -Color-White"> </span>count)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">  </span>std::string<span class=" -Color -Color-White"> </span>last(data<span class=" -Color -Color-White"> </span>+<span class=" -Color -Color-White"> </span>strlen(data)<span class=" -Color -Color-White"> </span>-<span class=" -Color -Color-White"> </span>count,<span class=" -Color -Color-White"> </span>count);
+<span class=" -Color -Color-White">  </span>std::cout<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>last<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+}
+
+<span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Green">validateAndPerformAction</span>(<span class=" -Color -Color-Cyan">char</span>*<span class=" -Color -Color-White"> </span>buffer,<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Cyan">size_t</span><span class=" -Color -Color-White"> </span>size)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(size<span class=" -Color -Color-White"> </span>&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">2</span>)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">    </span>std::cerr<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">&quot;Buffer is too short.&quot;</span><span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+<span class=" -Color -Color-White">    </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">1</span>;
+<span class=" -Color -Color-White">  </span>}
+
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Cyan">uint8_t</span><span class=" -Color -Color-White"> </span>action<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span>buffer[<span class=" -Color -Color-Blue">0</span>];
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Cyan">uint8_t</span><span class=" -Color -Color-White"> </span>count<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span>buffer[<span class=" -Color -Color-Blue">1</span>];
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Cyan">char</span>*<span class=" -Color -Color-White"> </span>data<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span>buffer<span class=" -Color -Color-White"> </span>+<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">2</span>;
+
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(!count)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">    </span>std::cerr<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">&quot;count must be non-zero.&quot;</span><span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+<span class=" -Color -Color-White">    </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">1</span>;
+<span class=" -Color -Color-White">  </span>}
+
+<span class=" -Color -Color-White">  // Forgot to check count vs. the length of data here, doh!</span>
+
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(!action)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">    </span>std::cerr<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">&quot;Action can&#39;t be zero.&quot;</span><span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+<span class=" -Color -Color-White">    </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">1</span>;
+<span class=" -Color -Color-White">  </span>}<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">else</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(action<span class=" -Color -Color-White"> </span>&gt;=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">128</span>)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">    </span>printLast(data,<span class=" -Color -Color-White"> </span>count);
+<span class=" -Color -Color-White">    </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">0</span>;
+<span class=" -Color -Color-White">  </span>}<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">else</span><span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">    </span>printFirst(data,<span class=" -Color -Color-White"> </span>count);
+<span class=" -Color -Color-White">    </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">0</span>;
+<span class=" -Color -Color-White">  </span>}
+}
+
+<span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Green">main</span>(<span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span>argc,<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Cyan">char</span>**<span class=" -Color -Color-White"> </span>argv)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(argc<span class=" -Color -Color-White"> </span>&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">2</span>)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">    </span>std::cerr<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">&quot;Usage is: &quot;</span><span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>argv[<span class=" -Color -Color-Blue">0</span>]<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">&quot; &lt;file&gt;&quot;</span><span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+<span class=" -Color -Color-White">    </span>exit(<span class=" -Color -Color-Blue">1</span>);
+<span class=" -Color -Color-White">  </span>}
+
+<span class=" -Color -Color-White">  </span>std::ifstream<span class=" -Color -Color-White"> </span>input(argv[<span class=" -Color -Color-Blue">1</span>],<span class=" -Color -Color-White"> </span>std::ifstream::binary);
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(!input)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">    </span>std::cerr<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">&quot;Error opening file.&quot;</span><span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+<span class=" -Color -Color-White">    </span>exit(<span class=" -Color -Color-Blue">1</span>);
+<span class=" -Color -Color-White">  </span>}
+
+<span class=" -Color -Color-White">  </span>input.seekg(<span class=" -Color -Color-Blue">0</span>,<span class=" -Color -Color-White"> </span>input.end);
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span>size<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span>input.tellg();
+<span class=" -Color -Color-White">  </span>input.seekg(<span class=" -Color -Color-Blue">0</span>,<span class=" -Color -Color-White"> </span>input.beg);
+
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(size<span class=" -Color -Color-White"> </span>&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">0</span>)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">    </span>std::cerr<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">&quot;Error seeking in file.&quot;</span><span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+<span class=" -Color -Color-White">    </span>exit(<span class=" -Color -Color-Blue">1</span>);
+<span class=" -Color -Color-White">  </span>}
+
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Cyan">char</span>*<span class=" -Color -Color-White"> </span>buffer<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">new</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Cyan">char</span>[size];
+<span class=" -Color -Color-White">  </span>input.read(buffer,<span class=" -Color -Color-White"> </span>size);
+
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(!input)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">    </span>std::cerr<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">&quot;Error while reading file.&quot;</span><span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+<span class=" -Color -Color-White">    </span>exit(<span class=" -Color -Color-Blue">1</span>);
+<span class=" -Color -Color-White">  </span>}
+
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span>ret<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span>validateAndPerformAction(buffer,<span class=" -Color -Color-White"> </span>size);
+
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">delete</span>[]<span class=" -Color -Color-White"> </span>buffer;
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span>ret;
+}
+</pre></div>
+</div>
+</div>
+</div>
+<p>This program looks way more elaborate compared to the last one, but don’t worry, it is not really doing a lot:</p>
+<ul class="simple">
+<li><p>The code in the <code class="docutils literal notranslate"><span class="pre">main()</span></code> function simply reads a file provided on the command line and puts its contents into a buffer that is passed to <code class="docutils literal notranslate"><span class="pre">validateAndPerformAction()</span></code>.</p></li>
+<li><p>That <code class="docutils literal notranslate"><span class="pre">validateAndPerformAction()</span></code> function pulls out two bytes of the buffer (<code class="docutils literal notranslate"><span class="pre">action</span></code> and <code class="docutils literal notranslate"><span class="pre">count</span></code>) and considers the rest <code class="docutils literal notranslate"><span class="pre">data</span></code>. Depending on the value of <code class="docutils literal notranslate"><span class="pre">action</span></code>, it then calls either <code class="docutils literal notranslate"><span class="pre">printFirst()</span></code> or <code class="docutils literal notranslate"><span class="pre">printLast()</span></code>, which prints either the first or the last <code class="docutils literal notranslate"><span class="pre">count</span></code> bytes of <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p></li>
+</ul>
+<p>If this sounds pointless, that is because it is.  The whole idea of this program is that the security check (that <code class="docutils literal notranslate"><span class="pre">count</span></code> is not larger than the length of <code class="docutils literal notranslate"><span class="pre">data</span></code>) is missing in <code class="docutils literal notranslate"><span class="pre">validateAndPerformAction()</span></code> but that the illegal access happens later in either of the two print functions. Hence, we would expect this program to generate at least two (slightly) different crash signatures - one with <code class="docutils literal notranslate"><span class="pre">printFirst()</span></code> and one with <code class="docutils literal notranslate"><span class="pre">printLast()</span></code>.</p>
+<p>Let’s try it out with very simple fuzzing based on the last Python script.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Since <em>FuzzManager</em> can have trouble with 8-bit characters in the input, we introduce an <code class="docutils literal notranslate"><span class="pre">escapelines()</span></code> function that converts text to printable ASCII characters.</p>
+<section id="excursion-escapelines-implementatipn">
+<h4>Excursion: <code class="docutils literal notranslate"><span class="pre">escapelines()</span></code> implementatipn<a class="headerlink" href="#excursion-escapelines-implementatipn" title="Link to this heading">#</a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">isascii</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">all</span><span class="p">([</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">127</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">s</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">isascii</span><span class="p">(</span><span class="s1">&#39;Hello,&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>True
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">escapelines</span><span class="p">(</span><span class="nb">bytes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ascii_chr</span><span class="p">(</span><span class="n">byte</span><span class="p">):</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">byte</span> <span class="o">&lt;=</span> <span class="mi">127</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">chr</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\x</span><span class="si">%02x</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">byte</span>
+
+    <span class="k">def</span> <span class="nf">unicode_escape</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">ascii_chr</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">isascii</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">unicode_escape</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">escapelines</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;Hello,</span><span class="se">\n</span><span class="s2">world!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;Hello,&#39;, &#39;world!&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">escapelines</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;abc</span><span class="se">\xff</span><span class="s2">ABC&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;abc\\xffABC&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="id2">
+<h4>End of Excursion<a class="headerlink" href="#id2" title="Link to this heading">#</a></h4>
+<p>Now to the actual script.  As above, we set up a collector that collects and sends crash info whenever a crash occurs.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;simply-buggy/out-of-bounds&quot;</span><span class="p">]</span>
+
+<span class="c1"># Connect to crash server</span>
+<span class="n">collector</span> <span class="o">=</span> <span class="n">Collector</span><span class="p">()</span>
+
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2048</span><span class="p">)</span>
+
+<span class="n">crash_count</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">TRIALS</span> <span class="o">=</span> <span class="mi">20</span>
+
+<span class="k">for</span> <span class="n">itnum</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">TRIALS</span><span class="p">):</span>
+    <span class="n">rand_len</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)</span>
+    <span class="n">rand_data</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">([</span><span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rand_len</span><span class="p">)])</span>
+
+    <span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">current_file</span><span class="p">)</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;fuzztest&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">rand_data</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+
+    <span class="n">current_cmd</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_cmd</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+    <span class="n">current_cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_file</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">current_cmd</span><span class="p">,</span>
+                            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+    <span class="n">stdout</span> <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># escapelines(result.stdout)</span>
+    <span class="n">stderr</span> <span class="o">=</span> <span class="n">escapelines</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="n">crashed</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stderr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;ERROR: AddressSanitizer&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">crashed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">itnum</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">crashed</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;(Crash) &quot;</span><span class="p">)</span>
+
+        <span class="c1"># This reads the simple-crash.fuzzmanagerconf file</span>
+        <span class="n">configuration</span> <span class="o">=</span> <span class="n">ProgramConfiguration</span><span class="o">.</span><span class="n">fromBinary</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># This reads and parses our ASan trace into a more generic format,</span>
+        <span class="c1"># returning us a generic &quot;CrashInfo&quot; object that we can inspect</span>
+        <span class="c1"># and/or submit to the server.</span>
+        <span class="n">crashInfo</span> <span class="o">=</span> <span class="n">CrashInfo</span><span class="o">.</span><span class="n">fromRawCrashData</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="p">,</span> <span class="n">configuration</span><span class="p">)</span>
+
+        <span class="c1"># Submit the crash</span>
+        <span class="n">collector</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">crashInfo</span><span class="p">,</span> <span class="n">testCase</span> <span class="o">=</span> <span class="n">current_file</span><span class="p">)</span>
+
+        <span class="n">crash_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">current_file</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done, submitted </span><span class="si">%d</span><span class="s2"> crashes after </span><span class="si">%d</span><span class="s2"> runs.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crash_count</span><span class="p">,</span> <span class="n">TRIALS</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0 (Crash) 1 2 (Crash) 3 4 5 6 7 8 (Crash) 9 10 11 12 (Crash) 13 14 (Crash) 15 16 17 18 19 
+Done, submitted 5 crashes after 20 runs.
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you run this script, you will see its progress and notice that it produces quite a few crashes. And indeed, if you visit the <a class="reference external" href="http://127.0.0.1:8000/crashmanager/crashes/">FuzzManager crashes page</a>, you will notice a variety of crashes that have accumulated:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">gui_driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fuzzmanager_url</span> <span class="o">+</span> <span class="s2">&quot;/crashmanager/crashes&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">Image</span><span class="p">(</span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/86881b8e866192258ee01dd1b48cda48792f9223ffb64d3cd20dec9c4ae237bb.png" src="_images/86881b8e866192258ee01dd1b48cda48792f9223ffb64d3cd20dec9c4ae237bb.png" />
+</div>
+</div>
+<p>Pick the first crash and create a bucket for it, like you did the last time. After saving, you will notice that not all of your crashes went into the bucket. The reason is that our program created several different stacks that are somewhat similar but not exactly identical. This is a common problem when fuzzing real world applications.</p>
+<p>Fortunately, there is an easy way to deal with this. While on the bucket page, hit the <em>Optimize</em> button for the bucket. FuzzManager will then automatically propose you to change your signature. Accept the change by hitting <code class="docutils literal notranslate"><span class="pre">Edit</span> <span class="pre">with</span> <span class="pre">Changes</span></code> and then <code class="docutils literal notranslate"><span class="pre">Save</span></code>. Repeat these steps until all crashes are part of the bucket. After 3 to 4 iterations, your signature will likely look like this:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;symptoms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;src&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;stderr&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/ERROR: AddressSanitizer: heap-buffer-overflow/&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;stackFrames&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;functionNames&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;?&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;?&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;?&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;validateAndPerformAction&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;main&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;__libc_start_main&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;_start&quot;</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;crashAddress&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&gt; 0xFF&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>As you can see in the <code class="docutils literal notranslate"><span class="pre">stackFrames</span></code> signature symptom, the <code class="docutils literal notranslate"><span class="pre">validateAndPerformAction</span></code> function is still present in the stack frame, because this function is common across all stack traces in all crashes; in fact, this is where the bug lives.  But the lower stack parts have been generalized into arbitrary functions (<code class="docutils literal notranslate"><span class="pre">?</span></code>) because they vary across the set of submitted crashes.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Optimize</span></code> function is designed to automate this process as much as possible: It attempts to broaden the signature by fitting it to untriaged crashes and then checks if the modified signature would touch other existing buckets. This works with the assumption that other buckets are indeed other bugs, i.e. if you had created two buckets from your crashes first, optimizing would not work anymore. Also, if the existing bucket data is sparse, and you have a lot of untriaged crashes, the algorithm could propose changes that include crashes of different bugs in the same bucket. There is no way to fully automatically detect and prevent this, hence the process is semi-automated and requires you to review all proposed changes.</p>
+</section>
+</section>
+</section>
+<section id="collecting-code-coverage">
+<h2>Collecting Code Coverage<a class="headerlink" href="#collecting-code-coverage" title="Link to this heading">#</a></h2>
+<p>In the <a class="reference internal" href="Coverage.html"><span class="std std-doc">chapter on coverage</span></a>, we have seen how measuring code coverage can be beneficial to assess fuzzer performance.  Holes in code coverage can reveal particularly hard-to-reach locations as well as bugs in the fuzzer itself.  Because this is an important part of the overall fuzzing operations, FuzzManager supports visualizing <em>per-fuzzing code coverage</em> of repositories – that is, we can interactively <em>inspect</em> which code was covered during fuzzing, and which was not.</p>
+<p>To illustrate coverage collection and visualization in <em>FuzzManager</em>, we take a look at a another simple C++ program, the <code class="docutils literal notranslate"><span class="pre">maze.cpp</span></code> example:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">print_file</span><span class="p">(</span><span class="s2">&quot;simply-buggy/maze.cpp&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-White">/*</span>
+<span class=" -Color -Color-White"> * maze - A simple constant maze that crashes at some point.</span>
+<span class=" -Color -Color-White"> *</span>
+<span class=" -Color -Color-White"> * WARNING: This program neither makes sense nor should you code like it is</span>
+<span class=" -Color -Color-White"> *          done in this program. It is purely for demo purposes and uses</span>
+<span class=" -Color -Color-White"> *          bad and meaningless coding habits on purpose.</span>
+<span class=" -Color -Color-White"> */</span>
+
+<span class=" -Color -Color-Cyan">#include</span><span class=" -Color -Color-White"> &lt;cstdlib&gt;</span>
+<span class=" -Color -Color-Cyan">#include</span><span class=" -Color -Color-White"> &lt;iostream&gt;</span>
+
+<span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Green">boom</span>()<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Cyan">int</span>*<span class=" -Color -Color-White"> </span>p<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span>(<span class=" -Color -Color-Cyan">int</span>*)<span class=" -Color -Color-Blue">0x1</span>;
+<span class=" -Color -Color-White">  </span>*p<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">0xDEADBEEF</span>;
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span>*p;
+}
+
+<span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Green">main</span>(<span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span>argc,<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Cyan">char</span>**<span class=" -Color -Color-White"> </span>argv)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(argc<span class=" -Color -Color-White"> </span>!=<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">5</span>)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">    </span>std::cerr<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">&quot;All I&#39;m asking for is four numbers...&quot;</span><span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+<span class=" -Color -Color-White">    </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">1</span>;
+<span class=" -Color -Color-White">  </span>}
+
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span>num1<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span>atoi(argv[<span class=" -Color -Color-Blue">1</span>]);
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(num1<span class=" -Color -Color-White"> </span>&gt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">0</span>)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">    </span><span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span>num2<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span>atoi(argv[<span class=" -Color -Color-Blue">2</span>]);
+<span class=" -Color -Color-White">    </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(num1<span class=" -Color -Color-White"> </span>&gt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">2040109464</span>)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">      </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(num2<span class=" -Color -Color-White"> </span>&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">0</span>)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">        </span>std::cerr<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">&quot;You found secret 1&quot;</span><span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+<span class=" -Color -Color-White">        </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">0</span>;
+<span class=" -Color -Color-White">      </span>}
+<span class=" -Color -Color-White">    </span>}<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">else</span><span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">      </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>((<span class=" -Color -Color-Cyan">unsigned</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Cyan">int</span>)num2<span class=" -Color -Color-White"> </span>==<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">3735928559</span>)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">        </span><span class=" -Color -Color-Cyan">unsigned</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span>num3<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span>atoi(argv[<span class=" -Color -Color-Blue">3</span>]);
+<span class=" -Color -Color-White">        </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(num3<span class=" -Color -Color-White"> </span>==<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">3405695742</span>)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">          </span><span class=" -Color -Color-Cyan">int</span><span class=" -Color -Color-White"> </span>num4<span class=" -Color -Color-White"> </span>=<span class=" -Color -Color-White"> </span>atoi(argv[<span class=" -Color -Color-Blue">4</span>]);
+<span class=" -Color -Color-White">          </span><span class=" -Color -Color-Blue">if</span><span class=" -Color -Color-White"> </span>(num4<span class=" -Color -Color-White"> </span>==<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">1111638594</span>)<span class=" -Color -Color-White"> </span>{
+<span class=" -Color -Color-White">            </span>std::cerr<span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span><span class=" -Color -Color-Yellow">&quot;You found secret 2&quot;</span><span class=" -Color -Color-White"> </span>&lt;&lt;<span class=" -Color -Color-White"> </span>std::endl;
+<span class=" -Color -Color-White">            </span>boom();
+<span class=" -Color -Color-White">            </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">0</span>;
+<span class=" -Color -Color-White">          </span>}
+<span class=" -Color -Color-White">        </span>}
+<span class=" -Color -Color-White">      </span>}
+<span class=" -Color -Color-White">    </span>}
+<span class=" -Color -Color-White">  </span>}
+
+<span class=" -Color -Color-White">  </span><span class=" -Color -Color-Blue">return</span><span class=" -Color -Color-White"> </span><span class=" -Color -Color-Blue">0</span>;
+}
+</pre></div>
+</div>
+</div>
+</div>
+<p>As you can see, all this program does is read some numbers from the command line, compare them to some magical constants and arbitrary criteria, and if everything works out, you reach one of the two secrets in the program.  Reaching one of these secrets also triggers a failure.</p>
+<p>Before we start to work on this program, we recompile the programs with coverage support. In order to emit code coverage with either Clang or GCC, programs typically need to be built and linked with special <code class="docutils literal notranslate"><span class="pre">CFLAGS</span></code> like <code class="docutils literal notranslate"><span class="pre">--coverage</span></code>. In our case, the Makefile does this for us:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!(</span><span class="nb">cd</span><span class="w"> </span>simply-buggy<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>clean<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>coverage<span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>rm -f ./maze ./out-of-bounds ./simple-crash
+clang++ -fsanitize=address -g --coverage -o maze maze.cpp
+clang++ -fsanitize=address -g --coverage -o out-of-bounds out-of-bounds.cpp
+clang++ -fsanitize=address -g --coverage -o simple-crash simple-crash.cpp
+</pre></div>
+</div>
+</div>
+</div>
+<p>Also, if we want to use FuzzManager to look at our code, we need to do the initial repository setup (essentially giving the server its own working copy of our <em>git</em> repository to pull the source from). Normally, the client and server run on different machines, so this involves checking out the repository on the server and telling it where to find it (and what version control system it uses):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/uds-se/simply-buggy<span class="w"> </span>simply-buggy-server<span class="w">    </span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cloning into &#39;simply-buggy-server&#39;...
+remote: Enumerating objects: 22, done.
+remote: Total 22 (delta 0), reused 0 (delta 0), pack-reused 22 (from 1)
+Receiving objects: 100% (22/22), 4.90 KiB | 4.90 MiB/s, done.
+Resolving deltas: 100% (9/9), done.
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span><span class="nb">cd</span><span class="w"> </span>FuzzManager<span class="p">;</span><span class="w"> </span><span class="o">{</span>sys.executable<span class="o">}</span><span class="w"> </span>server/manage.py<span class="w"> </span>setup_repository<span class="w"> </span>simply-buggy<span class="w"> </span>GITSourceCodeProvider<span class="w"> </span>../simply-buggy-server
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Successfully created repository &#39;simply-buggy&#39; with provider &#39;GITSourceCodeProvider&#39; located at ../simply-buggy-server
+</pre></div>
+</div>
+</div>
+</div>
+<p>We now assume that we know some magic constants (like in practice, we sometimes know some things about the target, but might miss a detail) and we fuzz the program with that:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;simply-buggy/maze&quot;</span><span class="p">]</span>
+
+<span class="n">constants</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3735928559</span><span class="p">,</span> <span class="mi">1111638594</span><span class="p">]</span>
+
+<span class="n">TRIALS</span> <span class="o">=</span> <span class="mi">1000</span>
+
+<span class="k">for</span> <span class="n">itnum</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">TRIALS</span><span class="p">):</span>
+    <span class="n">current_cmd</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_cmd</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">current_cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">constants</span><span class="p">[</span>
+                <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">constants</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">2147483647</span><span class="p">,</span> <span class="mi">2147483647</span><span class="p">)))</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">current_cmd</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+    <span class="n">stderr</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="n">crashed</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">stderr</span> <span class="ow">and</span> <span class="s2">&quot;secret&quot;</span> <span class="ow">in</span> <span class="n">stderr</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">stderr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stderr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;ERROR: AddressSanitizer&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">crashed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">crashed</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found the bug!&quot;</span><span class="p">)</span>
+        <span class="k">break</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>You found secret 1
+You found secret 1
+You found secret 1
+You found secret 1
+You found secret 1
+Done!
+</pre></div>
+</div>
+</div>
+</div>
+<p>As you can see, with 1000 runs we found secret 1 a few times, but secret 2 (and the crash) are still missing. In order to determine how to improve this, we are now going to look at the <em>coverage data.</em></p>
+<p>We use <a class="reference external" href="https://github.com/mozilla/grcov">Mozilla’s <code class="docutils literal notranslate"><span class="pre">grcov</span></code> tool</a> to capture graphical coverage information.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="c1"># !brew install rust</span>
+<span class="c1"># !cargo install grcov</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$HOME</span>/.cargo/bin:<span class="nv">$PATH</span><span class="p">;</span><span class="w"> </span>grcov<span class="w"> </span>simply-buggy/<span class="w"> </span>-t<span class="w"> </span>coveralls+<span class="w"> </span>--commit-sha<span class="w"> </span><span class="k">$(</span><span class="nb">cd</span><span class="w"> </span>simply-buggy<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>rev-parse<span class="w"> </span>HEAD<span class="k">)</span><span class="w"> </span>--token<span class="w"> </span>NONE<span class="w"> </span>-p<span class="w"> </span><span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>/simply-buggy/<span class="w"> </span>&gt;<span class="w"> </span>coverage.json
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span><span class="nb">cd</span><span class="w"> </span>FuzzManager<span class="p">;</span><span class="w"> </span><span class="o">{</span>sys.executable<span class="o">}</span><span class="w"> </span>-mCovReporter<span class="w"> </span>--repository<span class="w"> </span>simply-buggy<span class="w"> </span>--description<span class="w"> </span><span class="s2">&quot;Test1&quot;</span><span class="w"> </span>--submit<span class="w"> </span>../coverage.json
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can now go to the <a class="reference external" href="http://127.0.0.1:8000/covmanager/">FuzzManager coverage page</a> to take a look at our source code and its coverage.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">gui_driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fuzzmanager_url</span> <span class="o">+</span> <span class="s2">&quot;/covmanager&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">Image</span><span class="p">(</span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/8deab54e365aab303a997be315f59276ac32caba1ffd6b51ee730525552ba1b1.png" src="_images/8deab54e365aab303a997be315f59276ac32caba1ffd6b51ee730525552ba1b1.png" />
+</div>
+</div>
+<p>Click on the first ID to browse the coverage data that you just submitted.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">first_id</span> <span class="o">=</span> <span class="n">gui_driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">XPATH</span><span class="p">,</span> <span class="s1">&#39;//td/a[contains(@href,&quot;/browse&quot;)]&#39;</span><span class="p">)</span>
+<span class="n">first_id</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">DELAY_AFTER_CLICK</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">Image</span><span class="p">(</span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/57b4a90d50145f0ffeea91c65160479c06f3d6bdc9b6a801d5517a3e1f5c3a9d.png" src="_images/57b4a90d50145f0ffeea91c65160479c06f3d6bdc9b6a801d5517a3e1f5c3a9d.png" />
+</div>
+</div>
+<p>You will first see the full list of files in the <code class="docutils literal notranslate"><span class="pre">simply-buggy</span></code> repository, with all but the <code class="docutils literal notranslate"><span class="pre">maze.cpp</span></code> file showing 0% coverage (because we didn’t do anything with these binaries since we rebuilt them with coverage support). Now click on <code class="docutils literal notranslate"><span class="pre">maze.cpp</span></code> and inspect the coverage line by line:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">maze_cpp</span> <span class="o">=</span> <span class="n">gui_driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">XPATH</span><span class="p">,</span> <span class="s2">&quot;//*[contains(text(), &#39;maze.cpp&#39;)]&quot;</span><span class="p">)</span>
+<span class="n">maze_cpp</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">DELAY_AFTER_CLICK</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">gui_driver</span><span class="o">.</span><span class="n">set_window_size</span><span class="p">(</span><span class="mi">1400</span><span class="p">,</span> <span class="mi">1400</span><span class="p">)</span>
+<span class="n">Image</span><span class="p">(</span><span class="n">gui_driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/8e7539bb04d714fbf9db017c76cbfe62fcbdc2d163ee51723ad82a2aba05081b.png" src="_images/8e7539bb04d714fbf9db017c76cbfe62fcbdc2d163ee51723ad82a2aba05081b.png" />
+</div>
+</div>
+<p>Lines highlighted in <em>green</em> have been executed; the number in the green bar on the left tells how many times.  Lines highlighted in <em>red</em> have <em>not</em> been executed.  There are two observations to make:</p>
+<ol class="arabic simple">
+<li><p>The if-statement in Line 34 is still covered, but the lines following after it are red. This is because our fuzzer misses the constant checked in that statement, so it is fairly obvious that we need to add to our constants list.</p></li>
+<li><p>From Line 26 to Line 27 there is a sudden drop in coverage. Both lines are covered, but the counters show that we fail that check in more than 95% of the cases. This explains why we find secret 1 so rarely. If this was a real program, we would now try to figure out how much additional code is behind that branch and adjust probabilities such that we hit it more often, if necessary.</p></li>
+</ol>
+<p>Of course, the <code class="docutils literal notranslate"><span class="pre">maze</span></code> program is so small that one could see these issues with the bare eye. But in reality, with complex programs, it seldom obvious where a fuzzing tool gets stuck. Identifying these cases can greatly help to improve fuzzing results.</p>
+<p>For the sake of completeness, let’s rerun the program now with the missing constant added:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;simply-buggy/maze&quot;</span><span class="p">]</span>
+
+<span class="c1"># Added the missing constant here</span>
+<span class="n">constants</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3735928559</span><span class="p">,</span> <span class="mi">1111638594</span><span class="p">,</span> <span class="mi">3405695742</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">itnum</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="n">current_cmd</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_cmd</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">current_cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span>
+                <span class="n">constants</span><span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">constants</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">2147483647</span><span class="p">,</span> <span class="mi">2147483647</span><span class="p">)))</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">current_cmd</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+    <span class="n">stderr</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="n">crashed</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">stderr</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">stderr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stderr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;ERROR: AddressSanitizer&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">crashed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">crashed</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found the bug!&quot;</span><span class="p">)</span>
+        <span class="k">break</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>You found secret 1
+You found secret 2
+Found the bug!
+Done!
+</pre></div>
+</div>
+</div>
+</div>
+<p>As expected, we now found secret 2 including our crash.</p>
+</section>
+<section id="id3">
+<h2>Synopsis<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<p>The Python <code class="docutils literal notranslate"><span class="pre">FuzzManager</span></code> package allows for programmatic submission of failures from a large number of (fuzzed) programs.  One can query crashes and their details, collect them into buckets to ensure they will be treated the same, and also retrieve coverage information for debugging both programs and their tests.</p>
+</section>
+<section id="lessons-learned">
+<h2>Lessons Learned<a class="headerlink" href="#lessons-learned" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>When fuzzing (a) with several machines, (b) several programs, © with several fuzzers, use a <em>crash server</em> such as <em>FuzzManager</em> to collect and store crashes.</p></li>
+<li><p>Crashes likely to be caused by the same failure should be collected in <em>buckets</em> to ensure they all can be treated the same.</p></li>
+<li><p>Centrally collecting <em>fuzzer coverage</em> can help reveal issues with fuzzers.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="c1"># We&#39;re done, so we clean up</span>
+<span class="n">fuzzmanager_process</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">gui_driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="k">for</span> <span class="n">temp_file</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;coverage.json&#39;</span><span class="p">,</span> <span class="s1">&#39;geckodriver.log&#39;</span><span class="p">,</span> <span class="s1">&#39;ghostdriver.log&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">temp_file</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">temp_file</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">home</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">temp_dir</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;simply-buggy&#39;</span><span class="p">,</span> <span class="s1">&#39;simply-buggy-server&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;simply-buggy-server&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;FuzzManager&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">):</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading">#</a></h2>
+<p>In the next chapter, we will learn how to</p>
+<ul class="simple">
+<li><p>estimate <a class="reference internal" href="WhenToStopFuzzing.html"><span class="std std-doc">how many bugs remain in the code and when we have tested enough</span></a>.</p></li>
+</ul>
+</section>
+<section id="background">
+<h2>Background<a class="headerlink" href="#background" title="Link to this heading">#</a></h2>
+<p>This chapter builds on the implementation of <a class="reference external" href="https://github.com/MozillaSecurity/FuzzManager">FuzzManager</a>.  Its <a class="reference external" href="https://github.com/MozillaSecurity/FuzzManager">GitHub page</a> contains plenty of additional information on how to use it.</p>
+<p>The blog article <a class="reference external" href="https://blog.mozilla.org/attack-and-defense/2021/05/20/browser-fuzzing-at-mozilla/">“Browser Fuzzing at Mozilla”</a> discusses the context of how FuzzManager is used at Mozilla for massive browser testing.</p>
+<p>The paper “What makes a good bug report?” \cite{Bettenburg2008} lists essential information that developers expect from a bug report, how they use this information, and for which purposes.</p>
+</section>
+<section id="exercises">
+<h2>Exercises<a class="headerlink" href="#exercises" title="Link to this heading">#</a></h2>
+<section id="exercise-1-automatic-crash-reporting">
+<h3>Exercise 1: Automatic Crash Reporting<a class="headerlink" href="#exercise-1-automatic-crash-reporting" title="Link to this heading">#</a></h3>
+<p>Create a Python function that can be invoked at the beginning of a program to have it automatically report crashes and exceptions to a <em>FuzzManager</em> server.  Have it track program name (and if possible, outputs) automatically; crashes (exceptions raised) should be converted into ASan format such that <em>FuzzManager</em> can read them.</p>
+<p><strong>Solution.</strong> To be added.</p>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="GUIFuzzer.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Testing Graphical User Interfaces</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="WhenToStopFuzzing.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">When To Stop Fuzzing</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synopsis">Synopsis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#collecting-crashes-from-multiple-fuzzers">Collecting Crashes from Multiple Fuzzers</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-a-crash-server">Running a Crash Server</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#excursion-setting-up-the-server">Excursion: Setting up the Server</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#end-of-excursion">End of Excursion</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#excursion-starting-the-server">Excursion: Starting the Server</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">End of Excursion</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#logging-in">Logging In</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#collecting-crashes">Collecting Crashes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#program-configurations">Program Configurations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crash-info">Crash Info</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#collector">Collector</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-crashes">Inspecting Crashes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crash-buckets">Crash Buckets</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crash-signatures">Crash Signatures</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#coarse-grained-signatures">Coarse-Grained Signatures</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#excursion-escapelines-implementatipn">Excursion: <code class="docutils literal notranslate"><span class="pre">escapelines()</span></code> implementatipn</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">End of Excursion</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#collecting-code-coverage">Collecting Code Coverage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Synopsis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#lessons-learned">Lessons Learned</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next Steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercises">Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-1-automatic-crash-reporting">Exercise 1: Automatic Crash Reporting</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2021-2025 CISPA Helmholtz Center for Information Security (www.cispa.de); © Copyright 2018-2020 Saarland University, authors, and contributors. All Rights Reserved.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

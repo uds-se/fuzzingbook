@@ -1,0 +1,2218 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Mutation-Based Fuzzing &#8212; The Fuzzing Book</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=42e1b1a5" />
+    <link rel="stylesheet" type="text/css" href="_static/mastodon-timeline.css?v=f82c2b23" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'MutationFuzzer';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Greybox Fuzzing" href="GreyboxFuzzer.html" />
+    <link rel="prev" title="Code Coverage" href="Coverage.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content"><p>This is a beta version of fuzzingbook.org, currently in development. See the <a href="https://fuzzingbook.org/"  style="color:white!important;">classic site</a> for resources.</p></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/fuzzingbook.png" class="logo__image only-light" alt="The Fuzzing Book - Home"/>
+    <script>document.write(`<img src="_static/fuzzingbook.png" class="logo__image only-dark" alt="The Fuzzing Book - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="index.html">
+                    The Fuzzing Book
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Tours.html">Tours through the Book</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Intro_Testing.html">Introduction to Software Testing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Lexical Fuzzing</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Coverage.html">Code Coverage</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Mutation-Based Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GreyboxFuzzer.html">Greybox Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SearchBasedFuzzer.html">Search-Based Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MutationAnalysis.html">Mutation Analysis</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Syntactical Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Grammars.html">Fuzzing with Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarFuzzer.html">Efficient Grammar Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarCoverageFuzzer.html">Grammar Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Parser.html">Parsing Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeneratorGrammarFuzzer.html">Fuzzing with Generators</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="GreyboxGrammarFuzzer.html">Greybox Fuzzing with Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reducer.html">Reducing Failure-Inducing Inputs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Semantical Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="FuzzingWithConstraints.html">Fuzzing with Constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarMiner.html">Mining Input Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InformationFlow.html">Tracking Information Flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConcolicFuzzer.html">Concolic Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SymbolicFuzzer.html">Symbolic Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DynamicInvariants.html">Mining Function Specifications</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Domain-Specific Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ConfigurationFuzzer.html">Testing Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="APIFuzzer.html">Fuzzing APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Carver.html">Carving Unit Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PythonFuzzer.html">Testing Compilers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WebFuzzer.html">Testing Web Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GUIFuzzer.html">Testing Graphical User Interfaces</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Managing Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="FuzzingInTheLarge.html">Fuzzing in the Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WhenToStopFuzzing.html">When To Stop Fuzzing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Appendices</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="AcademicPrototyping.html">Academic Prototyping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PrototypingWithPython.html">Prototyping with Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExpectError.html">Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Timer.html">Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Timeout.html">Timeout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClassDiagram.html">Class Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RailroadDiagrams.html">Railroad Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ControlFlow.html">Control Flow Graph</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">About This Book</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ReleaseNotes.html">Fuzzingbook Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Importing.html">Using Fuzzingbook Code in your own Programs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Guide_for_Authors.html">Guide for Authors</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?urlpath=tree/docs/notebooks/MutationFuzzer.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/uds-se/fuzzingbook" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/uds-se/fuzzingbook/issues/new?title=Issue%20on%20page%20%2FMutationFuzzer.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/MutationFuzzer.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Mutation-Based Fuzzing</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synopsis">Synopsis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fuzzing-with-mutations">Fuzzing with Mutations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fuzzing-a-url-parser">Fuzzing a URL Parser</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mutating-inputs">Mutating Inputs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mutating-urls">Mutating URLs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#multiple-mutations">Multiple Mutations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guiding-by-coverage">Guiding by Coverage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Synopsis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#lessons-learned">Lessons Learned</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next Steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercises">Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-1-fuzzing-cgi-decode-with-mutations">Exercise 1: Fuzzing CGI decode with Mutations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-2-fuzzing-bc-with-mutations">Exercise 2: Fuzzing bc with Mutations</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#part-1-non-guided-mutations">Part 1: Non-Guided Mutations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#part-2-guided-mutations">Part 2: Guided Mutations</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-3">Exercise 3</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-4">Exercise 4</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-5">Exercise 5</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="mutation-based-fuzzing">
+<h1>Mutation-Based Fuzzing<a class="headerlink" href="#mutation-based-fuzzing" title="Link to this heading">#</a></h1>
+<p>Most <a class="reference internal" href="Fuzzer.html"><span class="std std-doc">randomly generated inputs</span></a> are syntactically <em>invalid</em> and thus are quickly rejected by the processing program.  To exercise functionality beyond input processing, we must increase chances to obtain valid inputs.  One such way is so-called <em>mutational fuzzing</em> – that is, introducing small changes to existing inputs that may still keep the input valid, yet exercise new behavior.  We show how to create such mutations, and how to guide them towards yet uncovered code, applying central concepts from the popular AFL fuzzer.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bookutils</span> <span class="kn">import</span> <span class="n">YouTubeVideo</span>
+<span class="n">YouTubeVideo</span><span class="p">(</span><span class="s1">&#39;5ROhc_42jQU&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+        <iframe
+            width="640"
+            height="360"
+            src="https://www.youtube-nocookie.com/embed/5ROhc_42jQU"
+            frameborder="0"
+            allowfullscreen
+            
+        ></iframe>
+        </div></div>
+</div>
+<p><strong>Prerequisites</strong></p>
+<ul class="simple">
+<li><p>You should know how basic fuzzing works; for instance, from the <a class="reference internal" href="Fuzzer.html"><span class="std std-doc">“Fuzzing”</span></a> chapter.</p></li>
+<li><p>You should understand the basics of <a class="reference internal" href="Coverage.html"><span class="std std-doc">obtaining coverage</span></a>.</p></li>
+</ul>
+<section id="synopsis">
+<h2>Synopsis<a class="headerlink" href="#synopsis" title="Link to this heading">#</a></h2>
+<!-- Automatically generated. Do not edit. -->
+<p>To <a class="reference internal" href="Importing.html"><span class="std std-doc">use the code provided in this chapter</span></a>, write</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fuzzingbook.MutationFuzzer</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>and then make use of the following features.</p>
+<p>This chapter introduces a <code class="docutils literal notranslate"><span class="pre">MutationFuzzer</span></code> class that takes a list of <em>seed inputs</em> which are then mutated:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mutation_fuzzer</span> <span class="o">=</span> <span class="n">MutationFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+<span class="go">[&#39;http://www.google.com/search?q=fuzzing&#39;,</span>
+<span class="go"> &#39;]hTtp://ww,google\x1ecom/searc?q=fuzzig&#39;,</span>
+<span class="go"> &#39;hppY://www.google.cm/seacH?q=fduzzing&#39;,</span>
+<span class="go"> &#39;http:&amp;//www.goole.com/sear#h?q=fuzz(ingw&#39;,</span>
+<span class="go"> &#39;http://vww.googlje.om/{earch?q5fuzzing&#39;,</span>
+<span class="go"> &#39;http://www.google.com/seach?q=uzzing&#39;,</span>
+<span class="go"> &#39;hv,tp*//www.ggogle.com/seagrch/q=fuzzing&#39;,</span>
+<span class="go"> &quot;h(tpy:/wGw.goo&#39;l%.com/searc?q=fuz~ing&quot;,</span>
+<span class="go"> &#39;hp://www.gooelecom/)search?q=fuz?zing?&#39;,</span>
+<span class="go"> &quot;httpv//www.goo6gl.#om&#39;search?q=Puzzin&quot;]</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">MutationCoverageFuzzer</span></code> maintains a <em>population</em> of inputs, which are then evolved in order to maximize coverage.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mutation_fuzzer</span> <span class="o">=</span> <span class="n">MutationCoverageFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="n">http_runner</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">population</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+<span class="go">[&#39;http://www.google.com/search?q=fuzzing&#39;,</span>
+<span class="go"> &#39;http://www.google.com&lt;/searc?q=fzzinw&#39;,</span>
+<span class="go"> &#39;http://twww.google.com/searc`pnu&lt;zzing&#39;,</span>
+<span class="go"> &#39;http://Btwnww.gIoog|e.cnsearc`pn&lt;zzing&#39;,</span>
+<span class="go"> &#39;http://www\x0egoogle.com&lt;/sea#r#?q=_fdz0zinw&#39;]</span>
+</pre></div>
+</div>
+<p><img alt="" src="_images/MutationFuzzer-synopsis-1.svg" /></p>
+</section>
+<section id="fuzzing-with-mutations">
+<h2>Fuzzing with Mutations<a class="headerlink" href="#fuzzing-with-mutations" title="Link to this heading">#</a></h2>
+<p>On November 2013, the first version of <a class="reference external" href="http://lcamtuf.coredump.cx/afl/">American Fuzzy Lop</a> (AFL) was released. Since then, AFL has become one of the most successful fuzzing tools and comes in many flavors, e.g., <a class="reference external" href="https://github.com/mboehme/aflfast">AFLFast</a>, <a class="reference external" href="https://github.com/aflgo/aflgo">AFLGo</a>, and <a class="reference external" href="https://github.com/aflsmart/aflsmart">AFLSmart</a> (which are discussed in this book). AFL has made fuzzing a popular choice for automated vulnerability detection. It was the first to demonstrate that vulnerabilities can be detected automatically at a large scale in many security-critical, real-world applications.</p>
+<p><img alt="American Fuzzy Lop Command Line User Interface" src="_images/afl_screen.png" /></p>
+<center><b>Figure 1.</b> American Fuzzy Lop Command Line User Interface</center>
+<p>In this chapter, we are going to introduce the basics of mutational fuzz testing; the next chapter will then further show how to direct fuzzing towards specific code goals.</p>
+</section>
+<section id="fuzzing-a-url-parser">
+<h2>Fuzzing a URL Parser<a class="headerlink" href="#fuzzing-a-url-parser" title="Link to this heading">#</a></h2>
+<p>Many programs expect their inputs to come in a very specific format before they would actually process them.  As an example, think of a program that accepts a URL (a Web address).  The URL has to be in a valid format (i.e., the URL format) such that the program can deal with it.  When fuzzing with random inputs, what are our chances to actually produce a valid URL?</p>
+<p>To get deeper into the problem, let us explore what URLs are made of.  A URL consists of a number of elements:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>scheme://netloc/path?query#fragment
+</pre></div>
+</div>
+<p>where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">scheme</span></code> is the protocol to be used, including <code class="docutils literal notranslate"><span class="pre">http</span></code>, <code class="docutils literal notranslate"><span class="pre">https</span></code>, <code class="docutils literal notranslate"><span class="pre">ftp</span></code>, <code class="docutils literal notranslate"><span class="pre">file</span></code>…</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">netloc</span></code> is the name of the host to connect to, such as <code class="docutils literal notranslate"><span class="pre">www.google.com</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code> is the path on that very host, such as <code class="docutils literal notranslate"><span class="pre">search</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">query</span></code> is a list of key/value pairs, such as <code class="docutils literal notranslate"><span class="pre">q=fuzzing</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fragment</span></code> is a marker for a location in the retrieved document, such as <code class="docutils literal notranslate"><span class="pre">#result</span></code></p></li>
+</ul>
+<p>In Python, we can use the <code class="docutils literal notranslate"><span class="pre">urlparse()</span></code> function to parse and decompose a URL into its parts.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bookutils.setup</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Any</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlparse</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">urlparse</span><span class="p">(</span><span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ParseResult(scheme=&#39;http&#39;, netloc=&#39;www.google.com&#39;, path=&#39;/search&#39;, params=&#39;&#39;, query=&#39;q=fuzzing&#39;, fragment=&#39;&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<p>We see how the result encodes the individual parts of the URL in different attributes.</p>
+<p>Let us now assume we have a program that takes a URL as input.  To simplify things, we won’t let it do very much; we simply have it check the passed URL for validity.  If the URL is valid, it returns True; otherwise, it raises an exception.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">http_program</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="n">supported_schemes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;http&quot;</span><span class="p">,</span> <span class="s2">&quot;https&quot;</span><span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_schemes</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Scheme must be one of &quot;</span> <span class="o">+</span> 
+                         <span class="nb">repr</span><span class="p">(</span><span class="n">supported_schemes</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">netloc</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host must be non-empty&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Do something with the URL</span>
+    <span class="k">return</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us now go and fuzz <code class="docutils literal notranslate"><span class="pre">http_program()</span></code>.  To fuzz, we use the full range of printable ASCII characters, such that <code class="docutils literal notranslate"><span class="pre">:</span></code>, <code class="docutils literal notranslate"><span class="pre">/</span></code>, and lowercase letters are included.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Fuzzer</span> <span class="kn">import</span> <span class="n">fuzzer</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fuzzer</span><span class="p">(</span><span class="n">char_start</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">char_range</span><span class="o">=</span><span class="mi">96</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;&quot;N&amp;+slk%h\x7fyp5o\&#39;@[3(rW*M5W]tMFPU4\\P@tz%[X?uo\\1?b4T;1bDeYtHx #UJ5w}pMmPodJM,_&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s try to fuzz with 1000 random inputs and see whether we have some success.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">http_program</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Success!&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>What are the chances of actually getting a valid URL?  We need our string to start with <code class="docutils literal notranslate"><span class="pre">&quot;http://&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;https://&quot;</span></code>.  Let’s take the <code class="docutils literal notranslate"><span class="pre">&quot;http://&quot;</span></code> case first.  These are seven very specific characters we need to start with.  The chance of producing these seven characters randomly (with a character range of 96 different characters) is <span class="math notranslate nohighlight">\(1 : 96^7\)</span>, or</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="mi">96</span> <span class="o">**</span> <span class="mi">7</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>75144747810816
+</pre></div>
+</div>
+</div>
+</div>
+<p>The odds of producing a <code class="docutils literal notranslate"><span class="pre">&quot;https://&quot;</span></code> prefix are even worse, at <span class="math notranslate nohighlight">\(1 : 96^8\)</span>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="mi">96</span> <span class="o">**</span> <span class="mi">8</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>7213895789838336
+</pre></div>
+</div>
+</div>
+</div>
+<p>which gives us a total chance of</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">likelihood</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">96</span> <span class="o">**</span> <span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">96</span> <span class="o">**</span> <span class="mi">8</span><span class="p">)</span>
+<span class="n">likelihood</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1.344627131107667e-14
+</pre></div>
+</div>
+</div>
+</div>
+<p>And this is the number of runs (on average) we’d need to produce a valid URL scheme:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span> <span class="o">/</span> <span class="n">likelihood</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>74370059689055.02
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s measure how long one run of <code class="docutils literal notranslate"><span class="pre">http_program()</span></code> takes:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Timer</span> <span class="kn">import</span> <span class="n">Timer</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">http_program</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Success!&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+<span class="n">duration_per_run_in_seconds</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span> <span class="o">/</span> <span class="n">trials</span>
+<span class="n">duration_per_run_in_seconds</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1.798770803725347e-05
+</pre></div>
+</div>
+</div>
+</div>
+<p>That’s pretty fast, isn’t it?  Unfortunately, we have a lot of runs to cover.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">seconds_until_success</span> <span class="o">=</span> <span class="n">duration_per_run_in_seconds</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">likelihood</span><span class="p">)</span>
+<span class="n">seconds_until_success</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1337746920.3998353
+</pre></div>
+</div>
+</div>
+</div>
+<p>which translates into</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hours_until_success</span> <span class="o">=</span> <span class="n">seconds_until_success</span> <span class="o">/</span> <span class="mi">3600</span>
+<span class="n">days_until_success</span> <span class="o">=</span> <span class="n">hours_until_success</span> <span class="o">/</span> <span class="mi">24</span>
+<span class="n">years_until_success</span> <span class="o">=</span> <span class="n">days_until_success</span> <span class="o">/</span> <span class="mf">365.25</span>
+<span class="n">years_until_success</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>42.39064188657678
+</pre></div>
+</div>
+</div>
+</div>
+<p>Even if we parallelize things a lot, we’re still in for months to years of waiting.  And that’s for getting <em>one</em> successful run that will get deeper into <code class="docutils literal notranslate"><span class="pre">http_program()</span></code>.</p>
+<p>What basic fuzzing will do well is to test <code class="docutils literal notranslate"><span class="pre">urlparse()</span></code>, and if there is an error in this parsing function, it has good chances of uncovering it.  But as long as we cannot produce a valid input, we are out of luck in reaching any deeper functionality.</p>
+</section>
+<section id="mutating-inputs">
+<h2>Mutating Inputs<a class="headerlink" href="#mutating-inputs" title="Link to this heading">#</a></h2>
+<p>The alternative to generating random strings from scratch is to start with a given <em>valid</em> input, and then to subsequently <em>mutate</em> it.  A <em>mutation</em> in this context is a simple string manipulation - say, inserting a (random) character, deleting a character, or flipping a bit in a character representation.  This is called <em>mutational fuzzing</em> – in contrast to the <em>generational fuzzing</em> techniques discussed earlier.</p>
+<p>Here are some mutations to get you started:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">random</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">delete_random_character</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns s with a random character deleted&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># print(&quot;Deleting&quot;, repr(s[pos]), &quot;at&quot;, pos)</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">[:</span><span class="n">pos</span><span class="p">]</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;A quick brown fox&quot;</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">delete_random_character</span><span class="p">(</span><span class="n">seed_input</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;A uick brown fox&#39;
+&#39;A quic brown fox&#39;
+&#39;A quick brown fo&#39;
+&#39;A quic brown fox&#39;
+&#39;A quick bown fox&#39;
+&#39;A quick bown fox&#39;
+&#39;A quick brown fx&#39;
+&#39;A quick brown ox&#39;
+&#39;A quick brow fox&#39;
+&#39;A quic brown fox&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">insert_random_character</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns s with a random character inserted&quot;&quot;&quot;</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    <span class="n">random_character</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">127</span><span class="p">))</span>
+    <span class="c1"># print(&quot;Inserting&quot;, repr(random_character), &quot;at&quot;, pos)</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">[:</span><span class="n">pos</span><span class="p">]</span> <span class="o">+</span> <span class="n">random_character</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="n">pos</span><span class="p">:]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">insert_random_character</span><span class="p">(</span><span class="n">seed_input</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;A quick brvown fox&#39;
+&#39;A quwick brown fox&#39;
+&#39;A qBuick brown fox&#39;
+&#39;A quick broSwn fox&#39;
+&#39;A quick brown fvox&#39;
+&#39;A quick brown 3fox&#39;
+&#39;A quick brNown fox&#39;
+&#39;A quick brow4n fox&#39;
+&#39;A quick brown fox8&#39;
+&#39;A equick brown fox&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">flip_random_character</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns s with a random bit flipped in a random position&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span>
+    <span class="n">bit</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">new_c</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">^</span> <span class="n">bit</span><span class="p">)</span>
+    <span class="c1"># print(&quot;Flipping&quot;, bit, &quot;in&quot;, repr(c) + &quot;, giving&quot;, repr(new_c))</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">[:</span><span class="n">pos</span><span class="p">]</span> <span class="o">+</span> <span class="n">new_c</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">flip_random_character</span><span class="p">(</span><span class="n">seed_input</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;A quick bRown fox&#39;
+&#39;A quici brown fox&#39;
+&#39;A&quot;quick brown fox&#39;
+&#39;A quick brown$fox&#39;
+&#39;A quick bpown fox&#39;
+&#39;A quick brown!fox&#39;
+&#39;A 1uick brown fox&#39;
+&#39;@ quick brown fox&#39;
+&#39;A quic+ brown fox&#39;
+&#39;A quick bsown fox&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us now create a random mutator that randomly chooses which mutation to apply:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return s with a random mutation applied&quot;&quot;&quot;</span>
+    <span class="n">mutators</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">delete_random_character</span><span class="p">,</span>
+        <span class="n">insert_random_character</span><span class="p">,</span>
+        <span class="n">flip_random_character</span>
+    <span class="p">]</span>
+    <span class="n">mutator</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">mutators</span><span class="p">)</span>
+    <span class="c1"># print(mutator)</span>
+    <span class="k">return</span> <span class="n">mutator</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">mutate</span><span class="p">(</span><span class="s2">&quot;A quick brown fox&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;A qzuick brown fox&#39;
+&#39; quick brown fox&#39;
+&#39;A quick Brown fox&#39;
+&#39;A qMuick brown fox&#39;
+&#39;A qu_ick brown fox&#39;
+&#39;A quick bXrown fox&#39;
+&#39;A quick brown fx&#39;
+&#39;A quick!brown fox&#39;
+&#39;A! quick brown fox&#39;
+&#39;A quick brownfox&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>The idea is now that <em>if</em> we have some valid input(s) to begin with, we may create more input candidates by applying one of the above mutations.  To see how this works, let’s get back to URLs.</p>
+</section>
+<section id="mutating-urls">
+<h2>Mutating URLs<a class="headerlink" href="#mutating-urls" title="Link to this heading">#</a></h2>
+<p>Let us now get back to our URL parsing problem.  Let us create a function <code class="docutils literal notranslate"><span class="pre">is_valid_url()</span></code> that checks whether <code class="docutils literal notranslate"><span class="pre">http_program()</span></code> accepts the input.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">is_valid_url</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">http_program</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_url</span><span class="p">(</span><span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_url</span><span class="p">(</span><span class="s2">&quot;xyzzy&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us now apply the <code class="docutils literal notranslate"><span class="pre">mutate()</span></code> function on a given URL and see how many valid inputs we obtain.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span>
+<span class="n">valid_inputs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="n">trials</span> <span class="o">=</span> <span class="mi">20</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+    <span class="n">inp</span> <span class="o">=</span> <span class="n">mutate</span><span class="p">(</span><span class="n">seed_input</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_valid_url</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+        <span class="n">valid_inputs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can now observe that by <em>mutating</em> the original input, we get a high proportion of valid inputs:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">valid_inputs</span><span class="p">)</span> <span class="o">/</span> <span class="n">trials</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.8
+</pre></div>
+</div>
+</div>
+</div>
+<p>What are the odds of also producing a <code class="docutils literal notranslate"><span class="pre">https:</span></code> prefix by mutating a <code class="docutils literal notranslate"><span class="pre">http:</span></code> sample seed input?  We have to insert (<span class="math notranslate nohighlight">\(1 : 3\)</span>) the right character <code class="docutils literal notranslate"><span class="pre">'s'</span></code> (<span class="math notranslate nohighlight">\(1 : 96\)</span>) into the correct position (<span class="math notranslate nohighlight">\(1 : l\)</span>), where <span class="math notranslate nohighlight">\(l\)</span> is the length of our seed input.  This means that on average, we need this many runs:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">96</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">seed_input</span><span class="p">)</span>
+<span class="n">trials</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>10944
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can actually afford this.  Let’s try:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Timer</span> <span class="kn">import</span> <span class="n">Timer</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">trials</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">inp</span> <span class="o">=</span> <span class="n">mutate</span><span class="p">(</span><span class="n">seed_input</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inp</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;https://&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Success after&quot;</span><span class="p">,</span>
+                <span class="n">trials</span><span class="p">,</span>
+                <span class="s2">&quot;trials in&quot;</span><span class="p">,</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">(),</span>
+                <span class="s2">&quot;seconds&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Success after 3656 trials in 0.004294582991860807 seconds
+</pre></div>
+</div>
+</div>
+</div>
+<p>Of course, if we wanted to get, say, an <code class="docutils literal notranslate"><span class="pre">&quot;ftp://&quot;</span></code> prefix, we would need more mutations and more runs – most important, though, we would need to apply <em>multiple</em> mutations.</p>
+</section>
+<section id="multiple-mutations">
+<h2>Multiple Mutations<a class="headerlink" href="#multiple-mutations" title="Link to this heading">#</a></h2>
+<p>So far, we have only applied one single mutation on a sample string.  However, we can also apply <em>multiple</em> mutations, further changing it.  What happens, for instance, if we apply, say, 20 mutations on our sample string?</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span>
+<span class="n">mutations</span> <span class="o">=</span> <span class="mi">50</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inp</span> <span class="o">=</span> <span class="n">seed_input</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mutations</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;mutations:&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span>
+    <span class="n">inp</span> <span class="o">=</span> <span class="n">mutate</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0 mutations: &#39;http://www.google.com/search?q=fuzzing&#39;
+5 mutations: &#39;http:/L/www.googlej.com/seaRchq=fuz:ing&#39;
+10 mutations: &#39;http:/L/www.ggoWglej.com/seaRchqfu:in&#39;
+15 mutations: &#39;http:/L/wwggoWglej.com/seaR3hqf,u:in&#39;
+20 mutations: &#39;htt://wwggoVgle&quot;j.som/seaR3hqf,u:in&#39;
+25 mutations: &#39;htt://fwggoVgle&quot;j.som/eaRd3hqf,u^:in&#39;
+30 mutations: &#39;htv://&gt;fwggoVgle&quot;j.qom/ea0Rd3hqf,u^:i&#39;
+35 mutations: &#39;htv://&gt;fwggozVle&quot;Bj.qom/eapRd[3hqf,u^:i&#39;
+40 mutations: &#39;htv://&gt;fwgeo6zTle&quot;Bj.\&#39;qom/eapRd[3hqf,tu^:i&#39;
+45 mutations: &#39;htv://&gt;fwgeo]6zTle&quot;BjM.\&#39;qom/eaR[3hqf,tu^:i&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>As you see, the original seed input is hardly recognizable anymore.  By mutating the input again and again, we get a higher variety in the input.</p>
+<p>To implement such multiple mutations in a single package, let us introduce a <code class="docutils literal notranslate"><span class="pre">MutationFuzzer</span></code> class.  It takes a seed (a list of strings) as well as a minimum and a maximum number of mutations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Fuzzer</span> <span class="kn">import</span> <span class="n">Fuzzer</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MutationFuzzer</span><span class="p">(</span><span class="n">Fuzzer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for mutational fuzzing&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                 <span class="n">min_mutations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                 <span class="n">max_mutations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
+<span class="sd">        `seed` - a list of (input) strings to mutate.</span>
+<span class="sd">        `min_mutations` - the minimum number of mutations to apply.</span>
+<span class="sd">        `max_mutations` - the maximum number of mutations to apply.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_mutations</span> <span class="o">=</span> <span class="n">min_mutations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_mutations</span> <span class="o">=</span> <span class="n">max_mutations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set population to initial seed.</span>
+<span class="sd">        To be overloaded in subclasses.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">population</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed_index</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the following, let us develop <code class="docutils literal notranslate"><span class="pre">MutationFuzzer</span></code> further by adding more methods to it.  The Python language requires us to define an entire class with all methods as a single, continuous unit; however, we would like to introduce one method after another.  To avoid this problem, we use a special hack: Whenever we want to introduce a new method to some class <code class="docutils literal notranslate"><span class="pre">C</span></code>, we use the construct</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">C</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">new_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p>This seems to define <code class="docutils literal notranslate"><span class="pre">C</span></code> as a subclass of itself, which would make no sense – but actually, it introduces a new <code class="docutils literal notranslate"><span class="pre">C</span></code> class as a subclass of the <em>old</em> <code class="docutils literal notranslate"><span class="pre">C</span></code> class, and then shadowing the old <code class="docutils literal notranslate"><span class="pre">C</span></code> definition.  What this gets us is a <code class="docutils literal notranslate"><span class="pre">C</span></code> class with <code class="docutils literal notranslate"><span class="pre">new_method()</span></code> as a method, which is just what we want.  (<code class="docutils literal notranslate"><span class="pre">C</span></code> objects defined earlier will retain the earlier <code class="docutils literal notranslate"><span class="pre">C</span></code> definition, though, and thus must be rebuilt.)</p>
+<p>Using this hack, we can now add a <code class="docutils literal notranslate"><span class="pre">mutate()</span></code> method that actually invokes the above <code class="docutils literal notranslate"><span class="pre">mutate()</span></code> function.  Having <code class="docutils literal notranslate"><span class="pre">mutate()</span></code> as a method is useful when we want to extend a <code class="docutils literal notranslate"><span class="pre">MutationFuzzer</span></code> later.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MutationFuzzer</span><span class="p">(</span><span class="n">MutationFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mutate</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s get back to our strategy, maximizing <em>diversity in coverage</em> in our population.  First, let us create a method <code class="docutils literal notranslate"><span class="pre">create_candidate()</span></code>, which randomly picks some input from our current population (<code class="docutils literal notranslate"><span class="pre">self.population</span></code>), and then applies between <code class="docutils literal notranslate"><span class="pre">min_mutations</span></code> and <code class="docutils literal notranslate"><span class="pre">max_mutations</span></code> mutation steps, returning the final result:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MutationFuzzer</span><span class="p">(</span><span class="n">MutationFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_candidate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new candidate by mutating a population member&quot;&quot;&quot;</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">)</span>
+        <span class="n">trials</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_mutations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_mutations</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mutate</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">candidate</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">fuzz()</span></code> method is set to first pick the seeds; when these are gone, we mutate:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MutationFuzzer</span><span class="p">(</span><span class="n">MutationFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fuzz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">):</span>
+            <span class="c1"># Still seeding</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">seed_index</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">seed_index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Mutating</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_candidate</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Here is the <code class="docutils literal notranslate"><span class="pre">fuzz()</span></code> method in action. With every new invocation of <code class="docutils literal notranslate"><span class="pre">fuzz()</span></code>, we get another variant with multiple mutations applied.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span>
+<span class="n">mutation_fuzzer</span> <span class="o">=</span> <span class="n">MutationFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">])</span>
+<span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;http://www.google.com/search?q=fuzzing&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;http://www.gogl9ecom/earch?qfuzzing&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;htotq:/www.googleom/yseach?q=fzzijg&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>The higher variety in inputs, though, increases the risk of having an invalid input.  The key to success lies in the idea of <em>guiding</em> these mutations – that is, <em>keeping those that are especially valuable.</em></p>
+</section>
+<section id="guiding-by-coverage">
+<h2>Guiding by Coverage<a class="headerlink" href="#guiding-by-coverage" title="Link to this heading">#</a></h2>
+<p>To cover as much functionality as possible, one can rely on either <em>specified</em> or <em>implemented</em> functionality, as discussed in the <a class="reference internal" href="Coverage.html"><span class="std std-doc">“Coverage”</span></a> chapter.  For now, we will not assume that there is a specification of program behavior (although it <em>definitely</em> would be good to have one!).  We <em>will</em> assume, though, that the program to be tested exists – and that we can leverage its structure to guide test generation.</p>
+<p>Since testing always executes the program at hand, one can always gather information about its execution – the least is the information needed to decide whether a test passes or fails.  Since coverage is frequently measured as well to determine test quality, let us also assume we can retrieve coverage of a test run.  The question is then: <em>How can we leverage coverage to guide test generation?</em></p>
+<p>One particularly successful idea is implemented in the popular fuzzer named <a class="reference external" href="http://lcamtuf.coredump.cx/afl/">American fuzzy lop</a>, or <em>AFL</em> for short.  Just like our examples above, AFL evolves test cases that have been successful – but for AFL, “success” means <em>finding a new path through the program execution</em>.  This way, AFL can keep on mutating inputs that so far have found new paths; and if an input finds another path, it will be retained as well.</p>
+<p>Let us build such a strategy.  We start with introducing a <code class="docutils literal notranslate"><span class="pre">Runner</span></code> class that captures the coverage for a given function.  First, a <code class="docutils literal notranslate"><span class="pre">FunctionRunner</span></code> class:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Fuzzer</span> <span class="kn">import</span> <span class="n">Runner</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FunctionRunner</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize.  `function` is a function to be executed&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
+
+    <span class="k">def</span> <span class="nf">run_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_function</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+            <span class="n">outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PASS</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FAIL</span>
+
+        <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">http_runner</span> <span class="o">=</span> <span class="n">FunctionRunner</span><span class="p">(</span><span class="n">http_program</span><span class="p">)</span>
+<span class="n">http_runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;https://foo.bar/&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(True, &#39;PASS&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can now extend the <code class="docutils literal notranslate"><span class="pre">FunctionRunner</span></code> class such that it also measures coverage.  After invoking <code class="docutils literal notranslate"><span class="pre">run()</span></code>, the <code class="docutils literal notranslate"><span class="pre">coverage()</span></code> method returns the coverage achieved in the last run.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Coverage</span> <span class="kn">import</span> <span class="n">Coverage</span><span class="p">,</span> <span class="n">population_coverage</span><span class="p">,</span> <span class="n">Location</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FunctionCoverageRunner</span><span class="p">(</span><span class="n">FunctionRunner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run_function</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
+                <span class="k">raise</span> <span class="n">exc</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Location</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">http_runner</span> <span class="o">=</span> <span class="n">FunctionCoverageRunner</span><span class="p">(</span><span class="n">http_program</span><span class="p">)</span>
+<span class="n">http_runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;https://foo.bar/&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(True, &#39;PASS&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<p>Here are the first five locations covered:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">http_runner</span><span class="o">.</span><span class="n">coverage</span><span class="p">())[:</span><span class="mi">5</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(&#39;http_program&#39;, 11), (&#39;run_function&#39;, 7), (&#39;urlparse&#39;, 395), (&#39;_coerce_args&#39;, 129), (&#39;urlparse&#39;, 401)]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now for the main class.  We maintain the population and a set of coverages already achieved (<code class="docutils literal notranslate"><span class="pre">coverages_seen</span></code>).  The <code class="docutils literal notranslate"><span class="pre">fuzz()</span></code> helper function takes an input and runs the given <code class="docutils literal notranslate"><span class="pre">function()</span></code> on it.  If its coverage is new (i.e. not in <code class="docutils literal notranslate"><span class="pre">coverages_seen</span></code>), the input is added to <code class="docutils literal notranslate"><span class="pre">population</span></code> and the coverage to <code class="docutils literal notranslate"><span class="pre">coverages_seen</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MutationCoverageFuzzer</span><span class="p">(</span><span class="n">MutationFuzzer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fuzz with mutated inputs based on coverage&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coverages_seen</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">frozenset</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="c1"># Now empty; we fill this with seed in the first fuzz runs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">population</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">:</span> <span class="n">FunctionCoverageRunner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run function(inp) while tracking coverage.</span>
+<span class="sd">           If we reach new coverage,</span>
+<span class="sd">           add inp to population and its coverage to population_coverage</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">runner</span><span class="p">)</span>
+        <span class="n">new_coverage</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">coverage</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">outcome</span> <span class="o">==</span> <span class="n">Runner</span><span class="o">.</span><span class="n">PASS</span> <span class="ow">and</span> <span class="n">new_coverage</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coverages_seen</span><span class="p">:</span>
+            <span class="c1"># We have new coverage</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inp</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coverages_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_coverage</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us now put this to use:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span>
+<span class="n">mutation_fuzzer</span> <span class="o">=</span> <span class="n">MutationCoverageFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">])</span>
+<span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="n">http_runner</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">population</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;http://www.google.com/search?q=fuzzing&#39;,
+ &#39;http://ww.google.co/searc(?q=fuzzin_g&#39;,
+ &#39;http://ww.google.#o/sarc(?q=fuzzhn_w&#39;,
+ &#39;Http://www.g/ogle.com/earchq=fuzzing&#39;,
+ &#39;http://$\x7fw,go0ogle.co/searc(;q=fXzin_g&#39;,
+ &#39;http://$\x7fw(g\x7f0ogle&amp;@cosWearc(;q3=fXzin_g&#39;,
+ &#39;Http://www.g/ogle*com;/ea+chq=fuzzing&#39;,
+ &#39;http://ww.Google.co/saarch?#q=fuzzi|n_o&#39;,
+ &#39;http://{$H\x7fw,o0ogle.co/sarc(;q=fXzi#n_&quot;g&#39;,
+ &#39;http://ww.gogle.bm/s;eqrh?q=fuzzi)ng&#39;,
+ &#39;Http://www.g/ogQle*com;/ea#ch=fu~ring&#39;,
+ &#39;Http://\x7fww.g/ogle*com;/Yeachq?8fuzzing&#39;,
+ &#39;Http://wwwd.g/ogQle*com;?ea#ch=fu~ring&#39;,
+ &#39;Http://www.g/ogQle*com;/1ea?#ch=fu~ring&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Success!  In our population, <em>each and every input</em> now is valid and has a different coverage, coming from various combinations of schemes, paths, queries, and fragments.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">all_coverage</span><span class="p">,</span> <span class="n">cumulative_coverage</span> <span class="o">=</span> <span class="n">population_coverage</span><span class="p">(</span>
+    <span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">population</span><span class="p">,</span> <span class="n">http_program</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>  <span class="c1"># type: ignore</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cumulative_coverage</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Coverage of urlparse() with random inputs&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;# of inputs&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;lines covered&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/f4f7df7e18af2274bbdfa6c1eba440a5508c4bbc89460ec208d12b2478e03e93.png" src="_images/f4f7df7e18af2274bbdfa6c1eba440a5508c4bbc89460ec208d12b2478e03e93.png" />
+</div>
+</div>
+<p>The nice thing about this strategy is that, applied to larger programs, it will happily explore one path after the other – covering functionality after functionality.  All that is needed is a means to capture the coverage.</p>
+</section>
+<section id="id1">
+<h2>Synopsis<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<p>This chapter introduces a <code class="docutils literal notranslate"><span class="pre">MutationFuzzer</span></code> class that takes a list of <em>seed inputs</em> which are then mutated:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span>
+<span class="n">mutation_fuzzer</span> <span class="o">=</span> <span class="n">MutationFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">])</span>
+<span class="p">[</span><span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;http://www.google.com/search?q=fuzzing&#39;,
+ &#39;]hTtp://ww,google\x1ecom/searc?q=fuzzig&#39;,
+ &#39;hppY://www.google.cm/seacH?q=fduzzing&#39;,
+ &#39;http:&amp;//www.goole.com/sear#h?q=fuzz(ingw&#39;,
+ &#39;http://vww.googlje.om/{earch?q5fuzzing&#39;,
+ &#39;http://www.google.com/seach?q=uzzing&#39;,
+ &#39;hv,tp*//www.ggogle.com/seagrch/q=fuzzing&#39;,
+ &quot;h(tpy:/wGw.goo&#39;l%.com/searc?q=fuz~ing&quot;,
+ &#39;hp://www.gooelecom/)search?q=fuz?zing?&#39;,
+ &quot;httpv//www.goo6gl.#om&#39;search?q=Puzzin&quot;]
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">MutationCoverageFuzzer</span></code> maintains a <em>population</em> of inputs, which are then evolved in order to maximize coverage.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mutation_fuzzer</span> <span class="o">=</span> <span class="n">MutationCoverageFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">])</span>
+<span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="n">http_runner</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">population</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;http://www.google.com/search?q=fuzzing&#39;,
+ &#39;http://www.google.com&lt;/searc?q=fzzinw&#39;,
+ &#39;http://twww.google.com/searc`pnu&lt;zzing&#39;,
+ &#39;http://Btwnww.gIoog|e.cnsearc`pn&lt;zzing&#39;,
+ &#39;http://www\x0egoogle.com&lt;/sea#r#?q=_fdz0zinw&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="kn">from</span> <span class="nn">ClassDiagram</span> <span class="kn">import</span> <span class="n">display_class_hierarchy</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">MutationCoverageFuzzer</span><span class="p">,</span>
+                        <span class="n">public_methods</span><span class="o">=</span><span class="p">[</span>
+                            <span class="n">Fuzzer</span><span class="o">.</span><span class="n">run</span><span class="p">,</span>
+                            <span class="n">Fuzzer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">,</span>
+                            <span class="n">Fuzzer</span><span class="o">.</span><span class="n">runs</span><span class="p">,</span>
+                            <span class="n">Fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">,</span>
+                            <span class="n">MutationFuzzer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">,</span>
+                            <span class="n">MutationFuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">,</span>
+                            <span class="n">MutationCoverageFuzzer</span><span class="o">.</span><span class="n">run</span><span class="p">,</span>
+                        <span class="p">],</span>
+                        <span class="n">types</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Location&#39;</span><span class="p">:</span> <span class="n">Location</span><span class="p">},</span>
+                        <span class="n">project</span><span class="o">=</span><span class="s1">&#39;fuzzingbook&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
+ -->
+<!-- Pages: 1 -->
+<svg width="318pt" height="325pt"
+ viewBox="0.00 0.00 318.38 325.25" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 321.25)">
+<g id="a_graph0"><a xlink:title="MutationCoverageFuzzer class hierarchy">
+<polygon fill="white" stroke="none" points="-4,4 -4,-321.25 314.38,-321.25 314.38,4 -4,4"/>
+</a>
+</g>
+<!-- MutationCoverageFuzzer -->
+<g id="node1" class="node">
+<title>MutationCoverageFuzzer</title>
+<g id="a_node1"><a xlink:href="#" xlink:title="class MutationCoverageFuzzer:&#10;Fuzz with mutated inputs based on coverage">
+<polygon fill="none" stroke="black" points="0,-0.5 0,-60 173.5,-60 173.5,-0.5 0,-0.5"/>
+<text text-anchor="start" x="8" y="-43.7" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">MutationCoverageFuzzer</text>
+<polyline fill="none" stroke="black" points="0,-34 173.5,-34"/>
+<g id="a_node1_0"><a xlink:href="#" xlink:title="MutationCoverageFuzzer">
+<g id="a_node1_1"><a xlink:href="#" xlink:title="run(self, runner: FunctionCoverageRunner) &#45;&gt; Any:&#10;Run function(inp) while tracking coverage.&#10;If we reach new coverage,&#10;add inp to population and its coverage to population_coverage">
+<text text-anchor="start" x="65.75" y="-21.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">run()</text>
+</a>
+</g>
+<g id="a_node1_2"><a xlink:href="#" xlink:title="reset(self) &#45;&gt; None:&#10;Set population to initial seed.&#10;To be overloaded in subclasses.">
+<text text-anchor="start" x="65.75" y="-8.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">reset()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- MutationFuzzer -->
+<g id="node2" class="node">
+<title>MutationFuzzer</title>
+<g id="a_node2"><a xlink:href="#" xlink:title="class MutationFuzzer:&#10;Base class for mutational fuzzing">
+<polygon fill="none" stroke="black" points="24.75,-97 24.75,-194.75 148.75,-194.75 148.75,-97 24.75,-97"/>
+<text text-anchor="start" x="36.88" y="-178.45" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">MutationFuzzer</text>
+<polyline fill="none" stroke="black" points="24.75,-168.75 148.75,-168.75"/>
+<g id="a_node2_3"><a xlink:href="#" xlink:title="MutationFuzzer">
+<g id="a_node2_4"><a xlink:href="#" xlink:title="__init__(self, seed: List[str], min_mutations: int = 2, max_mutations: int = 10) &#45;&gt; None:&#10;Constructor.&#10;`seed` &#45; a list of (input) strings to mutate.&#10;`min_mutations` &#45; the minimum number of mutations to apply.&#10;`max_mutations` &#45; the maximum number of mutations to apply.">
+<text text-anchor="start" x="32.75" y="-156.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node2_5"><a xlink:href="#" xlink:title="fuzz(self) &#45;&gt; str:&#10;Return fuzz input">
+<text text-anchor="start" x="32.75" y="-143.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
+</a>
+</g>
+<g id="a_node2_6"><a xlink:href="#" xlink:title="create_candidate(self) &#45;&gt; str:&#10;Create a new candidate by mutating a population member">
+<text text-anchor="start" x="32.75" y="-129.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">create_candidate()</text>
+</a>
+</g>
+<g id="a_node2_7"><a xlink:href="#" xlink:title="mutate(self, inp: str) &#45;&gt; str">
+<text text-anchor="start" x="32.75" y="-117" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">mutate()</text>
+</a>
+</g>
+<g id="a_node2_8"><a xlink:href="#" xlink:title="reset(self) &#45;&gt; None:&#10;Set population to initial seed.&#10;To be overloaded in subclasses.">
+<text text-anchor="start" x="32.75" y="-105.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">reset()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- MutationCoverageFuzzer&#45;&gt;MutationFuzzer -->
+<g id="edge1" class="edge">
+<title>MutationCoverageFuzzer&#45;&gt;MutationFuzzer</title>
+<path fill="none" stroke="black" d="M86.75,-60.22C86.75,-67.9 86.75,-76.48 86.75,-85.15"/>
+<polygon fill="none" stroke="black" points="83.25,-85.02 86.75,-95.02 90.25,-85.02 83.25,-85.02"/>
+</g>
+<!-- Fuzzer -->
+<g id="node3" class="node">
+<title>Fuzzer</title>
+<g id="a_node3"><a xlink:href="Fuzzer.ipynb" xlink:title="class Fuzzer:&#10;Base class for fuzzers.">
+<polygon fill="none" stroke="black" points="48.75,-231.75 48.75,-316.75 124.75,-316.75 124.75,-231.75 48.75,-231.75"/>
+<text text-anchor="start" x="66.12" y="-300.45" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">Fuzzer</text>
+<polyline fill="none" stroke="black" points="48.75,-290.75 124.75,-290.75"/>
+<g id="a_node3_9"><a xlink:href="#" xlink:title="Fuzzer">
+<g id="a_node3_10"><a xlink:href="Fuzzer.ipynb" xlink:title="__init__(self) &#45;&gt; None:&#10;Constructor">
+<text text-anchor="start" x="56.75" y="-278.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node3_11"><a xlink:href="Fuzzer.ipynb" xlink:title="fuzz(self) &#45;&gt; str:&#10;Return fuzz input">
+<text text-anchor="start" x="56.75" y="-265.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
+</a>
+</g>
+<g id="a_node3_12"><a xlink:href="Fuzzer.ipynb" xlink:title="run(self, runner: Fuzzer.Runner = &lt;Fuzzer.Runner object at 0x1106b2a50&gt;) &#45;&gt; Tuple[subprocess.CompletedProcess, str]:&#10;Run `runner` with fuzz input">
+<text text-anchor="start" x="56.75" y="-252.75" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">run()</text>
+</a>
+</g>
+<g id="a_node3_13"><a xlink:href="Fuzzer.ipynb" xlink:title="runs(self, runner: Fuzzer.Runner = &lt;Fuzzer.PrintRunner object at 0x11083b020&gt;, trials: int = 10) &#45;&gt; List[Tuple[subprocess.CompletedProcess, str]]:&#10;Run `runner` with fuzz input, `trials` times">
+<text text-anchor="start" x="56.75" y="-240" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">runs()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- MutationFuzzer&#45;&gt;Fuzzer -->
+<g id="edge2" class="edge">
+<title>MutationFuzzer&#45;&gt;Fuzzer</title>
+<path fill="none" stroke="black" d="M86.75,-195.01C86.75,-203.17 86.75,-211.68 86.75,-219.95"/>
+<polygon fill="none" stroke="black" points="83.25,-219.93 86.75,-229.93 90.25,-219.93 83.25,-219.93"/>
+</g>
+<!-- Legend -->
+<g id="node4" class="node">
+<title>Legend</title>
+<text text-anchor="start" x="191.12" y="-46.25" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="191.12" y="-36.25" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="197.12" y="-36.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="191.12" y="-26.25" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="197.12" y="-26.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="191.12" y="-16.25" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="197.12" y="-16.25" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="191.12" y="-7.2" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+</g>
+</g>
+</svg>
+</div></div>
+</div>
+</section>
+<section id="lessons-learned">
+<h2>Lessons Learned<a class="headerlink" href="#lessons-learned" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Randomly generated inputs are frequently invalid – and thus exercise mostly input processing functionality.</p></li>
+<li><p>Mutations from existing valid inputs have much higher chances to be valid, and thus to exercise functionality beyond input processing.</p></li>
+</ul>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading">#</a></h2>
+<p>In the next chapter on <a class="reference internal" href="GreyboxFuzzer.html"><span class="std std-doc">greybox fuzzing</span></a>, we further extend the concept of mutation-based testing with <em>power schedules</em> that allow spending more energy on seeds that exercise “unlikely” paths and seeds that are “closer” to a target location.</p>
+</section>
+<section id="exercises">
+<h2>Exercises<a class="headerlink" href="#exercises" title="Link to this heading">#</a></h2>
+<section id="exercise-1-fuzzing-cgi-decode-with-mutations">
+<h3>Exercise 1: Fuzzing CGI decode with Mutations<a class="headerlink" href="#exercise-1-fuzzing-cgi-decode-with-mutations" title="Link to this heading">#</a></h3>
+<p>Apply the above <em>guided</em> mutation-based fuzzing technique on <code class="docutils literal notranslate"><span class="pre">cgi_decode()</span></code> from the <a class="reference internal" href="Coverage.html"><span class="std std-doc">“Coverage”</span></a> chapter.  How many trials do you need until you cover all variations of <code class="docutils literal notranslate"><span class="pre">+</span></code>, <code class="docutils literal notranslate"><span class="pre">%</span></code> (valid and invalid), and regular characters?</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Coverage</span> <span class="kn">import</span> <span class="n">cgi_decode</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">seed</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Hello World&quot;</span><span class="p">]</span>
+<span class="n">cgi_runner</span> <span class="o">=</span> <span class="n">FunctionCoverageRunner</span><span class="p">(</span><span class="n">cgi_decode</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">MutationCoverageFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="n">cgi_runner</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">population</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;Hello World&#39;, &#39;he_&lt;+llo(or&lt;D&#39;, &#39;L}eml &amp;Wol%dD&#39;, &#39;L)q&lt;}aml &amp;cWol%d3D+&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cgi_runner</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{(&#39;cgi_decode&#39;, 16),
+ (&#39;cgi_decode&#39;, 17),
+ (&#39;cgi_decode&#39;, 18),
+ (&#39;cgi_decode&#39;, 19),
+ (&#39;cgi_decode&#39;, 20),
+ (&#39;cgi_decode&#39;, 23),
+ (&#39;cgi_decode&#39;, 24),
+ (&#39;cgi_decode&#39;, 25),
+ (&#39;cgi_decode&#39;, 26),
+ (&#39;cgi_decode&#39;, 27),
+ (&#39;cgi_decode&#39;, 29),
+ (&#39;cgi_decode&#39;, 38),
+ (&#39;cgi_decode&#39;, 39),
+ (&#39;cgi_decode&#39;, 40),
+ (&#39;run_function&#39;, 7)}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">all_coverage</span><span class="p">,</span> <span class="n">cumulative_coverage</span> <span class="o">=</span> <span class="n">population_coverage</span><span class="p">(</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">population</span><span class="p">,</span> <span class="n">cgi_decode</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cumulative_coverage</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Coverage of cgi_decode() with random inputs&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;# of inputs&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;lines covered&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/35d4a5ae82ac4e8da31ddc168c2d2a76b93962feccec7b4b509cffc862270f24.png" src="_images/35d4a5ae82ac4e8da31ddc168c2d2a76b93962feccec7b4b509cffc862270f24.png" />
+</div>
+</div>
+<p>After 10,000 runs, we have managed to synthesize a <code class="docutils literal notranslate"><span class="pre">+</span></code> character and a valid <code class="docutils literal notranslate"><span class="pre">%xx</span></code> form.  We can still do better.</p>
+</section>
+<section id="exercise-2-fuzzing-bc-with-mutations">
+<h3>Exercise 2: Fuzzing bc with Mutations<a class="headerlink" href="#exercise-2-fuzzing-bc-with-mutations" title="Link to this heading">#</a></h3>
+<p>Apply the above mutation-based fuzzing technique on <code class="docutils literal notranslate"><span class="pre">bc</span></code>, as in the chapter <a class="reference internal" href="Fuzzer.html"><span class="std std-doc">“Introduction to Fuzzing”</span></a>.</p>
+<section id="part-1-non-guided-mutations">
+<h4>Part 1: Non-Guided Mutations<a class="headerlink" href="#part-1-non-guided-mutations" title="Link to this heading">#</a></h4>
+<p>Start with non-guided mutations.  How many of the inputs are valid?</p>
+<p><strong>Solution.</strong> This is just a matter of tying a <code class="docutils literal notranslate"><span class="pre">ProgramRunner</span></code> to a <code class="docutils literal notranslate"><span class="pre">MutationFuzzer</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Fuzzer</span> <span class="kn">import</span> <span class="n">ProgramRunner</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">seed</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;1 + 1&quot;</span><span class="p">]</span>
+<span class="n">bc</span> <span class="o">=</span> <span class="n">ProgramRunner</span><span class="p">(</span><span class="n">program</span><span class="o">=</span><span class="s2">&quot;bc&quot;</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">MutationFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">outcomes</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outcomes</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(CompletedProcess(args=&#39;bc&#39;, returncode=0, stdout=&#39;2\n&#39;, stderr=&#39;&#39;), &#39;PASS&#39;),
+ (CompletedProcess(args=&#39;bc&#39;, returncode=0, stdout=&#39;41\n&#39;, stderr=&#39;&#39;), &#39;PASS&#39;),
+ (CompletedProcess(args=&#39;bc&#39;, returncode=2, stdout=&#39;&#39;, stderr=&#39;\nParse error: bad expression\n    &lt;stdin&gt;:1\n\n&#39;),
+  &#39;UNRESOLVED&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">completed_process</span><span class="p">,</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">outcomes</span> <span class="k">if</span> <span class="n">completed_process</span><span class="o">.</span><span class="n">stderr</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>17
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="part-2-guided-mutations">
+<h4>Part 2: Guided Mutations<a class="headerlink" href="#part-2-guided-mutations" title="Link to this heading">#</a></h4>
+<p>Continue with <em>guided</em> mutations.  To this end, you will have to find a way to extract coverage from a C program such as <code class="docutils literal notranslate"><span class="pre">bc</span></code>.  Proceed in these steps:</p>
+<p>First, get <a class="reference external" href="https://www.gnu.org/software/bc/">GNU bc</a>; download, say, <code class="docutils literal notranslate"><span class="pre">bc-1.07.1.tar.gz</span></code> and unpack it:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>curl<span class="w"> </span>-O<span class="w"> </span>mirrors.kernel.org/gnu/bc/bc-1.07.1.tar.gz
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  410k  100  410k    0     0   350k      0  0:00:01  0:00:01 --:--:--  350k
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>tar<span class="w"> </span>xfz<span class="w"> </span>bc-1.07.1.tar.gz
+</pre></div>
+</div>
+</div>
+</div>
+<p>Second, configure the package:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span><span class="nb">cd</span><span class="w"> </span>bc-1.07.1<span class="p">;</span><span class="w"> </span>./configure
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>checking for a BSD-compatible install... /opt/homebrew/bin/ginstall -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... /opt/homebrew/bin/gmkdir -p
+checking for gawk... no
+checking for mawk... no
+checking for nawk... no
+checking for awk... awk
+checking whether make sets $(MAKE)... yes
+checking whether make supports nested variables... yes
+checking for gcc... gcc
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables... 
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether gcc accepts -g... yes
+checking for gcc option to accept ISO C89... none needed
+checking whether gcc understands -c and -o together... yes
+checking for style of include used by make... GNU
+checking dependency style of gcc... gcc3
+checking how to run the C preprocessor... gcc -E
+checking for grep that handles long lines and -e... /usr/bin/grep
+checking for egrep... /usr/bin/grep -E
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking minix/config.h usability... no
+checking minix/config.h presence... no
+checking for minix/config.h... no
+checking whether it is safe to define __EXTENSIONS__... yes
+checking for flex... flex
+checking lex output file root... lex.yy
+checking lex library... -ll
+checking whether yytext is a pointer... yes
+checking for ar... ar
+checking the archiver (ar) interface... ar
+checking for bison... bison -y
+checking for ranlib... ranlib
+checking whether make sets $(MAKE)... (cached) yes
+checking for stdarg.h... yes
+checking for stddef.h... yes
+checking for stdlib.h... (cached) yes
+checking for string.h... (cached) yes
+checking for errno.h... yes
+checking for limits.h... yes
+checking for unistd.h... (cached) yes
+checking for lib.h... no
+checking for an ANSI C-conforming const... yes
+checking for size_t... yes
+checking for ptrdiff_t... yes
+checking for vprintf... yes
+checking for _doprnt... no
+checking for isgraph... yes
+checking for setvbuf... yes
+checking for fstat... yes
+checking for strtol... yes
+Adding GCC specific compile flags.
+checking that generated files are newer than configure... done
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating bc/Makefile
+config.status: creating dc/Makefile
+config.status: creating lib/Makefile
+config.status: creating doc/Makefile
+config.status: creating doc/texi-ver.incl
+config.status: creating config.h
+config.status: executing depfiles commands
+</pre></div>
+</div>
+</div>
+</div>
+<p>Third, compile the package with special flags:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span><span class="nb">cd</span><span class="w"> </span>bc-1.07.1<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>-k<span class="w"> </span><span class="nv">CFLAGS</span><span class="o">=</span><span class="s2">&quot;--coverage&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Applications/Xcode.app/Contents/Developer/usr/bin/make  all-recursive
+Making all in lib
+gcc -DHAVE_CONFIG_H  -I. -I..  -I. -I.. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT getopt.o -MD -MP -MF .deps/getopt.Tpo -c -o getopt.o getopt.c
+<span class=" -Color -Color-Bold">getopt.c:348:28: </span><span class=" -Color -Color-Bold -Color-Bold-Magenta">warning: </span><span class=" -Color -Color-Bold">passing arguments to &#39;getenv&#39;</span>
+<span class=" -Color -Color-Bold">      without a prototype is deprecated in all versions of C and is not</span>
+<span class=" -Color -Color-Bold">      supported in C2x [-Wdeprecated-non-prototype]</span>
+  348 |   posixly_correct = getenv (&quot;POSIXLY_CORRECT&quot;);
+      | <span class=" -Color -Color-Bold -Color-Bold-Green">                           ^</span>
+In file included from getopt.c:106:
+<span class=" -Color -Color-Bold">./../h/getopt.h:144:12: </span><span class=" -Color -Color-Bold -Color-Bold-Magenta">warning: </span><span class=" -Color -Color-Bold">a function declaration</span>
+<span class=" -Color -Color-Bold">      without a prototype is deprecated in all versions of C and is treated as a</span>
+<span class=" -Color -Color-Bold">      zero-parameter prototype in C2x, conflicting with a subsequent definition</span>
+<span class=" -Color -Color-Bold">      [-Wdeprecated-non-prototype]</span>
+  144 | extern int getopt ();
+      | <span class=" -Color -Color-Bold -Color-Bold-Green">           ^</span>
+<span class=" -Color -Color-Bold">getopt.c:1135:1: </span><span class=" -Color -Color-Bold -Color-Bold-Black">note: </span>conflicting prototype is here
+ 1135 | getopt (int argc, char *const *argv, const char *optstring)
+      | <span class=" -Color -Color-Bold -Color-Bold-Green">^</span>
+2 warnings generated.
+mv -f .deps/getopt.Tpo .deps/getopt.Po
+gcc -DHAVE_CONFIG_H  -I. -I..  -I. -I.. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT getopt1.o -MD -MP -MF .deps/getopt1.Tpo -c -o getopt1.o getopt1.c
+mv -f .deps/getopt1.Tpo .deps/getopt1.Po
+gcc -DHAVE_CONFIG_H  -I. -I..  -I. -I.. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT vfprintf.o -MD -MP -MF .deps/vfprintf.Tpo -c -o vfprintf.o vfprintf.c
+mv -f .deps/vfprintf.Tpo .deps/vfprintf.Po
+gcc -DHAVE_CONFIG_H  -I. -I..  -I. -I.. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT number.o -MD -MP -MF .deps/number.Tpo -c -o number.o number.c
+mv -f .deps/number.Tpo .deps/number.Po
+rm -f libbc.a
+ar cru libbc.a getopt.o getopt1.o vfprintf.o number.o 
+ranlib libbc.a
+Making all in bc
+gcc -DHAVE_CONFIG_H -I. -I..  -I. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT main.o -MD -MP -MF .deps/main.Tpo -c -o main.o main.c
+In file included from main.c:34:
+<span class=" -Color -Color-Bold">./../h/getopt.h:144:12: </span><span class=" -Color -Color-Bold -Color-Bold-Magenta">warning: </span><span class=" -Color -Color-Bold">a function declaration</span>
+<span class=" -Color -Color-Bold">      without a prototype is deprecated in all versions of C and is treated as a</span>
+<span class=" -Color -Color-Bold">      zero-parameter prototype in C2x, conflicting with a previous declaration</span>
+<span class=" -Color -Color-Bold">      [-Wdeprecated-non-prototype]</span>
+  144 | extern int getopt ();
+      | <span class=" -Color -Color-Bold -Color-Bold-Green">           ^</span>
+<span class=" -Color -Color-Bold">/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/unistd.h:509:6: </span><span class=" -Color -Color-Bold -Color-Bold-Black">note: </span>
+      conflicting prototype is here
+  509 | int      getopt(int, char * const [], const char *) __DARWIN_ALIAS(getopt);
+      | <span class=" -Color -Color-Bold -Color-Bold-Green">         ^</span>
+1 warning generated.
+mv -f .deps/main.Tpo .deps/main.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT bc.o -MD -MP -MF .deps/bc.Tpo -c -o bc.o bc.c
+mv -f .deps/bc.Tpo .deps/bc.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT scan.o -MD -MP -MF .deps/scan.Tpo -c -o scan.o scan.c
+mv -f .deps/scan.Tpo .deps/scan.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT execute.o -MD -MP -MF .deps/execute.Tpo -c -o execute.o execute.c
+mv -f .deps/execute.Tpo .deps/execute.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT load.o -MD -MP -MF .deps/load.Tpo -c -o load.o load.c
+mv -f .deps/load.Tpo .deps/load.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT storage.o -MD -MP -MF .deps/storage.Tpo -c -o storage.o storage.c
+mv -f .deps/storage.Tpo .deps/storage.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT util.o -MD -MP -MF .deps/util.Tpo -c -o util.o util.c
+mv -f .deps/util.Tpo .deps/util.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT warranty.o -MD -MP -MF .deps/warranty.Tpo -c -o warranty.o warranty.c
+<span class=" -Color -Color-Bold">warranty.c:56:1: </span><span class=" -Color -Color-Bold -Color-Bold-Magenta">warning: </span><span class=" -Color -Color-Bold">a function definition without a</span>
+<span class=" -Color -Color-Bold">      prototype is deprecated in all versions of C and is not supported in C2x</span>
+<span class=" -Color -Color-Bold">      [-Wdeprecated-non-prototype]</span>
+   56 | warranty(prefix)
+      | <span class=" -Color -Color-Bold -Color-Bold-Green">^</span>
+1 warning generated.
+mv -f .deps/warranty.Tpo .deps/warranty.Po
+echo &#39;{0}&#39; &gt; libmath.h
+/Applications/Xcode.app/Contents/Developer/usr/bin/make global.o
+gcc -DHAVE_CONFIG_H -I. -I..  -I. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT global.o -MD -MP -MF .deps/global.Tpo -c -o global.o global.c
+mv -f .deps/global.Tpo .deps/global.Po
+gcc -g -O2 -Wall -funsigned-char --coverage   -o libmath.h -o fbc main.o bc.o scan.o execute.o load.o storage.o util.o warranty.o global.o ../lib/libbc.a -ll  
+./fbc -c ./libmath.b &lt;/dev/null &gt;libmath.h
+./fix-libmath_h
+2655
+2793
+rm -f ./fbc ./global.o
+gcc -DHAVE_CONFIG_H -I. -I..  -I. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT global.o -MD -MP -MF .deps/global.Tpo -c -o global.o global.c
+mv -f .deps/global.Tpo .deps/global.Po
+gcc -g -O2 -Wall -funsigned-char --coverage   -o bc main.o bc.o scan.o execute.o load.o storage.o util.o global.o warranty.o ../lib/libbc.a -ll  
+Making all in dc
+gcc -DHAVE_CONFIG_H -I. -I..  -I./.. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT dc.o -MD -MP -MF .deps/dc.Tpo -c -o dc.o dc.c
+mv -f .deps/dc.Tpo .deps/dc.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I./.. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT misc.o -MD -MP -MF .deps/misc.Tpo -c -o misc.o misc.c
+mv -f .deps/misc.Tpo .deps/misc.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I./.. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT eval.o -MD -MP -MF .deps/eval.Tpo -c -o eval.o eval.c
+mv -f .deps/eval.Tpo .deps/eval.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I./.. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT stack.o -MD -MP -MF .deps/stack.Tpo -c -o stack.o stack.c
+mv -f .deps/stack.Tpo .deps/stack.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I./.. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT array.o -MD -MP -MF .deps/array.Tpo -c -o array.o array.c
+mv -f .deps/array.Tpo .deps/array.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I./.. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT numeric.o -MD -MP -MF .deps/numeric.Tpo -c -o numeric.o numeric.c
+<span class=" -Color -Color-Bold">numeric.c:576:1: </span><span class=" -Color -Color-Bold -Color-Bold-Magenta">warning: </span><span class=" -Color -Color-Bold">a function definition without a</span>
+<span class=" -Color -Color-Bold">      prototype is deprecated in all versions of C and is not supported in C2x</span>
+<span class=" -Color -Color-Bold">      [-Wdeprecated-non-prototype]</span>
+  576 | out_char (ch)
+      | <span class=" -Color -Color-Bold -Color-Bold-Green">^</span>
+1 warning generated.
+mv -f .deps/numeric.Tpo .deps/numeric.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I./.. -I./../h  -g -O2 -Wall -funsigned-char --coverage -MT string.o -MD -MP -MF .deps/string.Tpo -c -o string.o string.c
+mv -f .deps/string.Tpo .deps/string.Po
+gcc -g -O2 -Wall -funsigned-char --coverage   -o dc dc.o misc.o eval.o stack.o array.o numeric.o string.o ../lib/libbc.a 
+Making all in doc
+restore=: &amp;&amp; backupdir=&quot;.am$$&quot; &amp;&amp; \
+	am__cwd=`pwd` &amp;&amp; CDPATH=&quot;${ZSH_VERSION+.}:&quot; &amp;&amp; cd . &amp;&amp; \
+	rm -rf $backupdir &amp;&amp; mkdir $backupdir &amp;&amp; \
+	if (makeinfo --no-split --version) &gt;/dev/null 2&gt;&amp;1; then \
+	  for f in bc.info bc.info-[0-9] bc.info-[0-9][0-9] bc.i[0-9] bc.i[0-9][0-9]; do \
+	    if test -f $f; then mv $f $backupdir; restore=mv; else :; fi; \
+	  done; \
+	else :; fi &amp;&amp; \
+	cd &quot;$am__cwd&quot;; \
+	if makeinfo --no-split   -I . \
+	 -o bc.info bc.texi; \
+	then \
+	  rc=0; \
+	  CDPATH=&quot;${ZSH_VERSION+.}:&quot; &amp;&amp; cd .; \
+	else \
+	  rc=$?; \
+	  CDPATH=&quot;${ZSH_VERSION+.}:&quot; &amp;&amp; cd . &amp;&amp; \
+	  $restore $backupdir/* `echo &quot;./bc.info&quot; | sed &#39;s|[^/]*$||&#39;`; \
+	fi; \
+	rm -rf $backupdir; exit $rc
+restore=: &amp;&amp; backupdir=&quot;.am$$&quot; &amp;&amp; \
+	am__cwd=`pwd` &amp;&amp; CDPATH=&quot;${ZSH_VERSION+.}:&quot; &amp;&amp; cd . &amp;&amp; \
+	rm -rf $backupdir &amp;&amp; mkdir $backupdir &amp;&amp; \
+	if (makeinfo --no-split --version) &gt;/dev/null 2&gt;&amp;1; then \
+	  for f in dc.info dc.info-[0-9] dc.info-[0-9][0-9] dc.i[0-9] dc.i[0-9][0-9]; do \
+	    if test -f $f; then mv $f $backupdir; restore=mv; else :; fi; \
+	  done; \
+	else :; fi &amp;&amp; \
+	cd &quot;$am__cwd&quot;; \
+	if makeinfo --no-split   -I . \
+	 -o dc.info dc.texi; \
+	then \
+	  rc=0; \
+	  CDPATH=&quot;${ZSH_VERSION+.}:&quot; &amp;&amp; cd .; \
+	else \
+	  rc=$?; \
+	  CDPATH=&quot;${ZSH_VERSION+.}:&quot; &amp;&amp; cd . &amp;&amp; \
+	  $restore $backupdir/* `echo &quot;./dc.info&quot; | sed &#39;s|[^/]*$||&#39;`; \
+	fi; \
+	rm -rf $backupdir; exit $rc
+make[3]: Nothing to be done for `all-am&#39;.
+</pre></div>
+</div>
+</div>
+</div>
+<p>The file <code class="docutils literal notranslate"><span class="pre">bc/bc</span></code> should now be executable…</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span><span class="nb">cd</span><span class="w"> </span>bc-1.07.1/bc<span class="p">;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="m">2</span><span class="w"> </span>+<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>./bc
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>4
+</pre></div>
+</div>
+</div>
+</div>
+<p>…and you should be able to run the <code class="docutils literal notranslate"><span class="pre">gcov</span></code> program to retrieve coverage information.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span><span class="nb">cd</span><span class="w"> </span>bc-1.07.1/bc<span class="p">;</span><span class="w"> </span>gcov<span class="w"> </span>main.c
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>File &#39;main.c&#39;
+Lines executed:52.55% of 137
+Creating &#39;main.c.gcov&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>As sketched in the <a class="reference internal" href="Coverage.html"><span class="std std-doc">“Coverage” chapter</span></a>, the file <a class="reference internal" href="#bc-1.07.1/bc/main.c.gcov"><span class="xref myst">bc-1.07.1/bc/main.c.gcov</span></a> now holds the coverage information for <code class="docutils literal notranslate"><span class="pre">bc.c</span></code>.  Each line is prefixed with the number of times it was executed. <code class="docutils literal notranslate"><span class="pre">#####</span></code> means zero times; <code class="docutils literal notranslate"><span class="pre">-</span></code> means non-executable line.</p>
+<p>Parse the GCOV file for <code class="docutils literal notranslate"><span class="pre">bc</span></code> and create a <code class="docutils literal notranslate"><span class="pre">coverage</span></code> set, as in <code class="docutils literal notranslate"><span class="pre">FunctionCoverageRunner</span></code>.  Make this a <code class="docutils literal notranslate"><span class="pre">ProgramCoverageRunner</span></code> class that would be constructed with a list of source files (<code class="docutils literal notranslate"><span class="pre">bc.c</span></code>, <code class="docutils literal notranslate"><span class="pre">main.c</span></code>, <code class="docutils literal notranslate"><span class="pre">load.c</span></code>) to run <code class="docutils literal notranslate"><span class="pre">gcov</span></code> on.</p>
+<p>When you’re done, don’t forget to clean up:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>rm<span class="w"> </span>-fr<span class="w"> </span>bc-1.07.1<span class="w"> </span>bc-1.07.1.tar.gz
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="exercise-3">
+<h3>Exercise 3<a class="headerlink" href="#exercise-3" title="Link to this heading">#</a></h3>
+<p>In this <a class="reference external" href="https://lcamtuf.blogspot.com/2014/08/binary-fuzzing-strategies-what-works.html">blog post</a>, the author of <em>American Fuzzy Lop</em> (AFL), a very popular mutation-based fuzzer discusses the efficiency of various mutation operators.  Implement four of them and evaluate their efficiency as in the examples above.</p>
+</section>
+<section id="exercise-4">
+<h3>Exercise 4<a class="headerlink" href="#exercise-4" title="Link to this heading">#</a></h3>
+<p>When adding a new element to the list of candidates, AFL does actually not compare the <em>coverage</em>, but adds an element if it exercises a new <em>branch</em>.  Using branch coverage from the exercises of the <a class="reference internal" href="Coverage.html"><span class="std std-doc">“Coverage”</span></a> chapter, implement this “branch” strategy and compare it against the “coverage” strategy, above.</p>
+</section>
+<section id="exercise-5">
+<h3>Exercise 5<a class="headerlink" href="#exercise-5" title="Link to this heading">#</a></h3>
+<p>Design and implement a system that will gather a population of URLs from the Web.  Can you achieve a higher coverage with these samples?  What if you use them as initial population for further mutation?</p>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Coverage.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Code Coverage</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="GreyboxFuzzer.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Greybox Fuzzing</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synopsis">Synopsis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fuzzing-with-mutations">Fuzzing with Mutations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fuzzing-a-url-parser">Fuzzing a URL Parser</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mutating-inputs">Mutating Inputs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mutating-urls">Mutating URLs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#multiple-mutations">Multiple Mutations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guiding-by-coverage">Guiding by Coverage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Synopsis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#lessons-learned">Lessons Learned</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next Steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercises">Exercises</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-1-fuzzing-cgi-decode-with-mutations">Exercise 1: Fuzzing CGI decode with Mutations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-2-fuzzing-bc-with-mutations">Exercise 2: Fuzzing bc with Mutations</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#part-1-non-guided-mutations">Part 1: Non-Guided Mutations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#part-2-guided-mutations">Part 2: Guided Mutations</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-3">Exercise 3</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-4">Exercise 4</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-5">Exercise 5</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2021-2025 CISPA Helmholtz Center for Information Security (www.cispa.de); © Copyright 2018-2020 Saarland University, authors, and contributors. All Rights Reserved.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

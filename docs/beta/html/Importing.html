@@ -1,0 +1,851 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Using Fuzzingbook Code in your own Programs &#8212; The Fuzzing Book</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=42e1b1a5" />
+    <link rel="stylesheet" type="text/css" href="_static/mastodon-timeline.css?v=f82c2b23" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'Importing';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Guide for Authors" href="Guide_for_Authors.html" />
+    <link rel="prev" title="Fuzzingbook Release Notes" href="ReleaseNotes.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content"><p>This is a beta version of fuzzingbook.org, currently in development. See the <a href="https://fuzzingbook.org/"  style="color:white!important;">classic site</a> for resources.</p></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/fuzzingbook.png" class="logo__image only-light" alt="The Fuzzing Book - Home"/>
+    <script>document.write(`<img src="_static/fuzzingbook.png" class="logo__image only-dark" alt="The Fuzzing Book - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="index.html">
+                    The Fuzzing Book
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Tours.html">Tours through the Book</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Intro_Testing.html">Introduction to Software Testing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Lexical Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Coverage.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MutationFuzzer.html">Mutation-Based Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GreyboxFuzzer.html">Greybox Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SearchBasedFuzzer.html">Search-Based Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MutationAnalysis.html">Mutation Analysis</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Syntactical Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Grammars.html">Fuzzing with Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarFuzzer.html">Efficient Grammar Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarCoverageFuzzer.html">Grammar Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Parser.html">Parsing Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeneratorGrammarFuzzer.html">Fuzzing with Generators</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="GreyboxGrammarFuzzer.html">Greybox Fuzzing with Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reducer.html">Reducing Failure-Inducing Inputs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Semantical Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="FuzzingWithConstraints.html">Fuzzing with Constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GrammarMiner.html">Mining Input Grammars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InformationFlow.html">Tracking Information Flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConcolicFuzzer.html">Concolic Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SymbolicFuzzer.html">Symbolic Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DynamicInvariants.html">Mining Function Specifications</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Domain-Specific Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ConfigurationFuzzer.html">Testing Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="APIFuzzer.html">Fuzzing APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Carver.html">Carving Unit Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PythonFuzzer.html">Testing Compilers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WebFuzzer.html">Testing Web Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GUIFuzzer.html">Testing Graphical User Interfaces</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Managing Fuzzing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="FuzzingInTheLarge.html">Fuzzing in the Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WhenToStopFuzzing.html">When To Stop Fuzzing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Appendices</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="AcademicPrototyping.html">Academic Prototyping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PrototypingWithPython.html">Prototyping with Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExpectError.html">Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Timer.html">Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Timeout.html">Timeout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClassDiagram.html">Class Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RailroadDiagrams.html">Railroad Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ControlFlow.html">Control Flow Graph</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">About This Book</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ReleaseNotes.html">Fuzzingbook Release Notes</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Using Fuzzingbook Code in your own Programs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Guide_for_Authors.html">Guide for Authors</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?urlpath=tree/docs/notebooks/Importing.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/uds-se/fuzzingbook" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/uds-se/fuzzingbook/issues/new?title=Issue%20on%20page%20%2FImporting.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/Importing.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Using Fuzzingbook Code in your own Programs</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-import-the-code-for-my-own-python-projects">Can I import the code for my own Python projects?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#which-os-and-python-versions-are-required">Which OS and Python versions are required?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-use-the-code-from-within-a-jupyter-notebook">Can I use the code from within a Jupyter notebook?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-check-out-the-code-from-git-and-get-the-latest-and-greatest">Can I check out the code from git and get the latest and greatest?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-just-run-the-python-code-i-mean-without-notebooks">Can I just run the Python code?  I mean, without notebooks?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#which-other-packages-do-i-need-to-use-the-python-modules">Which other Packages do I need to use the Python Modules?</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-required-python-packages">Step 1: Install Required Python Packages</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-install-additional-non-python-packages">Step 2: Install Additional Non-Python Packages</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-graphviz-on-linux">Installing Graphviz on Linux</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-graphviz-on-macos">Installing Graphviz on macOS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-fuzzingbook-code-in-an-isolated-environment">Installing Fuzzingbook Code in an Isolated Environment</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-pyenv">Step 1: Install PyEnv</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-install-pipenv">Step 2: Install PipEnv</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-install-python-packages">Step 3: Install Python Packages</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-install-additional-non-python-packages">Step 4: Install Additional Non-Python Packages</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-enter-the-environment">Step 5: Enter the Environment</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="using-fuzzingbook-code-in-your-own-programs">
+<h1>Using Fuzzingbook Code in your own Programs<a class="headerlink" href="#using-fuzzingbook-code-in-your-own-programs" title="Link to this heading">#</a></h1>
+<p>This notebook has instructions on how to use the <code class="docutils literal notranslate"><span class="pre">fuzzingbook</span></code> code in your own programs.</p>
+<p>In short, there are three ways:</p>
+<ol class="arabic simple">
+<li><p>Simply run the notebooks in your browser, using the “mybinder” environment. Choose “Resources→Edit as Notebook” in any of the <code class="docutils literal notranslate"><span class="pre">fuzzingbook.org</span></code> pages; this will lead you to a preconfigured Jupyter Notebook environment where you can toy around at your leisure.</p></li>
+<li><p>Import the code for your own Python programs. Using <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">fuzzingbook</span></code>, you can install all code and start using it from your own code. See “Can I import the code for my own Python projects?”, below.</p></li>
+<li><p>Download or check out the code and/or the notebooks from the project site. This allows you to edit and run all things locally. However, be sure to also install the required packages; see below for details.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bookutils.setup</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bookutils</span> <span class="kn">import</span> <span class="n">YouTubeVideo</span>
+<span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;fGu3uwHcTRc&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+        <iframe
+            width="640"
+            height="360"
+            src="https://www.youtube-nocookie.com/embed/fGu3uwHcTRc"
+            frameborder="0"
+            allowfullscreen
+            
+        ></iframe>
+        </div></div>
+</div>
+<section id="can-i-import-the-code-for-my-own-python-projects">
+<h2>Can I import the code for my own Python projects?<a class="headerlink" href="#can-i-import-the-code-for-my-own-python-projects" title="Link to this heading">#</a></h2>
+<p>Yes, you can!  (If you like Python, that is.)  We provide a <code class="docutils literal notranslate"><span class="pre">fuzzingbook</span></code> Python package that you can install using the <code class="docutils literal notranslate"><span class="pre">pip</span></code> package manager:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>fuzzingbook
+</pre></div>
+</div>
+<p>As of <code class="docutils literal notranslate"><span class="pre">fuzzingbook</span> <span class="pre">1.0</span></code>, this is set up such that almost all additional required packages are also installed. For a full installation, also follow the steps in “Which other Packages do I need to use the Python Modules?” below.</p>
+<p>Once <code class="docutils literal notranslate"><span class="pre">pip</span></code> is complete, you can import individual classes, constants, or functions from each notebook using</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fuzzingbook.</span><span class="o">&lt;</span><span class="n">notebook</span><span class="o">&gt;</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;identifier&gt;</span></code> is the name of the class, constant, or function to use, and <code class="docutils literal notranslate"><span class="pre">&lt;notebook&gt;</span></code> is the name of the respective notebook.  (If you read this at <a class="reference external" href="http://fuzzingbook.org">fuzzingbook.org</a>, then the notebook name is the identifier preceding <code class="docutils literal notranslate"><span class="pre">&quot;.html&quot;</span></code> in the URL).</p>
+<p>Here is an example importing <code class="docutils literal notranslate"><span class="pre">RandomFuzzer</span></code> from <a class="reference internal" href="Fuzzer.html"><span class="std std-doc">the chapter on fuzzers</span></a>, whose notebook name is <code class="docutils literal notranslate"><span class="pre">Fuzzer</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fuzzingbook.Fuzzer</span> <span class="kn">import</span> <span class="n">RandomFuzzer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">RandomFuzzer</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+<span class="go">&#39;!7#%&quot;*#0=)$;%6*;&gt;638:*&gt;80&quot;=&lt;/&gt;(/*:-(2&lt;4 !:5*6856&amp;?&quot;&quot;11&lt;7+%&lt;%7,4.8,*+&amp;,,$,.&quot;5%&lt;%76&lt; -5&#39;</span>
+</pre></div>
+</div>
+<p>The “Synopsis” section at the beginning of a chapter gives a short survey on useful code features you can use.</p>
+</section>
+<section id="which-os-and-python-versions-are-required">
+<h2>Which OS and Python versions are required?<a class="headerlink" href="#which-os-and-python-versions-are-required" title="Link to this heading">#</a></h2>
+<p>As of <code class="docutils literal notranslate"><span class="pre">fuzzingbook</span> <span class="pre">1.0</span></code>, Python 3.9 and later is required. Specifically, we use Python 3.9.7 for development and testing. This is also the version to be used if you check out the code from git, and the version you get if you use the debugging book within the “mybinder” environment.</p>
+<p>To use the <code class="docutils literal notranslate"><span class="pre">fuzzingbook</span></code> code with earlier Python version, use</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;fuzzingbook=0.95&#39;</span>
+</pre></div>
+</div>
+<p>Our notebooks generally assume a Unix-like environment; the code is tested on Linux and macOS. System-independent code may also run on Windows.</p>
+</section>
+<section id="can-i-use-the-code-from-within-a-jupyter-notebook">
+<h2>Can I use the code from within a Jupyter notebook?<a class="headerlink" href="#can-i-use-the-code-from-within-a-jupyter-notebook" title="Link to this heading">#</a></h2>
+<p>Yes, you can!  You would first install the <code class="docutils literal notranslate"><span class="pre">fuzzingbook</span></code> package (as above); you can then access all code right from your notebook.</p>
+<p>Another way to use the code is to <em>import the notebooks directly</em>.  Download the notebooks from the menu.  Then, add your own notebooks into the same folder.  After importing <code class="docutils literal notranslate"><span class="pre">bookutils</span></code>, you can then simply import the code from other notebooks, just as our own notebooks do.</p>
+<p>Here is again the above example, importing <code class="docutils literal notranslate"><span class="pre">RandomFuzzer</span></code> from <a class="reference internal" href="Fuzzer.html"><span class="std std-doc">the chapter on fuzzers</span></a> – but now from a notebook:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bookutils.setup</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Fuzzer</span> <span class="kn">import</span> <span class="n">RandomFuzzer</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">RandomFuzzer</span><span class="p">()</span>
+<span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;!7#%&quot;*#0=)$;%6*;&gt;638:*&gt;80&quot;=&lt;/&gt;(/*:-(2&lt;4 !:5*6856&amp;?&quot;&quot;11&lt;7+%&lt;%7,4.8,*+&amp;,,$,.&quot;5%&lt;%76&lt; -5&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you’d like to share your notebook, let us know; we can integrate it in the repository or even in the book.</p>
+</section>
+<section id="can-i-check-out-the-code-from-git-and-get-the-latest-and-greatest">
+<h2>Can I check out the code from git and get the latest and greatest?<a class="headerlink" href="#can-i-check-out-the-code-from-git-and-get-the-latest-and-greatest" title="Link to this heading">#</a></h2>
+<p>Yes, you can! We have a few continuous integration (CI) workflows running which do exactly that. After cloning the repository from <a class="reference external" href="https://github.com/uds-se/fuzzingbook/">the project page</a> and installing the additional packages (see below), you can <code class="docutils literal notranslate"><span class="pre">cd</span></code> into <code class="docutils literal notranslate"><span class="pre">notebooks</span></code> and start <code class="docutils literal notranslate"><span class="pre">jupyter</span></code> right away!</p>
+<p>There also is a <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> provided with literally hundreds of targets; most important are the ones we also use in continuous integration:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">check-imports</span></code> checks whether your code is free of syntax errors</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">check-style</span></code> checks whether your code is free of type errors</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">check-code</span></code> runs all derived code, testing it</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">check-notebooks</span></code> runs all notebooks, testing them</p></li>
+</ul>
+<p>If you want to contribute to the project, ensure that the above tests run through.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> has many more, often experimental, targets. <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">markdown</span></code> creates a <code class="docutils literal notranslate"><span class="pre">.md</span></code> variant in <code class="docutils literal notranslate"><span class="pre">markdown/</span></code>, and there’s also <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">word</span></code> and <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">epub</span></code>, which are set to create Word and EPUB variants (with mixed results). Try <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">help</span></code> for commonly used targets.</p>
+</section>
+<section id="can-i-just-run-the-python-code-i-mean-without-notebooks">
+<h2>Can I just run the Python code?  I mean, without notebooks?<a class="headerlink" href="#can-i-just-run-the-python-code-i-mean-without-notebooks" title="Link to this heading">#</a></h2>
+<p>Yes, you can! You can download the code as Python programs; simply select “Resources <span class="math notranslate nohighlight">\(\rightarrow\)</span> Download Code” for one chapter or “Resources <span class="math notranslate nohighlight">\(\rightarrow\)</span> All Code” for all chapters.  These code files can be executed, yielding (hopefully) the same results as the notebooks.</p>
+<p>The code files can also be edited if you wish, but (a) they are very obviously generated from notebooks, (b) therefore not much fun to work with, and © if you fix any errors, you’ll have to back-propagate them to the notebook before you can make a pull request.  Use code files only under severely constrained circumstances.</p>
+<p>If you only want to <strong>use</strong> the Python code, install the code package (see above).</p>
+</section>
+<section id="which-other-packages-do-i-need-to-use-the-python-modules">
+<h2>Which other Packages do I need to use the Python Modules?<a class="headerlink" href="#which-other-packages-do-i-need-to-use-the-python-modules" title="Link to this heading">#</a></h2>
+<p>After downloaded <code class="docutils literal notranslate"><span class="pre">fuzzingbook</span></code> code, installing the <code class="docutils literal notranslate"><span class="pre">fuzzingbook</span></code> package, or checking out <code class="docutils literal notranslate"><span class="pre">fuzzingbook</span></code> from the repository, here’s what to do to obtain a complete set of packages.</p>
+<section id="step-1-install-required-python-packages">
+<h3>Step 1: Install Required Python Packages<a class="headerlink" href="#step-1-install-required-python-packages" title="Link to this heading">#</a></h3>
+<p>The <a class="reference external" href="https://github.com/uds-se/fuzzingbook/tree/master/"><code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file within the project root folder</a> lists all <em>Python packages required</em>.</p>
+<p>You can do</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<p>to install all required packages (but using <code class="docutils literal notranslate"><span class="pre">pipenv</span></code> is preferred; see below).</p>
+</section>
+<section id="step-2-install-additional-non-python-packages">
+<h3>Step 2: Install Additional Non-Python Packages<a class="headerlink" href="#step-2-install-additional-non-python-packages" title="Link to this heading">#</a></h3>
+<p>The <a class="reference external" href="https://github.com/uds-se/fuzzingbook/tree/master/binder"><code class="docutils literal notranslate"><span class="pre">apt.txt</span></code> file in the <code class="docutils literal notranslate"><span class="pre">binder/</span></code> folder</a> lists all <em>Linux</em> packages required.</p>
+<p>In most cases, however, it suffices to install the <code class="docutils literal notranslate"><span class="pre">dot</span></code> graph drawing program (part of the <code class="docutils literal notranslate"><span class="pre">graphviz</span></code> package). Here are some instructions:</p>
+<section id="installing-graphviz-on-linux">
+<h4>Installing Graphviz on Linux<a class="headerlink" href="#installing-graphviz-on-linux" title="Link to this heading">#</a></h4>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>graphviz
+</pre></div>
+</div>
+<p>to install it.</p>
+</section>
+<section id="installing-graphviz-on-macos">
+<h4>Installing Graphviz on macOS<a class="headerlink" href="#installing-graphviz-on-macos" title="Link to this heading">#</a></h4>
+<p>On macOS, if you use <code class="docutils literal notranslate"><span class="pre">conda</span></code>, run</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>install<span class="w"> </span>graphviz
+</pre></div>
+</div>
+<p>If you use HomeBrew, run</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>brew<span class="w"> </span>install<span class="w"> </span>graphviz
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="installing-fuzzingbook-code-in-an-isolated-environment">
+<h2>Installing Fuzzingbook Code in an Isolated Environment<a class="headerlink" href="#installing-fuzzingbook-code-in-an-isolated-environment" title="Link to this heading">#</a></h2>
+<p>If you wish to install the <code class="docutils literal notranslate"><span class="pre">fuzzingbook</span></code> code in an environment that is isolated from your system interpreter,
+we recommend using <a class="reference external" href="https://pipenv.pypa.io/">Pipenv</a>, which can automatically create a so called <em>virtual environment</em> hosting all required packages.</p>
+<p>To accomplish this, please follow these steps:</p>
+<section id="step-1-install-pyenv">
+<h3>Step 1: Install PyEnv<a class="headerlink" href="#step-1-install-pyenv" title="Link to this heading">#</a></h3>
+<p>Optionally install <code class="docutils literal notranslate"><span class="pre">pyenv</span></code> following the <a class="reference external" href="https://github.com/pyenv/pyenv#installation">official instructions</a> if you are on a Unix operating system.
+If you are on Windows, consider using <a class="reference external" href="https://github.com/pyenv-win/pyenv-win">pyenv-win</a> instead.
+This will allow you to seamlessly install any version of Python.</p>
+</section>
+<section id="step-2-install-pipenv">
+<h3>Step 2: Install PipEnv<a class="headerlink" href="#step-2-install-pipenv" title="Link to this heading">#</a></h3>
+<p>Install Pipenv following the official <a class="reference external" href="https://pypi.org/project/pipenv/">installation instructions</a>.
+If you have <code class="docutils literal notranslate"><span class="pre">pyenv</span></code> installed, Pipenv can automatically download and install the appropriate version of the Python distribution.
+Otherwise, Pipenv will use your system interpreter, which may or may not be the right version.</p>
+</section>
+<section id="step-3-install-python-packages">
+<h3>Step 3: Install Python Packages<a class="headerlink" href="#step-3-install-python-packages" title="Link to this heading">#</a></h3>
+<p>Run</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pipenv<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<p>in the <code class="docutils literal notranslate"><span class="pre">fuzzingbook</span></code> root directory.</p>
+</section>
+<section id="step-4-install-additional-non-python-packages">
+<h3>Step 4: Install Additional Non-Python Packages<a class="headerlink" href="#step-4-install-additional-non-python-packages" title="Link to this heading">#</a></h3>
+<p>See above for instructions on how to install additional non-python packages.</p>
+</section>
+<section id="step-5-enter-the-environment">
+<h3>Step 5: Enter the Environment<a class="headerlink" href="#step-5-enter-the-environment" title="Link to this heading">#</a></h3>
+<p>Enter the environment with</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pipenv<span class="w"> </span>shell
+</pre></div>
+</div>
+<p>where you can now execute</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>make<span class="w"> </span>-k<span class="w"> </span>check-code
+</pre></div>
+</div>
+<p>to run the tests.</p>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="ReleaseNotes.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Fuzzingbook Release Notes</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="Guide_for_Authors.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Guide for Authors</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-import-the-code-for-my-own-python-projects">Can I import the code for my own Python projects?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#which-os-and-python-versions-are-required">Which OS and Python versions are required?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-use-the-code-from-within-a-jupyter-notebook">Can I use the code from within a Jupyter notebook?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-check-out-the-code-from-git-and-get-the-latest-and-greatest">Can I check out the code from git and get the latest and greatest?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#can-i-just-run-the-python-code-i-mean-without-notebooks">Can I just run the Python code?  I mean, without notebooks?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#which-other-packages-do-i-need-to-use-the-python-modules">Which other Packages do I need to use the Python Modules?</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-required-python-packages">Step 1: Install Required Python Packages</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-install-additional-non-python-packages">Step 2: Install Additional Non-Python Packages</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-graphviz-on-linux">Installing Graphviz on Linux</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-graphviz-on-macos">Installing Graphviz on macOS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-fuzzingbook-code-in-an-isolated-environment">Installing Fuzzingbook Code in an Isolated Environment</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-pyenv">Step 1: Install PyEnv</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-install-pipenv">Step 2: Install PipEnv</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-install-python-packages">Step 3: Install Python Packages</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-install-additional-non-python-packages">Step 4: Install Additional Non-Python Packages</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-enter-the-environment">Step 5: Enter the Environment</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2021-2025 CISPA Helmholtz Center for Information Security (www.cispa.de); © Copyright 2018-2020 Saarland University, authors, and contributors. All Rights Reserved.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
