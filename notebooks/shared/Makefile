@@ -780,20 +780,20 @@ endif
 ## Jupyter Book (experimental)
 JUPYTER_BOOK = jupyter-book
 jupyter-book: $(JB_LINKS) _build/index.html
+FULL
+JB_LINKS = $(FULL_NOTEBOOKS)/_config.yml $(FULL_NOTEBOOKS)/_toc.yml $(FULL_NOTEBOOKS)/_build
+
+$(FULL_NOTEBOOKS)/_config.yml: _config.yml
+	cd $(FULL_NOTEBOOKS); ln -s ../_config.yml .
+
+$(FULL_NOTEBOOKS)/_toc.yml: _toc.yml
+	cd $(FULL_NOTEBOOKS); ln -s ../_toc.yml .
+
+$(FULL_NOTEBOOKS)/_build: _build
+	cd $(FULL_NOTEBOOKS); ln -s ../_build .
 	
-JB_LINKS = $(RENDERED_NOTEBOOKS)/_config.yml $(RENDERED_NOTEBOOKS)/_toc.yml $(RENDERED_NOTEBOOKS)/_build
-
-$(RENDERED_NOTEBOOKS)/_config.yml: _config.yml
-	cd $(RENDERED_NOTEBOOKS); ln -s ../_config.yml .
-
-$(RENDERED_NOTEBOOKS)/_toc.yml: _toc.yml
-	cd $(RENDERED_NOTEBOOKS); ln -s ../_toc.yml .
-
-$(RENDERED_NOTEBOOKS)/_build: _build
-	cd $(RENDERED_NOTEBOOKS); ln -s ../_build .
-	
-_build/index.html: $(RENDERS) \
-	cd $(RENDERED_NOTEBOOKS); $(JUPYTER_BOOK) build .
+_build/index.html: $(FULLS)
+	cd $(FULL_NOTEBOOKS); $(JUPYTER_BOOK) build .
 
 
 ## Some checks
