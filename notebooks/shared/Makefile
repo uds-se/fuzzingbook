@@ -777,6 +777,29 @@ $(HTML_TARGET)book.html: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 endif
 
 
+## Jupyter Book (experimental)
+JUPYTER_BOOK = jupyter-book
+jb jupyter-book: $(JB_LINKS) _build/index.html
+jb-links: $(JB_LINKS)
+
+JB_LINKS = $(FULL_NOTEBOOKS)/_config.yml $(FULL_NOTEBOOKS)/_toc.yml $(FULL_NOTEBOOKS)/_build
+
+$(FULL_NOTEBOOKS)/_config.yml: _config.yml
+	cd $(FULL_NOTEBOOKS); ln -s ../_config.yml .
+
+$(FULL_NOTEBOOKS)/_toc.yml: _toc.yml
+	cd $(FULL_NOTEBOOKS); ln -s ../_toc.yml .
+
+$(FULL_NOTEBOOKS)/_build: _build
+	cd $(FULL_NOTEBOOKS); ln -s ../_build .
+
+$(FULL_NOTEBOOKS)/index.rst: $(FULL_NOTEBOOKS)/index.ipynb
+	cd $(FULL_NOTEBOOKS); $(NBCONVERT) --to rst index.ipynb
+
+_build/index.html: $(FULLS)
+	cd $(FULL_NOTEBOOKS); $(JUPYTER_BOOK) build .
+
+
 ## Some checks
 
 # Style checks
