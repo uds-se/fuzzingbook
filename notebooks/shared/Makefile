@@ -778,7 +778,7 @@ endif
 
 
 ## Jupyter Book (experimental)
-JUPYTER_BOOK = $(JUPYTER_BOOK)
+JUPYTER_BOOK = jupyter-book
 jupyter-book: _build/index.html
 _build/index.html: $(FULLS) _config.yml _toc.yml
 	$(JUPYTER_BOOK) --config _config.yml --toc _toc.yml $(FULL_NOTEBOOKS)
