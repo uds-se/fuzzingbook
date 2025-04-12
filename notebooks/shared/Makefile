@@ -780,9 +780,9 @@ endif
 ## Jupyter Book (experimental)
 JUPYTER_BOOK = jupyter-book
 jupyter-book: _build/index.html
-_build/index.html: $(FULLS) _config.yml _toc.yml
-	cd $(FULL_NOTEBOOKS); ln -s ../config.yml ../toc.yml .
-	cd $(FULL_NOTEBOOKS); $(JUPYTER_BOOK) build .
+_build/index.html: $(RENDERS) _config.yml _toc.yml
+	-cd $(RENDERS); ln -s ../config.yml ../toc.yml .
+	cd $(RENDERS); $(JUPYTER_BOOK) build .
 
 
 
