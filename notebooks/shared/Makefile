@@ -780,8 +780,9 @@ endif
 ## Jupyter Book (experimental)
 JUPYTER_BOOK = jupyter-book
 jb jupyter-book: $(JB_LINKS) _build/index.html
+jb-links: $(JB_LINKS)
 
-JB_LINKS = $(FULL_NOTEBOOKS)/_config.yml $(FULL_NOTEBOOKS)/_toc.yml $(FULL_NOTEBOOKS)/_build
+JB_LINKS = $(FULL_NOTEBOOKS)/_config.yml $(FULL_NOTEBOOKS)/_toc.yml $(FULL_NOTEBOOKS)/_build $(FULL_NOTEBOOKS)/fuzzingbook.bib
 
 $(FULL_NOTEBOOKS)/_config.yml: _config.yml
 	cd $(FULL_NOTEBOOKS); ln -s ../_config.yml .
@@ -791,6 +792,10 @@ $(FULL_NOTEBOOKS)/_toc.yml: _toc.yml
 
 $(FULL_NOTEBOOKS)/_build: _build
 	cd $(FULL_NOTEBOOKS); ln -s ../_build .
+
+$(FULL_NOTEBOOKS)/fuzzingbook.bib: fuzzingbook.bib
+	cd $(FULL_NOTEBOOKS); ln -s ../fuzzingbook.bib .
+
 	
 _build/index.html: $(FULLS)
 	cd $(FULL_NOTEBOOKS); $(JUPYTER_BOOK) build .
