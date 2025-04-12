@@ -781,7 +781,8 @@ endif
 JUPYTER_BOOK = jupyter-book
 jupyter-book: _build/index.html
 _build/index.html: $(FULLS) _config.yml _toc.yml
-	$(JUPYTER_BOOK) --config _config.yml --toc _toc.yml $(FULL_NOTEBOOKS)
+	cd $(FULL_NOTEBOOKS); ln -s ../config.yml ../toc.yml .
+	$(JUPYTER_BOOK) build --config _config.yml --toc _toc.yml $(FULL_NOTEBOOKS)
 
 
 
