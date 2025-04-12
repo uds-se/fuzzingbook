@@ -779,12 +779,21 @@ endif
 
 ## Jupyter Book (experimental)
 JUPYTER_BOOK = jupyter-book
-jupyter-book: _build/index.html
-_build/index.html: $(RENDERS) _config.yml _toc.yml
-	-cd $(RENDERS); ln -s ../config.yml ../toc.yml .
-	cd $(RENDERS); $(JUPYTER_BOOK) build .
+jupyter-book: $(JB_LINKS) _build/index.html
+	
+JB_LINKS = $(RENDERED_NOTEBOOKS)/_config.yml $(RENDERED_NOTEBOOKS)/_toc.yml $(RENDERED_NOTEBOOKS)/_build
 
+$(RENDERED_NOTEBOOKS)/_config.yml: _config.yml
+	cd $(RENDERED_NOTEBOOKS); ln -s ../_config.yml .
 
+$(RENDERED_NOTEBOOKS)/_toc.yml: _toc.yml
+	cd $(RENDERED_NOTEBOOKS); ln -s ../_toc.yml .
+
+$(RENDERED_NOTEBOOKS)/_build: _build
+	cd $(RENDERED_NOTEBOOKS); ln -s ../_build .
+	
+_build/index.html: $(RENDERS) \
+	cd $(RENDERED_NOTEBOOKS); $(JUPYTER_BOOK) build .
 
 
 ## Some checks
