@@ -76,6 +76,9 @@ USER ${NB_USER}
 # Add local bin path
 ENV PATH="/home/${NB_USER}/.local/bin:$PATH"
 
+# Diagnostics
+RUN python3 -c 'import sys, platform; print(sys.version, sys.platform, platform.machine(), file=sys.stderr)'
+
 # Set up the conda environment
 # (Skipping for now, as installing conda is hard,
 #  and apparently we can do without)
