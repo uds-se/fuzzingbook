@@ -82,8 +82,8 @@ ENV PATH="/home/${NB_USER}/.local/bin:$PATH"
 # RUN conda activate myenv
 
 # Install the required Python packages
-RUN pip install -r requirements.txt; exit 0
-RUN pip install -r binder/requirements.txt; exit 0
+RUN python3 -m pip install .
+RUN python3 -m pip install ".[binder]"
 
 # Run the postBuild script (to set up Jupyter, sign notebooks and more)
 RUN bash binder/postBuild
