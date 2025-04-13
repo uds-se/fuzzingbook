@@ -62,6 +62,7 @@ WORKDIR ${HOME}
 COPY . ${HOME}
 WORKDIR ${HOME}
 
+# Get the repo
 RUN git clone --depth 1 ${REPO}
 RUN chown -R ${NB_UID} ${HOME}
 WORKDIR ${PROJECT}
