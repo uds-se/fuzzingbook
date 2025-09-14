@@ -65,7 +65,7 @@ PDF_TARGET      = pdf/
 NBPDF_TARGET    = nbpdf/
 HTML_TARGET     = html/
 SLIDES_TARGET   = slides/
-CODE_TARGET     = code/
+CODE_TARGET     = python_code/
 MYPY_TARGET     = mypy/
 MARKDOWN_TARGET = markdown/
 WORD_TARGET     = word/
@@ -192,10 +192,10 @@ NOTEDOWN ?= notedown
 
 # Style checks
 PYCODESTYLE ?= pycodestyle
-PYCODESTYLE_CFG = code/pycodestyle.cfg
+PYCODESTYLE_CFG = $(CODE)/pycodestyle.cfg
 
 AUTOPEP8 ?= autopep8
-AUTOPEP8_CFG = code/autopep8.cfg
+AUTOPEP8_CFG = $(CODE)/autopep8.cfg
 AUTOPEP8_OPTIONS = --global-config $(AUTOPEP8_CFG) --aggressive --in-place
 NBAUTOPEP8 = $(PYTHON) utils/nbautopep8.py
 
@@ -793,9 +793,6 @@ $(FULL_NOTEBOOKS)/_toc.yml: _toc.yml
 $(FULL_NOTEBOOKS)/_build: _build
 	cd $(FULL_NOTEBOOKS); ln -s ../_build .
 
-$(FULL_NOTEBOOKS)/index.rst: $(FULL_NOTEBOOKS)/index.ipynb
-	cd $(FULL_NOTEBOOKS); $(NBCONVERT) --to rst index.ipynb
-
 _build/index.html: $(FULLS)
 	cd $(FULL_NOTEBOOKS); $(JUPYTER_BOOK) build .
 
@@ -1054,7 +1051,7 @@ $(DOCS_TARGET)html/%: $(HTML_TARGET)%
 
 # Add/update Python code on Web pages
 .PHONY: publish-code publish-code-setup
-publish-code: code publish-code-setup \
+publish-code: $(CODE) publish-code-setup \
 	$(DOCS_TARGET)code/LICENSE.md \
 	$(DOCS_TARGET)code/README.md \
 	$(DOCS_TARGET)code/requirements.txt \
@@ -1091,9 +1088,9 @@ DIST_CODE_FILES = \
 	$(DOCS_TARGET)code/__init__.py
 
 clean-dist:
-	$(RM) -r code/__pycache__
-	-chmod +w code/$(UTILS) code/$(UTILS)/__pycache__
-	$(RM) -r code/$(UTILS)/__pycache__
+	$(RM) -r $(CODE)/__pycache__
+	-chmod +w $(CODE)/$(UTILS) $(CODE)/$(UTILS)/__pycache__
+	$(RM) -r $(CODE)/$(UTILS)/__pycache__
 	-find $(DOCS_TARGET) -name __pycache__ -exec $(RM) -r {} \;
 	-find $(DOCS_TARGET) -name .ipynb_checkpoints -exec $(RM) -r {} \;
 
