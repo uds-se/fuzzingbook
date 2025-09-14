@@ -47,7 +47,7 @@ def setup_notebook(notebook_path, args):
             if re_ignore.match(source):
                 cell_tags = cell.get('metadata', {}).get('tags', [])
                 if "remove_cell" not in cell_tags:
-                    cell_tags.append("remove_cell")
+                    cell_tags.append("remove-input")
                     cell['metadata']['tags'] = cell_tags
                     changed_cells += 1
         new_cells.append(cell)
