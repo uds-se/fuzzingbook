@@ -192,10 +192,10 @@ NOTEDOWN ?= notedown
 
 # Style checks
 PYCODESTYLE ?= pycodestyle
-PYCODESTYLE_CFG = $(CODE_TARGET)/pycodestyle.cfg
+PYCODESTYLE_CFG = $(CODE_TARGET)pycodestyle.cfg
 
 AUTOPEP8 ?= autopep8
-AUTOPEP8_CFG = $(CODE_TARGET)/autopep8.cfg
+AUTOPEP8_CFG = $(CODE_TARGET)autopep8.cfg
 AUTOPEP8_OPTIONS = --global-config $(AUTOPEP8_CFG) --aggressive --in-place
 NBAUTOPEP8 = $(PYTHON) utils/nbautopep8.py
 
@@ -1088,9 +1088,9 @@ DIST_CODE_FILES = \
 	$(DOCS_TARGET)code/__init__.py
 
 clean-dist:
-	$(RM) -r $(CODE_TARGET)/__pycache__
-	-chmod +w $(CODE_TARGET)/$(UTILS) $(CODE_TARGET)/$(UTILS)/__pycache__
-	$(RM) -r $(CODE_TARGET)/$(UTILS)/__pycache__
+	$(RM) -r $(CODE_TARGET)__pycache__
+	-chmod +w $(CODE_TARGET)$(UTILS) $(CODE_TARGET)$(UTILS)/__pycache__
+	$(RM) -r $(CODE_TARGET)$(UTILS)/__pycache__
 	-find $(DOCS_TARGET) -name __pycache__ -exec $(RM) -r {} \;
 	-find $(DOCS_TARGET) -name .ipynb_checkpoints -exec $(RM) -r {} \;
 
@@ -1430,12 +1430,12 @@ $(SITEMAP_SVG): $(CHAPTER_SOURCES) $(NBDEPEND)
 $(HTML_TARGET)/Tours.html: $(SITEMAP_SVG)
 $(FULL_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVG)	
 $(RENDERED_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVG)	
-# $(CODE_TARGET)/Tours.py: $(SITEMAP_SVG)
+# $(CODE_TARGET)Tours.py: $(SITEMAP_SVG)
 
 $(HTML_TARGET)/00_Table_of_Contents.html: $(SITEMAP_SVG) $(NBTOC)
 $(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG) $(NBTOC)
 $(RENDERED_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG) $(NBTOC)
-# $(CODE_TARGET)/00_Table_of_Contents.py: $(SITEMAP_SVG)
+# $(CODE_TARGET)00_Table_of_Contents.py: $(SITEMAP_SVG)
 
 
 ## Dependencies - should come at the very end
