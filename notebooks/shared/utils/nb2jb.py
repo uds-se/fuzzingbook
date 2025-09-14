@@ -40,14 +40,15 @@ def setup_notebook(notebook_path, args):
             
     changed_cells = 0
     new_cells = []
+    remove_tag = "remove-input"
 
     for cell in notebook.cells:
         if cell.cell_type == 'code':
             source = cell.source.strip()
             if re_ignore.match(source):
                 cell_tags = cell.get('metadata', {}).get('tags', [])
-                if "remove_cell" not in cell_tags:
-                    cell_tags.append("remove-input")
+                if remove_tag not in cell_tags:
+                    cell_tags.append(remove_tag)
                     cell['metadata']['tags'] = cell_tags
                     changed_cells += 1
         new_cells.append(cell)
