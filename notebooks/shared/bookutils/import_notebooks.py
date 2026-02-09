@@ -121,7 +121,15 @@ class NotebookLoader:
             self.lines[fullname] = '\n'.join(source)
             p = len(self.lines[fullname].split('\n')) + 1
             assert lno == p
-    
+            
+        except ModuleNotFoundError as e:
+            # remove the module from sys.modules to allow re-import
+            del sys.modules[fullname]
+            try:
+                raise e
+            finally:
+                pass
+
         finally:
             self.shell.user_ns = save_user_ns
             data = self.lines[fullname]
