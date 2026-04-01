@@ -842,7 +842,7 @@ if __name__ == '__main__':
     reply.taint  # type: ignore
 
 def send_back(s):
-    assert not isinstance(s, tstr) and not s.taint == 'SECRET'  # type: ignore
+    assert not (isinstance(s, tstr) and s.taint == 'SECRET')  # type: ignore
     ...
 
 if __name__ == '__main__':
