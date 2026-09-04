@@ -1,0 +1,63 @@
+# Dockerfile for testing fuzzingbook on linux/arm64 with z3-solver
+# Build with:
+#   docker build --platform linux/arm64 -f Dockerfile.linux-arm64 -t fuzzingbook-arm64-test .
+# Run with:
+#   docker run --rm --platform linux/arm64 fuzzingbook-arm64-test
+#
+# Base uses trixie (glibc 2.41) so that z3-solver>=4.16 (manylinux_2_38_aarch64)
+# wheels work. bookworm/jammy (glibc 2.36/2.35) only support z3<=4.15.x.
+# NOTE: build with --platform linux/arm64 (do not hardcode FROM --platform).
+FROM python:3.12-slim-trixie
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# System deps: graphviz for pygraphviz, gcc for datrie (isla dep),
+# clang/cargo/bc/etc. from binder/apt.txt, libmagic for python-magic
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    graphviz libgraphviz-dev \
+    gcc g++ python3-dev \
+    clang cargo \
+    bc groff ed texinfo \
+    libmagic1 curl git make \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+
+# Copy only what `pip install .` needs (repo is 1.6G, avoid full docs/).
+# docs/code/ holds the committed generated code (used to catch z3 breakage).
+COPY pyproject.toml README.md LICENSE.md ./
+COPY Chapters.makefile Makefile ./
+COPY python_code/ ./python_code/
+COPY notebooks/ ./notebooks/
+COPY utils/ ./utils/
+COPY docs/code/ ./docs_code/
+
+# Upgrade pip, then install the project (tests dependency resolution on arm64).
+# Pin setuptools==80.9.0 (last with pkg_resources): isla-solver<=1.10.1 does
+# `import pkg_resources`, removed in setuptools>=81 (fails on Python 3.12+).
+RUN pip install --no-cache-dir --upgrade pip "setuptools==80.9.0" wheel && \
+    pip install --no-cache-dir . && \
+    pip show z3-solver isla-solver || echo "NOTE: z3/isla not installed (markers excluded arm64)"
+
+# Smoke test: z3 + isla must import and solve on linux/aarch64
+RUN python3 -c "import platform; print('machine:', platform.machine())" && \
+    python3 -c "import z3; print('z3 version:', z3.get_version()); s = z3.Solver(); x = z3.Int('x'); s.add(x > 0); assert s.check() == z3.sat; print('z3 smoke: sat, model =', s.model())" && \
+    python3 -c "from isla.solver import ISLaSolver; s = ISLaSolver(grammar='<start> ::= \"a\"'); print('isla smoke:', s.solve())"
+
+# Verify fuzzingbook+z3 integration with committed generated code.
+# docs_code/ is imported as a package (relative imports like `from .Coverage`
+# resolve inside it). Exercises z3-heavy chapters to catch z3 4.x->5.x breakage.
+RUN PYTHONPATH=. python3 -c "from docs_code.ConcolicFuzzer import ConcolicTracer; print('ConcolicFuzzer import ok')" && \
+    PYTHONPATH=. python3 -c "from docs_code.SymbolicFuzzer import SymbolicFuzzer; print('SymbolicFuzzer import ok')" && \
+    PYTHONPATH=. python3 -c "from docs_code.FuzzingWithConstraints import ISLaSolver; print('FuzzingWithConstraints import ok')" && \
+    PYTHONPATH=. python3 -c "from docs_code.PrototypingWithPython import *; print('PrototypingWithPython import ok')"
+
+# NOTE: `CI=true make -k code` currently fails on Coverage.py (NameError: Any)
+# due to a pre-existing export bug (notebooks/Coverage.ipynb has two
+# "## Synopsis" blocks; the first block's `from typing import ...` cell is
+# discarded by export_notebook_code.py). Unrelated to z3/arm64; not fixed here.
+# RUN CI=true make -k code
+
+CMD ["python3", "-c", "import z3; print('fuzzingbook linux/arm64 OK, z3 =', z3.get_version())"]

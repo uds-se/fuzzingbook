@@ -40,9 +40,12 @@ dependencies = [
     'enforce>=0.3.4',
     'graphviz>=0.14.2',
     'ipython>=7.16.1',
-    # ISLa needs Z3 (-> not linux/arm64) and Python 3.10
-    'isla-solver>=0.8.9; python_version >= "3.10" and sys_platform != "linux"',
-    'isla-solver>=0.8.9; python_version >= "3.10" and platform_machine != "aarch64"',
+    # ISLa from our fork (null-byte fix for z3>=4.13, linux/aarch64 wheels).
+    # Upstream pins z3-solver<=4.11.2.0 (no aarch64 wheel); the fork relaxes it.
+    # TODO: switch back to PyPI once upstream accepts the fix.
+    # NOTE: plain `name@url` form: setuptools rejects a URL requirement
+    # combined with `;` markers in [project] dependencies.
+    'isla-solver@git+https://github.com/minh-dng/isla.git@fix-z3-aarch64',
     'lxml>=4.5.1',
     'Markdown>=3.3.4',
     'markdown>=3.4.3',
@@ -68,9 +71,10 @@ dependencies = [
     'showast2>=0.3.1',
     'svglib>=1.1.0',
     'yapf>=0.31.0',
-     # Z3 does not run on linux/arm64
-    'z3-solver>=4.8.13.0; sys_platform != "linux"',
-    'z3-solver>=4.8.13.0; platform_machine != "aarch64"',
+    # z3-solver>=4.13.0.0 is the first release with manylinux_aarch64 wheels,
+    # so linux/arm64 works. Requires glibc>=2.34 (bookworm/jammy ok);
+    # z3>=4.16 needs glibc>=2.38 (trixie/noble+). See Dockerfile.linux-arm64.
+    'z3-solver>=4.13.0.0',
 ]
 
 [tool.setuptools.packages.find]
